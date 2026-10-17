@@ -522,3 +522,63 @@
     font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#d8ffb0;background:rgba(0,10,20,.62);
     padding:6px 8px;border-radius:8px}
   body.free #board,body.free #clock{display:none}
+
+  /* ── phones: short landscape screens, portrait hint ── */
+  .sheet{overflow-y:auto;place-items:safe center;touch-action:pan-y;overscroll-behavior:contain}
+  #camBtn{top:16px;left:calc(50% - 90px);pointer-events:auto;cursor:pointer;display:none;
+    width:42px;height:30px;border-radius:999px;font:inherit;font-size:10px;font-weight:700;
+    letter-spacing:.08em;color:#fff;text-shadow:0 1px 3px rgba(0,30,60,.8);
+    background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.08) 47%,
+               rgba(13,127,212,.45));
+    border:1px solid rgba(255,255,255,.6);
+    box-shadow:0 4px 12px rgba(2,24,48,.45),inset 0 1px 0 rgba(255,255,255,.85);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  body.touch #camBtn{display:block}
+  body.touch:not(.racing) #pads{display:none}
+  #pH{left:14px;bottom:98px;width:74px;height:40px;border-radius:999px;font-size:11px}
+  #rotate{position:fixed;inset:0;z-index:30;display:none;place-items:center;align-content:center;
+    gap:10px;text-align:center;color:#fff;font-weight:700;letter-spacing:.14em;
+    background:linear-gradient(180deg,#1a6fb3,#063a66)}
+  #rotate .rot-ico{font-size:64px;line-height:1;animation:rot 2.4s ease-in-out infinite}
+  #rotate small{font-weight:400;letter-spacing:.04em;color:var(--sky)}
+  @keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+  @media (orientation:portrait){body.touch.racing #rotate{display:grid}}
+  @media (prefers-reduced-motion:reduce){#rotate .rot-ico{animation:none}}
+  @media (max-height:540px){
+    body.touch #speedo{bottom:calc(10px + env(safe-area-inset-bottom,0px));width:170px}
+    body.touch #spd{font-size:28px}
+    body.touch #toast{bottom:120px}
+    .pad{width:66px;height:66px;bottom:10px}
+    #pL{left:max(12px,env(safe-area-inset-left))}#pR{left:calc(max(12px,env(safe-area-inset-left)) + 76px)}
+    #pH{left:max(12px,env(safe-area-inset-left));bottom:84px;height:36px}
+    #pA{right:max(12px,env(safe-area-inset-right));height:100px}
+    #pD{right:calc(max(12px,env(safe-area-inset-right)) + 76px)}
+    #pF{right:calc(max(12px,env(safe-area-inset-right)) + 76px);bottom:84px;height:46px}
+    #pB{right:max(12px,env(safe-area-inset-right));bottom:118px;height:46px}
+    .sheet{padding:10px 14px}
+    .sheet-in{padding:16px 20px}
+    .sheet h1{font-size:30px}
+    /* driver select: everything on one screen */
+    .vs{gap:6px 14px;padding:0 max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));
+      grid-template-columns:minmax(240px,42%) 1fr;overflow-y:auto}
+    .vs-top{padding:4px 14px;margin:0 -14px;gap:12px}
+    .vs-logo{display:none}
+    #pick .vs-title{font-size:22px}
+    .vs-mode{font-size:10px}
+    .vs-grid{gap:4px;padding:5px}
+    .vcard img{aspect-ratio:16/9;object-fit:cover;object-position:50% 30%}
+    .vcard span{padding:2px;font-size:11px}
+    .vs-big{font-size:26px}
+    .vs-home{margin-top:2px;font-size:13px}
+    .vs-panel{padding:8px 10px}
+    .vs-car{padding-bottom:4px;margin-bottom:5px}
+    .vs-carname b{font-size:16px}
+    .vs-arrow{padding:4px 10px}
+    .vs-blurb{display:none}
+    .vs-stats{gap:8px}
+    .vbar{margin:0 0 2px}
+    .vs-quirk b{font-size:14px}
+    .vs-quirk span{font-size:11.5px;line-height:1.25}
+    .vs-back,.vs-go{padding:5px 14px 5px 6px;font-size:15px}
+    .vs-back i,.vs-go i{width:24px;height:24px;font-size:13px}
+  }

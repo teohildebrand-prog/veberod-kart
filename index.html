@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Veberöd Kart">
+<meta name="theme-color" content="#0e5a93">
 <title>Veberöd Kart - Jakten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +40,7 @@
   </div>
   <button id="pause" aria-label="Pausa">II</button>
   <button id="rescue" aria-label="Tillbaka på banan" title="Tillbaka på banan">&#8634;</button>
+  <button id="camBtn" aria-label="Byt kamera" title="Byt kamera">KAM</button>
   <div id="flash"><span id="flashtxt"></span></div>
   <div id="toast"></div>
   <div id="keys">
@@ -53,6 +59,12 @@
   <button class="pad" id="pF" aria-label="Fire">SKJUT</button>
   <button class="pad" id="pB" aria-label="Brake">BROMS</button>
   <button class="pad" id="pA" aria-label="Accelerate">^</button>
+  <button class="pad" id="pH" aria-label="Tuta">TUT</button>
+</div>
+<div id="rotate" aria-hidden="true">
+  <div class="rot-ico">&#8635;</div>
+  <div>VRID TELEFONEN</div>
+  <small>Veberöd Kart körs på bredden</small>
 </div>
 
 <div class="sheet" id="start">
