@@ -312,6 +312,75 @@ function buildDriver(kind,addc,add,skin,dark){
     add(new THREE.SphereGeometry(.18,6,5),psMat({color:0x3f63c8}),.2,1.48,-1.7);
   }
 }
+/** the four cup champions: the ghost, the chieftain, the green man and Raket-Rune */
+function buildChampion(kind,addc,add,skin,dark){
+  const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+  if(kind==='ghost'){                       /* Spöket på Glimmingehus: a sheet, a chain, a lantern */
+    const sheet=psMat({color:0xe6eef4}),hole=psMat({color:0x161a24}),iron=psMat({color:0x4a4e56});
+    addc(new THREE.CylinderGeometry(.36,.58,1.15,7),sheet,0,1.28,-.6);
+    addc(new THREE.SphereGeometry(.38,7,5),sheet,0,1.96,-.6);
+    addc(B(.11,.16,.05),hole,-.13,2.0,-.24);addc(B(.11,.16,.05),hole,.13,2.0,-.24);
+    addc(B(.14,.14,.05),hole,0,1.82,-.25);                               /* hooo */
+    for(const sg of [-1,1]){
+      addc(B(.22,.2,.86),sheet,sg*.36,1.14,.02);
+      addc(B(.24,.06,.06),iron,sg*.36,1.08,.3);                          /* shackles */
+    }
+    for(let n=0;n<6;n++){const a=n/6*6.283;
+      addc(B(.18,.22,.1),sheet,Math.sin(a)*.5,.74,-.6+Math.cos(a)*.5).rotation.y=a;}
+    for(let n=0;n<4;n++)addc(B(.08,.08,.14),iron,.26+n*.07,.95-n*.06,.32-n*.12);
+    const pole=add(new THREE.CylinderGeometry(.03,.03,1.6,4),iron,.55,1.7,-1.25);pole.rotation.z=.12;
+    add(B(.3,.36,.3),psMat({color:0xffcc55,unlit:true}),.65,2.5,-1.25);
+    add(B(.36,.06,.36),iron,.65,2.71,-1.25);
+  }else if(kind==='viking'){                /* Vikingahövdingen: fur, beard, horns, a round shield */
+    const fur=psMat({color:0x6b4a2e}),hide=psMat({color:0x8a6a44}),beard=psMat({color:0xd0642a}),
+          iron=psMat({color:0x8a9098}),horn=psMat({color:0xeee4c8});
+    addc(B(1.0,.88,.6),hide,0,1.24,-.6);
+    addc(B(1.12,.3,.7),fur,0,1.62,-.6);                                 /* fur collar */
+    addc(B(1.02,.12,.62),psMat({color:0x3a2a1c}),0,.96,-.6);
+    for(const sg of [-1,1])addc(B(.29,.27,.86),skin,sg*.4,1.13,.02);
+    addc(B(.52,.5,.46),skin,0,1.84,-.6);
+    addc(B(.54,.46,.2),beard,0,1.58,-.36);
+    for(const sg of [-1,1])addc(B(.1,.3,.1),beard,sg*.16,1.28,-.33);   /* braids */
+    addc(B(.12,.1,.05),psMat({color:0x14181c}),-.13,1.9,-.36);
+    addc(B(.12,.1,.05),psMat({color:0x14181c}),.13,1.9,-.36);
+    const helm=addc(new THREE.SphereGeometry(.33,7,4,0,6.283,0,Math.PI/2),iron,0,2.0,-.6);helm.scale.y=.9;
+    addc(B(.08,.16,.08),iron,0,1.94,-.27);                               /* nose guard */
+    for(const sg of [-1,1]){const h=addc(new THREE.ConeGeometry(.09,.52,5),horn,sg*.42,2.18,-.6);h.rotation.z=-sg*.95;}
+    const sh=add(new THREE.CylinderGeometry(.6,.6,.08,10),psMat({color:0xb82a22}),-.86,1.15,-.9);sh.rotation.z=Math.PI/2;
+    const st=add(B(.1,1.15,.18),psMat({color:0xe8c33a}),-.9,1.15,-.9);
+    add(new THREE.CylinderGeometry(.14,.14,.12,6),iron,-.92,1.15,-.9).rotation.z=Math.PI/2;
+    st.rotation.x=.6;
+  }else if(kind==='gubbe'){                 /* Gröna gubben från skogen: big head, black eyes, antennae, moss */
+    const green=psMat({color:0x6fcf52}),suit=psMat({color:0xb8c4cc}),eye=psMat({color:0x0c0e12}),
+          moss=psMat({color:0x3f6a2a}),glow=psMat({color:0xb6ff7a,unlit:true});
+    addc(B(.74,.8,.48),suit,0,1.2,-.6);
+    addc(B(.9,.5,.3),moss,0,1.4,-.86);                                   /* a cloak of moss */
+    for(const sg of [-1,1])addc(B(.18,.17,.88),green,sg*.32,1.1,.02);
+    addc(B(.14,.3,.14),green,0,1.66,-.6);
+    const hd=addc(new THREE.SphereGeometry(.42,8,6),green,0,2.02,-.6);hd.scale.set(1,1.12,.95);
+    for(const sg of [-1,1]){
+      const e=addc(B(.2,.12,.05),eye,sg*.16,2.06,-.21);e.rotation.z=sg*.45;
+      addc(new THREE.CylinderGeometry(.02,.02,.5,4),green,sg*.16,2.6,-.66).rotation.z=-sg*.3;
+      addc(B(.1,.1,.1),glow,sg*.24,2.86,-.66);
+    }
+    addc(B(.12,.03,.04),eye,0,1.88,-.22);
+  }else{                                    /* Raket-Rune: white suit, visor, moustache, a rocket pack */
+    const suit=psMat({color:0xf2f2f4}),red=psMat({color:0xd82a2a}),visor=psMat({color:0x1a2a44}),
+          steel=psMat({color:0xa8b0ba}),flame=psMat({color:0xffa83a,unlit:true});
+    addc(B(.92,.86,.56),suit,0,1.24,-.6);
+    addc(B(.94,.14,.58),red,0,1.38,-.6);
+    for(const sg of [-1,1])addc(B(.25,.23,.88),suit,sg*.37,1.12,.02);
+    const h=addc(new THREE.SphereGeometry(.36,8,6),suit,0,1.86,-.6);h.scale.set(1,.96,1.04);
+    addc(B(.74,.08,.74),red,0,1.95,-.6).scale.set(.98,1,.98);
+    addc(B(.5,.2,.1),visor,0,1.88,-.27);
+    addc(B(.34,.08,.06),psMat({color:0x3a2a1e}),0,1.72,-.25);           /* the moustache */
+    for(const sg of [-1,1]){
+      addc(new THREE.CylinderGeometry(.15,.15,.95,8),steel,sg*.24,1.32,-1.02);
+      addc(new THREE.ConeGeometry(.15,.3,8),red,sg*.24,1.94,-1.02);
+      const f=addc(new THREE.ConeGeometry(.12,.42,6),flame,sg*.24,.64,-1.02);f.rotation.x=Math.PI;
+    }
+  }
+}
 function addHay(add,x,y,z){
   add(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),x,y,z).rotation.z=Math.PI/2;
 }
@@ -440,6 +509,8 @@ function buildKart(color,kind,car){
     addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark);
+  }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
+    buildChampion(kind,addc,add,skin,dark);
   }else{
     addc(new THREE.BoxGeometry(.78,.78,.5),dark,0,1.22,-.62);
     addc(new THREE.BoxGeometry(.22,.2,.88),skin,-.34,1.12,.02);
@@ -551,6 +622,24 @@ const ROSTER=[
    maxSpeed:41.6,power:26,offRoad:.60,boostMul:1.38,gripOn:10.0,
    lineSpread:3.4,caution:2.7,lookAdd:2,driftLove:0.85,lean:{fuel:2,defend:true}}
 ];
+/* the champions: each one takes the rival's grid slot in their own cup */
+const CHAMPS={
+  spoket:{name:'SPÖKET',full:'SPÖKET PÅ GLIMMINGEHUS',color:0xcfe0ea,ai:true,kind:'ghost',car:'kart',
+   maxSpeed:43.2,power:28,offRoad:.70,boostMul:1.42,gripOn:10.6,
+   lineSpread:0.8,caution:2.6,lookAdd:5,driftLove:1.10,lean:{risk:1.2},
+   say:'Hoooo... ingen kör förbi Glimmingehus.'},
+  viking:{name:'HÖVDINGEN',full:'VIKINGAHÖVDINGEN',color:0x7a4a2a,ai:true,kind:'viking',car:'acc',
+   maxSpeed:43.6,power:27,offRoad:.72,boostMul:1.46,gripOn:10.2,
+   lineSpread:2.0,caution:2.2,lookAdd:2,driftLove:1.30,lean:{traffic:1.5},
+   say:'Till Valhall! Eller åtminstone till mål.'},
+  gubbe:{name:'GRÖNA GUBBEN',full:'GRÖNA GUBBEN FRÅN SKOGEN',color:0x4fd04a,ai:true,kind:'gubbe',car:'t96',
+   maxSpeed:43.8,power:29,offRoad:.82,boostMul:1.44,gripOn:10.8,
+   lineSpread:1.0,caution:2.5,lookAdd:4,driftLove:1.0,lean:{rough:-0.5},
+   say:'Bliip. Jordbor kör så långsamt.'},
+  rune:{name:'RAKET-RUNE',full:'RAKET-RUNE',color:0xd82a2a,ai:true,kind:'rune',car:'kart',
+   maxSpeed:44.2,power:31,offRoad:.70,boostMul:1.55,gripOn:11.0,
+   lineSpread:0.8,caution:2.4,lookAdd:5,driftLove:1.2,lean:{risk:1.3},
+   say:'Ingen slår Raket-Rune på hans egen runda!'}};
 const karts=ROSTER.map((r,i)=>{
   const v=buildKart(r.color,r.kind||'generic',r.car);scene.add(v.root);
   const bg=new THREE.PlaneGeometry(3.6,4.4);bg.rotateX(-Math.PI/2);

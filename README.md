@@ -3,6 +3,11 @@
 A silly PS1-style kart racer through the Skåne countryside. Three.js r128,
 plain JavaScript, no build step.
 
+19 tracks in five groups: the original Skåne five plus Rosengård, and four
+championships built on LEGO Racers' cup shape (ideas only): Österlencupen,
+Kustcupen and Vildmarkscupen (four tracks and a champion each, then mirrored
+and in reverse once won) and Finalen against Raket-Rune.
+
 ## Play
 
 Open `index.html` in a browser, or serve the folder:

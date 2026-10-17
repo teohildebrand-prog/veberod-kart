@@ -78,9 +78,24 @@ Design sheet: /mnt/project-files/design/new-characters.md, concept art: /mnt/pro
 - The other 7 shortcuts and stamps on the original five tracks (GDD build step 7), one track at a time.
 - Blanket paints per track, Gyllene Picknickpasset (21 stamps now).
 - Retire option in a cup race (scores 0), route-assist minimap setting, camera-shake slider, auto-accelerate.
-- More LEGO Racers counterparts from the GDD table (Karlskrona, Söderåsen, Limhamn, Ven, Kalmar...).
+- Championship tuning from playtest: champion speeds, unlock order, whether the mirror tier should also reverse the driving direction.
 - Repo split regenerated 2026-10-17 with the debug menu PR (includes the LEGO Racers round and the new drivers).
 
 ## Phone play (2026-10-17)
 - The touch pads already existed (body.touch from isTouch). Added: TUT horn pad, KAM camera button (touch only), pads hidden outside a race, a compact layout for short landscape screens (max-height 540px: smaller pads clear of safe areas, speedo between the pads, driver select fits on one screen), scrollable sheets, a "VRID TELEFONEN" overlay in portrait during a race, fullscreen + landscape lock on the first tap (coarse pointers; Android), home-screen web-app meta tags for iPhone.
 - Hosting: GitHub Pages from main / root (.nojekyll in the repo). URL https://teohildebrand-prog.github.io/veberod-kart/
+
+## All the LEGO Racers counterparts, the championships and Rosengård (built 2026-10-17)
+Teo: "add more of the suggested tracks and the championships", then "also add a Rosengård track". Built all 11 remaining tracks from the GDD table plus Rosengård, so 19 tracks in all. Ideas only from LEGO Racers, no code or data.
+- Track hooks (so a track is one self-contained section): stage.scenery(), stage.group (stage-picker tab), stage.role (cup brief line), stage.mod(x,z,t) terrain offset, stage.land(x,z,colour), stage.moon, stage.sfxRoad/sfxOff, stage.paint:false; registries ROADTEX, VERGEC, EDGES (plus GROUND, SURF, SFX). Shortcut blockers can bring their own blockMesh/blockAnim, and noRocket makes a passage switch-only.
+- Österlen: Kungagraven i Kivik (cairn passage GRAVKAMMAREN, apples rolling from the market), Söderåsen (gorge, TUNNELN before the ford, wild boar). With Glimmingehus and Ales stenar.
+- Kusten: Foteviken (through an upturned longship, catapult barrels on marked spots), Karlskrona (ropewalk straight, hidden quay passage behind herring barrels, fortress cannonballs), Ven (cliff cave GROTTAN and TYCHOS GLIPA, rolling boulders), Limhamn (night quarry, SPRICKAN opens the lap after you hit SPAKEN, steam vents).
+- Vildmarken: Ängelholm (UFO forest, hidden bunker behind a triangle door, saucer beam), Höör (wildlife park, BJÖRNFALLET through the waterfall, elk standing in the road), Romeleåsen (snow day, ISEN across the frozen lake on new SURF.ice, snow squalls, a plough), Kalmar slott (drawbridge that rises into a launch ramp, VALVET through the bastion, jousting knights).
+- Finalen: Raket-Runes runda in Malmö harbour (climb past the twisting tower, hidden SKULPTURPARKEN behind a split ring, container crane).
+- Rosengård (Mehmet's home, group Skåne, not in a cup): blocks, Rosengård Centrum, railway bridge, Möllan; FOTBOLLSBUREN through the football cage on new SURF.turf; a football and a delivery moped. Stamps ma'amoul, gözleme, baklava.
+- 36 new picnic stamps (45 in all); the golden pass counts whatever exists.
+- Championships (CUPS): Skånecupen unchanged; Österlencupen (open), Kustcupen (podium in Österlen), Vildmarkscupen (podium in Kust), each 4 rounds with a champion; once won, the same cup SPEGELVÄND OCH BAKLÄNGES (mirrored, rounds reversed, champion 2 % faster); Finalen (one race vs Raket-Rune) after winning all three. Points stay 10-7-5-3-2-1. Trophies keyed cupId_class(_m); Skånecupen keeps its old keys.
+- Champions take the rival's grid slot for their cup with their own model and numbers: Spöket på Glimmingehus, Vikingahövdingen, Gröna gubben från skogen, Raket-Rune. Beating one unlocks their paint and one kart part (SPÖKLYKTAN, VIKINGAHORNEN, UFO-ANTENNEN, RAKETFENORNA; DEL: toggle on the driver screen).
+- UI: cup picker cards in cup setup, stage picker tabs per championship, menu shelf shows each championship's best medal, debug menu LÅS UPP ALLA CUPER.
+- Deviation: the GDD's Kalmar shortcut goes "under the drawbridge"; the road can't pass under itself, so VALVET runs through the bastion beside it.
+

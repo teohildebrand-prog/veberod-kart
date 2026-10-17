@@ -43,8 +43,8 @@ function drive(k,dt,ctl){
   }
   const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.atPump;
   if(TT||FREE)k.fuel=TANK;                                /* nothing to manage in a time trial */
-  {const sf=RT?(surf?RT.S[i]:'grass'):(onRoad||stage.ground==='sea'?(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road')):
-      (stage.ground==='dunes'?'sand':'grass'));
+  {const sf=RT?(surf?RT.S[i]:'grass'):(onRoad||stage.ground==='sea'?(stage.sfxRoad||(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road'))):
+      (stage.sfxOff||(stage.ground==='dunes'?'sand':'grass')));
    if(sf!==k.sfx){const was=k.sfx;k.sfx=sf;if(was)surfaceEnter(k,sf);}}
   if(k.boost>0)k.boost=Math.max(0,k.boost-dt);
   if(k.slow>0)k.slow=Math.max(0,k.slow-dt);

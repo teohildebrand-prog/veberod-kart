@@ -23,7 +23,7 @@ function dbgSky(n){
   }
   skyMat.uniforms.uLow.value.setHex(S.sky[0]);skyMat.uniforms.uHigh.value.setHex(S.sky[1]);
   U.fogColor.value.setHex(S.fog[0]);U.fogNear.value=S.fog[1];U.fogFar.value=S.fog[2];
-  U.amb.value.setHex(S.amb);U.dif.value.setHex(S.dif);moon.visible=S.id==='glimminge';
+  U.amb.value.setHex(S.amb);U.dif.value.setHex(S.dif);moon.visible=S.id==='glimminge'||!!S.moon;
 }
 /** the AI mode on top of what the race set up: KÖR wakes parked karts, BORTA parks them */
 function dbgApplyAI(){
@@ -75,6 +75,7 @@ function renderDbg(){
   h+=dbgRow('DATORFÖRARE',AIMODES.map(([m,n])=>[n,'ai:'+m,DBG.ai===m]));
   h+=dbgRow('VISA',[['FPS: '+on(DBG.fps),'fps',DBG.fps],['FYSIK: '+on(DBG.phys),'phys',DBG.phys]]);
   h+=dbgRow('TIDSSKALA',TIMES.map(t=>[t+'×','ts:'+t,DBG.ts===t]));
+  h+=dbgRow('MÄSTERSKAP',[['LÅS UPP ALLA CUPER','cups',CUPS.every(C=>cupOpen(C)&&(!C.champ||C.id==='final'||mirrorOpen(C)))]]);
   dbgEl.innerHTML=h;
 }
 function dbgAct(a){
@@ -94,6 +95,8 @@ function dbgAct(a){
   if(cmd==='fps'){DBG.fps=!DBG.fps;}
   if(cmd==='phys'){DBG.phys=!DBG.phys;}
   if(cmd==='ts')DBG.ts=+arg;
+  if(cmd==='cups'){for(const C of CUPS)if(C.champ){SAVE.unlock['cup_'+C.id]=true;if(C.id!=='final')SAVE.unlock['win_'+C.id]=true;}
+    SAVE.unlock.cup=true;writeSave();refreshMenu();toast('ALLA CUPER UPPLÅSTA');}
   dbgHud.hidden=!(DBG.fps||DBG.phys);
   renderDbg();
 }

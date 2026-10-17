@@ -27,8 +27,9 @@ function buildWorld(st){
   else if(st.id==='ahus')sceneryAhus();
   else if(st.id==='glimminge')sceneryGlimminge();
   else if(st.id==='ales')sceneryAles();
+  else if(st.scenery)st.scenery();
   else sceneryTollarp();
-  moon.visible=st.id==='glimminge';
+  moon.visible=st.id==='glimminge'||!!st.moon;
   buildAltWorld();
   buildItems();
   hazardsFor(st);

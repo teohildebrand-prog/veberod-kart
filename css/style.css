@@ -441,6 +441,11 @@
   .note{font-size:12px!important;color:var(--amber)!important;margin:8px 0 0!important}
   .warn{font-size:12px!important;color:var(--amber)!important;margin:0 0 10px!important}
   #shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px}
+  #cupsetup .pick-in{max-height:100%;overflow:auto}
+  .card.lock{opacity:.5}
+  #scards .card[hidden]{display:none}
+  #sgroups{margin-bottom:8px}
+  #cupblurb{display:block;min-height:0;margin-bottom:8px}
   #shelf div{border-radius:10px;padding:7px 6px;text-align:center;font-size:9px;font-weight:700;
     letter-spacing:.1em;color:rgba(205,238,255,.75);border:1px solid rgba(255,255,255,.3);
     background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.03))}

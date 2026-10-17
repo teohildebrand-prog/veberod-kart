@@ -89,6 +89,7 @@ function railBron(){
   post.count=c;post.instanceMatrix.needsUpdate=true;world.add(post);
 }
 function buildEdges(st){
+  if(EDGES[st.edge])return EDGES[st.edge](st);
   if(st.edge==='rail')return railBron();
   if(st.edge==='wall')wallLund();
   else if(st.edge==='jersey')jerseyTollarp();

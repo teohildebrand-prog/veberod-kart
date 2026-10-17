@@ -76,7 +76,7 @@ function updateRockets(dt){
     }
     let bb=null;
     for(const B of BLOCKERS){
-      if(B.R.open)continue;
+      if(B.R.open||B.R.noRocket)continue;          /* a switch-only passage ignores rockets */
       let d=B.mi-r.si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
       if(d>=0&&d<60&&d<bd){bd=d;bb=B;}
     }
