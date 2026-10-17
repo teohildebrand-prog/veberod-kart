@@ -45,7 +45,10 @@ EDGES.soderasenStock=st=>{                          /* beech logs laid on stones
   L.count=a;S.count=b;L.instanceMatrix.needsUpdate=S.instanceMatrix.needsUpdate=true;world.add(L);world.add(S);
 };
 
-STAGES.push({ id:'soderasen', group:'osterlen', name:'SÖDERÅSEN', sub:'SKÄRALIDS RAVIN', hw:8.2,
+STAGES.push({ id:'soderasen', group:'osterlen', name:'SÖDERÅSEN', sub:'SKÄRALIDS RAVIN',
+  order:9, tag:'Ner genom bokskogen in i Skäralids ravin. Vildsvin på vägen och ett vadställe i botten.',
+  view:{i:300,lat:0,h:5,to:{i:340,lat:0,h:3},fov:55},
+  hw:8.2,
   bars:[0.55,0.85,0.6], laps:3,
   blurb:'Start high on the Söderåsen ridge, then drop through green-gold beech forest into the Skäralid gorge, splash over the ford at the bottom and climb back out under the Kopparhatten lookout. Just before the stream a rough rock tunnel cuts through the gorge wall, and a sounder of wild boar charges across the road: watch the bushes rustle and listen for the grunts.',
   role:'Utför i ravinen, genom berget och upp igen. Se upp för vildsvinen.',

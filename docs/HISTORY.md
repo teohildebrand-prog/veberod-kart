@@ -99,3 +99,15 @@ Teo: "add more of the suggested tracks and the championships", then "also add a 
 - UI: cup picker cards in cup setup, stage picker tabs per championship, menu shelf shows each championship's best medal, debug menu LÅS UPP ALLA CUPER.
 - Deviation: the GDD's Kalmar shortcut goes "under the drawbridge"; the road can't pass under itself, so VALVET runs through the bastion beside it.
 
+## Stage select like the driver screen (built 2026-10-17)
+Teo's spec: a roster of illustrated stage cards with a large preview of the highlighted track, on the driver screen's visual base.
+- New sections: js/55-stage-select.js (the screen) and js/54-stage-art.js (generated portraits); the old card/tab picker in race flow is gone. Loop is now js/56-loop.js.
+- Roster from STAGES: each stage has order (1-19 in the spec's fixed order), tag (Swedish line) and view (portrait camera: main-road sample {i,lat,h}, lane {r,f}, or spot {x,z}; t poses hazards, so the ghost, elk and saucer are in shot). Stages without order append after, so a new track enters the roster with no layout change. Optional modes list per stage; a card not available in the current mode is dimmed with the reason.
+- Portraits are real renders of each stage's scenery, baked by tools/stage_art.py to WebP data URLs (320x180, about 230 KB). Missing ones render live after the highlight rests 450 ms; a newer highlight cancels the request, so a stale render never lands. Moving the highlight never builds a world; only confirming does.
+- Layout 55/45: 4x2 cards per page (19 = 3 pages, last page shows only its 3 cards), page indicator, preview still with a slow pan, name, subtitle, tag, VARV, UNDERLAG (main road name + known lanes), GENVÄGAR, PICKNICKPASS (omitted where a stage has no stamps), REKORD by mode and normal/mirrored, BANPROFIL outline. Phones: compact preview above a 2-column roster, sticky footer.
+- Records: new SAVE.best[stageId(_m)] = {t, lap} from finished single races. Secret passages: new SAVE.routes['stage.route'] once the player drives one; until then the outline and counts leave it out.
+- Modes: Enkellopp and Sandlåda pick any stage (Sandlåda drops laps and records), Tidslopp shows the time-trial record and mirror eligibility, and a cup's schedule opens from BANORNA on the brief: cards marked AVKLARAD / NÄSTA / KOMMANDE, any round can be previewed, STARTA NÄSTA LOPP always starts the next round.
+- Input: arrows/WASD, Q/E pages, Enter, Backspace/Esc back, V mirror (only on this screen, the CRT key elsewhere). Pad: D-pad/stick with hold-repeat, LB/RB, A, B, X; PADBACK has a stages entry. Touch: tap a card, swipe for pages, VÄLJ BANA. Sounds: tick per card, deeper blip per page, rising confirm.
+- The world is not drawn while the stage picker covers it.
+- tools/join.py builds the single-file working copy from the repo (split.py's inverse).
+

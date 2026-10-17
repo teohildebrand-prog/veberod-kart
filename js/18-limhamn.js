@@ -32,7 +32,10 @@ function limNat(x,z){
   }else h=Math.min(34,y+st);
   return h;
 }
-STAGES.push({ id:'limhamn', group:'kust', name:'LIMHAMN', sub:'KALKBROTTET', hw:9.0,
+STAGES.push({ id:'limhamn', group:'kust', name:'LIMHAMN', sub:'KALKBROTTET',
+  order:10, tag:'Ner i kalkbrottet en natt när ugnarna glöder. Vita väggar och ånga ur marken.',
+  view:{i:110,lat:0,h:6,to:{i:150,lat:-40,h:8},fov:55},
+  hw:9.0,
   bars:[0.70,0.75,0.85], laps:3,
   blurb:'Down the white terraces of the great Limhamn limestone quarry by moonlight, past turquoise water at the bottom and back up the gravel ramps. The lime kilns glow like lava and vent steam through grates in the road. Pull the lever on the way down and next lap the cracked boulder lets you through the old cutting.',
   role:'Ner i gropen och upp igen, med ånga ur gallren.',

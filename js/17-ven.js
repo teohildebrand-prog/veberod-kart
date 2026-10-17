@@ -29,7 +29,10 @@ function venNat(x,z){
   if(d>-9)h=lerp(h,-22,smooth(-9,9,d));
   return h;
 }
-STAGES.push({ id:'ven', group:'kust', name:'VEN', sub:'ÖN I SUNDET', hw:8.2,
+STAGES.push({ id:'ven', group:'kust', name:'VEN', sub:'ÖN I SUNDET',
+  order:11, tag:'Ett varv runt ön mitt i sundet, förbi klipporna och Tycho Brahes Uraniborg. Se upp för stenar från klinten.',
+  view:{x:-175,z:-10,h:6,to:{x:-216,z:18,h:10},fov:60},
+  hw:8.2,
   bars:[0.75,0.70,0.65], laps:3,
   blurb:'Round the little island of Ven in the middle of Öresund: wheat on top, clay cliffs all round and Denmark and Sweden on either horizon. Cut through the cave in the harbour cliff or thread the narrow gap past the stone astronomer, and watch for dust on the cliff path: the boulders come next.',
   role:'Klippor, en grotta och stenras vid hamnen.',

@@ -9,7 +9,10 @@ SURF.turf={top:o=>o+(1-o)*0.62,grip:o=>1-0.12*(1-o),fuel:1.1,name:'KONSTGRÄS'};
 SFX.turf={dust:[.40,.62,.32],noise:{f:1250,g:.013}};
 EDGES.rosengard=st=>edgeRosengard(st);
 
-STAGES.push({ id:'rosengard', group:'skane', name:'ROSENGÅRD', sub:'MALMÖ', hw:8.8,
+STAGES.push({ id:'rosengard', group:'skane', name:'ROSENGÅRD', sub:'MALMÖ',
+  order:19, tag:'Kvarteren runt Rosengård centrum, under järnvägsbron och förbi fotbollsburen.',
+  view:{r:'bur',f:0,lat:0,h:9,to:{r:'bur',f:0.5,h:0},fov:55},
+  hw:8.8,
   bars:[0.75,0.65,0.45], laps:3,
   blurb:'Mehmet\'s home turf on a golden summer evening: wide Malmö streets between the big blocks with their colourful balconies, round the roundabout, over the railway and out to the market square at Möllan. Cut through the football cage and over the park on slow, grippy turf, and watch for footballs flying out of the cage and delivery mopeds on the zebra crossing.',
   role:'Mehmets hemmabana: breda gator, en fotbollsbur att gena genom och torghandel på Möllan.',

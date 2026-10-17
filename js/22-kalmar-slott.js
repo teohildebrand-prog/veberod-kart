@@ -77,7 +77,10 @@ function kalmarMoat(x,z){
   if(lat<-HW-0.2&&lat>KALMAR.castleLat+40)w=Math.max(w,1-smooth(5.5,8,Math.abs(along)));
   return w;
 }
-STAGES.push({ id:'kalmar', group:'vild', name:'KALMAR SLOTT', sub:'TORNERSPELET', hw:8.6,
+STAGES.push({ id:'kalmar', group:'vild', name:'KALMAR SLOTT', sub:'TORNERSPELET',
+  order:12, tag:'Över vallgraven, där vindbryggan reser sig till ett hopp. Riddare tornerar vid banan.',
+  view:{i:40,lat:0,h:6,to:{i:82,lat:-108,h:15},fov:55},
+  hw:8.6,
   bars:[0.80,0.65,0.70], laps:3,
   blurb:'Round the moated Renaissance castle at Kalmar, its towers capped in green copper, the Baltic and the Öland bridge behind. The drawbridge on the main road rises on a bell and turns into a launch ramp, so the narrow grassy tunnel beside it is the safe line. Down the tournament lists, knights gallop both sides of the road and swing their lances at anyone near the barrier.',
   role:'Vindbrygga som blir hoppramp, tornerspel och en smal tunnel.',

@@ -35,7 +35,10 @@ EDGES.kivikGard=st=>{                               /* stengärdesgård: a dry w
   a.count=na;b.count=nb;a.instanceMatrix.needsUpdate=b.instanceMatrix.needsUpdate=true;world.add(a);world.add(b);
 };
 
-STAGES.push({ id:'kivik', group:'osterlen', name:'KUNGAGRAVEN', sub:'KIVIK', hw:8.4,
+STAGES.push({ id:'kivik', group:'osterlen', name:'KUNGAGRAVEN', sub:'KIVIK',
+  order:16, tag:'Marknadsdag vid Kungagraven bland äppelträden. Äpplen rullar över vägen från stånden.',
+  view:{r:'kammaren',f:0.1,lat:0,h:4,to:{r:'kammaren',f:0.5,h:6},fov:55},
+  hw:8.4,
   bars:[0.6,0.7,0.5], laps:3,
   blurb:'Late summer on the Österlen coast: past the striped stalls of Kivik market, along the sea and up through the orchards to the great Bronze Age cairn. A side passage runs straight through the grave chamber between the carved slabs and out into the next room, and giant apples roll off the market stalls across the road, so watch for one wobbling at the top of its chute.',
   role:'Marknad, äppelodlingar och en gravkammare att köra rakt igenom.',

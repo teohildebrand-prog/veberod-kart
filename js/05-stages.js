@@ -8,7 +8,10 @@ const rx=new Float32Array(N),rz=new Float32Array(N);
 const curv=new Float32Array(N), bank=new Float32Array(N), scurv=new Float32Array(N);
 
 const STAGES=[
-{ id:'lund', name:'LUND', sub:'GAMLA STADEN', hw:7.0,
+{ id:'lund', name:'LUND', sub:'GAMLA STADEN',
+  order:2, tag:'Kullersten mellan gamla hus under domkyrkans torn. Nitton kurvor och knappt en raksträcka.',
+  view:{x:112,z:-70,h:12,to:{x:52,z:-36,h:22},fov:50},
+  hw:7.0,
   bars:[0.40,0.95,0.25], laps:3,
   blurb:'Cobbled lanes wound between the old houses, with the cathedral towers over everything. Nineteen corners and barely a straight — the slowest lap and the hardest to drive clean.',
   sky:[0xdde4e9,0x6f9cc4], fog:[0xccd7de,55,300], amb:0x6d7686, dif:0xfff2da,
@@ -20,7 +23,10 @@ const STAGES=[
         [-116, 3,  74],[-106, 1,  28],[ -70, 2,   4],[ -92, 4, -38],
         [-110, 3, -80],[ -64, 1,-104],[ -22, 0,-106]] },
 
-{ id:'veberod', name:'VEBERÖD', sub:'LANDSBYGDEN', hw:8.2,
+{ id:'veberod', name:'VEBERÖD', sub:'LANDSBYGDEN',
+  order:1, tag:'Rapsfält, grusvägar och full fart genom ladan.',
+  view:{i:398,lat:4,h:4,to:{i:458,lat:0,h:5},fov:50},
+  hw:8.2,
   bars:[0.75,0.60,0.90], laps:3,
   blurb:'Rapeseed, spruce and a barn you drive straight through. Thirty-two metres of elevation and three ramps through the fields.',
   sky:[0xdde4e9,0x2f7fd6], fog:[0xc2d0d9,70,340], amb:0x62707f, dif:0xfff0d4,
@@ -54,7 +60,10 @@ const STAGES=[
      hint:'Högt upp på en halmbal där rapsen tar slut.',
      story:'In June the elder along the field edges flowers white, and the umbels go into fläderblomssaft, a sweet cordial with lemon. It is the drink of every midsummer picnic: diluted, ice cold, with a wasp in it.'}] },
 
-{ id:'bron', name:'ÖRESUNDSBRON', sub:'ÖVER SUNDET', hw:11.0,
+{ id:'bron', name:'ÖRESUNDSBRON', sub:'ÖVER SUNDET',
+  order:3, tag:'Två kilometer bro över sundet i blå timmen. Gasen i botten hela vägen.',
+  view:{i:200,lat:-6,h:3,to:{x:-3,z:-38,y:40},fov:55},
+  hw:11.0,
   bars:[1.00,0.08,0.00], laps:2,
   blurb:'Two kilometres of deck over open water at blue hour, lit down both edges, a hairpin at each end and nothing else. Flat out the whole way — the only stage where nothing matters but top speed. Two laps.',
   sky:[0xf2a874,0x1f3a72], fog:[0xae97a6,140,640], amb:0x5c6079, dif:0xffd2a0,
@@ -67,7 +76,10 @@ const STAGES=[
         [   0, 27,  20],[-120, 25,  20],[-240, 21,  20],[-380, 16,  20],
         [-520, 12,  20],[-566, 11,   8],[-566, 11,  -8]] },
 
-{ id:'ahus', name:'ÅHUS-PARKEN', sub:'NÖJESFÄLTET', hw:8.6,
+{ id:'ahus', name:'ÅHUS-PARKEN', sub:'NÖJESFÄLTET',
+  order:4, tag:'Ett nöjesfält med en väg rakt igenom. Doserade kurvor, fyra hopp och pariserhjulet.',
+  view:{x:130,z:-20,h:10,to:{x:169,z:28,h:24},fov:62},
+  hw:8.6,
   bars:[0.80,0.70,1.00], laps:3, bankGain:0.95, bankMax:1.50,
   blurb:'A seaside funfair that someone paved a road through. Fifty metres of climb, four ramps and corners banked so hard you drive them sideways, in under the coaster loops and past the ferris wheel.',
   sky:[0xffb27a,0x2e5fa8], fog:[0xcfb4a2,80,400], amb:0x6a6478, dif:0xffdcb0,
@@ -81,7 +93,10 @@ const STAGES=[
         [-108,  8,  22],[ -62, 20,  -6],[ -88, 34, -46],[-136, 24, -92],
         [-104,  8,-132],[ -48,  0,-146]] },
 
-{ id:'tollarp', name:'TOLLARP', sub:'INDUSTRIHÅLAN', hw:9.4,
+{ id:'tollarp', name:'TOLLARP', sub:'INDUSTRIHÅLAN',
+  order:5, tag:'Sprucken betong mellan skjul och rörbroar. Kortets snabbaste varv.',
+  view:{i:95,lat:0,h:4,to:{i:122,lat:0,h:9},fov:55},
+  hw:9.4,
   bars:[0.95,0.45,0.70], laps:3,
   blurb:'Wide cracked concrete between the sheds, under the pipe bridges and over the slag heap. Long straights, flat-out and filthy — the fastest lap on the card.',
   sky:[0xd8b083,0x8a6f5a], fog:[0xc09a68,40,250], amb:0x6f6355, dif:0xffd8a4,
@@ -96,7 +111,10 @@ const STAGES=[
         [-152, 15,-100],[-188,  8,-140],[-120,  3,-172],[ -50,  0,-178]] },
 
 /* Knightmare-athon's counterpart: no shortcut, a castle ghost */
-{ id:'glimminge', name:'GLIMMINGEHUS', sub:'BORGEN I MÅNSKEN', hw:8.0,
+{ id:'glimminge', name:'GLIMMINGEHUS', sub:'BORGEN I MÅNSKEN',
+  order:6, tag:'Runt medeltidsborgen i fullmåne, utan genvägar. Slottsspöket snurrar den det rör.',
+  view:{x:156,z:-3,h:4,to:{x:6,z:8,h:10},fov:45,t:0},
+  hw:8.0,
   bars:[0.55,0.85,0.45], laps:3,
   blurb:'Round the medieval stone castle on Österlen under a full moon, on cobbles lit by torches and through the gatehouse arch. No shortcut, like the old castle track it borrows from, and the castle ghost drifts through the walls and spins whoever it touches.',
   sky:[0x23304f,0x05070f], fog:[0x18203a,45,280], amb:0x46506c, dif:0xa8bce8,
@@ -120,7 +138,10 @@ const STAGES=[
      story:'Österlen grows Sweden\'s apples, around Kivik and all the way up the coast. Äppelkaka is the autumn answer to a full orchard: sliced apples, cinnamon and a crumb of butter and breadcrumbs, baked soft and eaten warm with vanilla sauce.'}] },
 
 /* Desert Adventure Dragway's counterpart: two secret passages, opened with a rocket */
-{ id:'ales', name:'ALES STENAR', sub:'SANDDRAGET', hw:9.0,
+{ id:'ales', name:'ALES STENAR', sub:'SANDDRAGET',
+  order:7, tag:'Dragrace över dynerna ut till stenskeppet på klinten. Kör baklänges genom skeppet och ratten byter håll.',
+  view:{x:262,z:75,h:9,to:{x:300,z:-60,y:-4},fov:58},
+  hw:9.0,
   bars:[0.95,0.35,0.60], laps:3,
   blurb:'A drag strip over the Sandhammaren dunes out to the stone ship on the cliff above the sea. Two secret passages run between the standing stones, but a boulder sits in each mouth: blow it out of the way with a spettekaka. Drive the ship backwards and Ale\'s curse swaps your steering.',
   sky:[0xf6eed4,0x3a8ad6], fog:[0xe8dec4,90,430], amb:0x6c6a62, dif:0xfff4dc,

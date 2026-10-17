@@ -57,7 +57,14 @@ function showDone(){
   document.getElementById('doneStamps').textContent=of?'PICKNICKSTÄMPLAR PÅ '+stage.name+': '+got+'/'+of:'';
   for(const id of ['btnAgain','btnSwap','btnStage','btnMenu'])document.getElementById(id).hidden=!!c;
   document.getElementById('btnTable').hidden=!c;
+  if(!c&&player.done)saveBest();
   sheetDone.classList.remove('hide');
+}
+/** the single-race record per stage, normal and mirrored kept apart, shown on the stage picker */
+function saveBest(){
+  const key=stage.id+(MIRROR?'_m':''),B=SAVE.best[key]||{t:Infinity,lap:Infinity};
+  SAVE.best[key]={t:Math.min(B.t,player.total),lap:Math.min(B.lap,player.best==null?Infinity:player.best)};
+  writeSave();
 }
 function showTTDone(){
   const A=ARNE_GHOST[stage.id],G=SAVE.ghosts[stage.id],beat=A&&player.best!=null&&player.best<A.t;
@@ -185,60 +192,7 @@ function portrait(ci){
     if(cupSetup){previewOn=false;unpeek();showCupSetup();}else showStages();});
   applyCharacter(0);
 })();
-const sheetStages=document.getElementById('stages');
-let stageSel=1;
-(function buildStageCards(){
-  const LBL=['FART','KURVOR','HOPP'];
-  document.getElementById('scards').innerHTML=STAGES.map((c,i)=>
-    '<button class="card'+(i===stageSel?' sel':'')+'" data-i="'+i+'">'+
-    '<div class="cn">'+c.name+'</div><div class="cr">'+c.sub+'</div>'+
-    c.bars.map((v,k)=>'<div class="bar"><span>'+LBL[k]+
-      '</span><i><b style="width:'+Math.round(v*100)+'%"></b></i></div>').join('')+
-    '</button>').join('');
-  document.querySelectorAll('#scards .card').forEach(el=>{
-    el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyStage(+el.dataset.i);});
-  });
-})();
-/* the picker shows one championship's tracks at a time */
-const SGROUPS=[['skane','SKÅNE'],['osterlen','ÖSTERLEN'],['kust','KUSTEN'],['vild','VILDMARKEN'],['final','FINALEN']]
-  .filter(g=>STAGES.some(S=>S.group===g[0]));
-let stageGroup='skane';
-function renderGroups(){
-  const host=document.getElementById('sgroups');
-  host.innerHTML=SGROUPS.map(([g,n])=>'<button class="tab'+(g===stageGroup?' sel':'')+'" data-g="'+g+'">'+n+'</button>').join('');
-  host.querySelectorAll('.tab').forEach(el=>el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);
-    const g=el.dataset.g;if(g===stageGroup)return;
-    applyStage(STAGES.findIndex(S=>S.group===g));}));
-  document.querySelectorAll('#scards .card').forEach((el,k)=>el.hidden=STAGES[k].group!==stageGroup);
-}
-let mirrorSel=false;
-function renderStageInfo(){
-  const S=STAGES[stageSel],host=document.getElementById('mirrorRow'),open=!TT&&!!SAVE.unlock['mirror_'+S.id];
-  host.innerHTML=open?'<button class="tab'+(mirrorSel?' sel':'')+'" id="btnMirror">SPEGELVÄND: '+(mirrorSel?'PÅ':'AV')+'</button>':'';
-  if(open)document.getElementById('btnMirror').addEventListener('click',()=>{mirrorSel=!mirrorSel;renderStageInfo();});
-  const G=SAVE.ghosts[S.id],A=ARNE_GHOST[S.id];
-  document.getElementById('sinfo').textContent=TT?'TIDSLOPP · DITT REKORD '+(G?fmt(G.t):'—')+
-    ' · ARNE '+(A?fmt(A.t):'kör sitt varv när du startar')+(SAVE.unlock['mirror_'+S.id]?' · SPEGELVÄND UPPLÅST':''):'';
-  document.querySelector('#stages .pick-h').textContent=TT?'TIDSLOPP · VÄLJ BANA':'VÄLJ BANA';
-}
-function applyStage(i){
-  stageSel=i;
-  if(STAGES[i].group!==stageGroup){stageGroup=STAGES[i].group;renderGroups();}
-  document.querySelectorAll('#scards .card').forEach((el,k)=>el.classList.toggle('sel',k===i));
-  document.getElementById('sblurb').textContent=STAGES[i].blurb;
-  renderStageInfo();
-  buildWorld(STAGES[i]);
-  placeOnGrid();camInit=false;
-}
-function showStages(){
-  hideSheets();setMirror(false);renderGroups();
-  previewOn=false;unpeek();setPause(false);
-  state='select';camInit=false;
-  document.body.classList.remove('racing');
-  sheetStart.classList.add('hide');sheetDone.classList.add('hide');
-  sheetPick.classList.add('hide');sheetStages.classList.remove('hide');
-  applyStage(stageSel);
-}
+let stageSel=1,mirrorSel=false;                /* the stage picker lives in its own section */
 function showSelect(){
   hideSheets();
   previewOn=true;
@@ -479,5 +433,4 @@ document.getElementById('btnPodDone').addEventListener('click',showMenu);
 refreshMenu();
 document.getElementById('btnAgain').addEventListener('click',resetRace);
 document.getElementById('btnSwap').addEventListener('click',showSelect);
-document.getElementById('btnStage').addEventListener('click',showStages);
-document.getElementById('btnStageGo').addEventListener('click',()=>{bootAudio();showSelect();});
+document.getElementById('btnStage').addEventListener('click',()=>showStages());

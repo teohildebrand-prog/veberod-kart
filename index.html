@@ -70,7 +70,7 @@
 <div class="sheet" id="start">
   <div class="sheet-in">
     <h1>VEBERÖD KART<i>JAKTEN</i></h1>
-    <h2>SKÅNE · 7 BANOR · 6 FÖRARE</h2>
+    <h2>SKÅNE · 19 BANOR · 9 FÖRARE</h2>
     <p>Three laps of a closed farm road through the rapeseed. Hold a drift all the way round a bend and you come out with a boost.</p><p>Grab the milk for speed. Miss the pies. Land a long jump and the kart rewards you with a boost.</p>
     <div class="mrow">
       <button class="go" id="btnStart">ENKELT LOPP</button>
@@ -112,6 +112,7 @@
       <button class="go" id="btnBriefGo">KÖR</button>
     </div>
     <div class="mrow">
+      <button class="alt" id="btnBriefStages">BANORNA</button>
       <button class="alt" id="btnBriefAlbum">PICKNICKPASSET</button>
       <button class="alt" id="btnBriefMenu">MENY</button>
     </div>
@@ -152,14 +153,38 @@
 </div>
 
 <div class="sheet hide" id="stages">
-  <div class="pick-in">
-    <div class="pick-h">VÄLJ BANA</div>
-    <div class="tabs" id="sgroups"></div>
-    <div class="cards cards3" id="scards"></div>
-    <p class="cb" id="sblurb"></p>
-    <p class="note" id="sinfo"></p>
-    <div class="tabs" id="mirrorRow"></div>
-    <button class="go" id="btnStageGo">VÄLJ FÖRARE</button>
+  <div class="ss">
+    <header class="vs-top">
+      <div class="vs-logo" aria-hidden="true">VEBERÖD KART<i>JAKTEN</i></div>
+      <div class="ss-head"><h1 class="vs-title">VÄLJ BANA</h1><div class="ss-mode" id="ssMode"></div></div>
+    </header>
+    <div class="ss-roster">
+      <div class="ss-grid" id="ssGrid" role="listbox" aria-label="Banor"></div>
+      <div class="ss-pager" id="ssPager">
+        <button class="vs-arrow" id="ssPrev" aria-label="Föregående sida">◀</button>
+        <span class="ss-pagen"><i class="kb">Q</i><i class="xb">LB</i><b id="ssPageN">1 / 1</b><i class="kb">E</i><i class="xb">RB</i></span>
+        <button class="vs-arrow" id="ssNext" aria-label="Nästa sida">▶</button>
+      </div>
+    </div>
+    <div class="ss-prev">
+      <div class="ss-shot"><img id="ssShot" alt=""></div>
+      <div class="ss-card">
+        <div class="ss-name"><b id="ssName"></b><small id="ssSub"></small></div>
+        <p class="ss-tag" id="ssTag"></p>
+        <div class="ss-info"><dl id="ssInfo"></dl>
+          <div class="ss-side"><figure class="ss-map"><canvas id="ssMap" width="132" height="132" role="img" aria-label="Banprofil"></canvas><figcaption>BANPROFIL</figcaption></figure>
+          <button class="ss-mir" id="btnSsMirror"></button></div></div>
+        <p class="ss-why" id="ssWhy"></p>
+      </div>
+    </div>
+    <footer class="vs-foot">
+      <button class="vs-back" id="btnStageBack"><i aria-hidden="true"><span class="kb">ESC</span><span class="xb">B</span></i>TILLBAKA</button>
+      <div class="ss-hints" aria-hidden="true">
+        <span class="kb"><b>PILAR</b> FLYTTA · <b>Q/E</b> SIDA · <b>V</b> SPEGELVÄND</span>
+        <span class="xb"><b>D-PAD</b> FLYTTA · <b>LB/RB</b> SIDA · <b class="x">X</b> SPEGELVÄND</span>
+      </div>
+      <button class="vs-go" id="btnStageGo"><i aria-hidden="true"><span class="kb">↵</span><span class="xb">A</span></i><span id="btnStageGoT">VÄLJ BANA</span></button>
+    </footer>
   </div>
 </div>
 
@@ -387,6 +412,8 @@
 <script src="js/51-sandlada.js"></script>
 <script src="js/52-aero-bokeh.js"></script>
 <script src="js/53-gamepad.js"></script>
-<script src="js/54-loop.js"></script>
+<script src="js/54-stage-art.js"></script>
+<script src="js/55-stage-select.js"></script>
+<script src="js/56-loop.js"></script>
 </body>
 </html>

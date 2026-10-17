@@ -16,7 +16,10 @@ const runeY0=(x,z)=>-6*runeSea(x,z);
 /* the dusk deepens as the race goes on: 0 at the start, 1 by the last lap */
 const runeDusk=()=>0.12+0.88*smooth(0,150,typeof raceTime==='number'?raceTime:0);
 
-STAGES.push({ id:'rune', group:'final', name:'RAKET-RUNES RUNDA', sub:'FINALEN', hw:8.6,
+STAGES.push({ id:'rune', group:'final', name:'RAKET-RUNES RUNDA', sub:'FINALEN',
+  order:18, tag:'Raket-Runes egen bana i Malmö hamn, uppför spiralen förbi det vridna tornet. Finalen.',
+  view:{i:110,lat:0,h:6,to:{x:126,z:-28,h:40},fov:60},
+  hw:8.6,
   bars:[0.95,0.75,1.00], laps:3,
   blurb:'The championship final, round Malmö\'s western harbour at sunset. The road climbs a switchback ramp beside the twisting tower, dives back down to the waterfront and flies out over the water on a bridge deck while the city lights come on. A split steel ring in the sculpture park hides a shortcut that only a rocket opens, and a container crane drags its load across the quay road.',
   role:'Finalen: rampen upp längs tornet, bron över vattnet och Raket-Rune själv.',

@@ -4,7 +4,7 @@
    X item, Y camera, Menu pause. In menus the stick or D-pad moves focus between the open sheet's
    buttons, A picks and B goes back. The KONTROLLER sheet shows this the first time a pad wakes up. */
 const pad={throttle:0,brake:0,steer:0,drift:false};
-const PB={A:0,B:1,X:2,Y:3,LT:6,RT:7,MENU:9,UP:12,DOWN:13,LEFT:14,RIGHT:15};
+const PB={A:0,B:1,X:2,Y:3,LB:4,RB:5,LT:6,RT:7,MENU:9,UP:12,DOWN:13,LEFT:14,RIGHT:15};
 const padHelp=document.getElementById('padhelp');
 let padPrev=[],padDir='',padHold=0,padRoot=null,padLast=null,padT=performance.now();
 const deadzone=(v,d)=>Math.abs(v)<d?0:Math.sign(v)*(Math.abs(v)-d)/(1-d);
@@ -51,17 +51,15 @@ function padPick(root){
   if(!b||!root.contains(b)||b===root){padHome(root);return;}
   /* A on the driver or track that is already chosen moves on, like Enter */
   const go=b.matches('.vcard.sel')?document.getElementById('btnGo'):
-    b.matches('#scards .card.sel')?document.getElementById('btnStageGo'):
     b.matches('#classcards .card.sel')?document.getElementById('btnCupNext'):null;
   padLast=padId(b);bootAudio();
   (go||b).click();
 }
 const PADBACK={pick:'btnBack',cupsetup:'btnCupBack',album:'btnAlbumBack',brief:'btnBriefMenu',
-  podium:'btnPodDone',paused:'btnResume'};
+  podium:'btnPodDone',paused:'btnResume',stages:'btnStageBack'};
 function padBack(root){
   if(root===padHelp)return hidePadHelp();
   if(root===dbgEl)return setDbg(false);
-  if(root.id==='stages')return showMenu();
   const b=document.getElementById(PADBACK[root.id]);
   if(b&&!b.hidden){padLast=null;b.click();}
 }
@@ -78,18 +76,21 @@ function pollPad(){
   if(root){
     if(root!==padRoot){                    /* a new sheet: put focus on its obvious choice */
       padRoot=root;
-      if(document.body.classList.contains('padnav')&&!root.contains(document.activeElement))padHome(root);
+      if(document.body.classList.contains('padnav')&&root.id!=='stages'&&!root.contains(document.activeElement))padHome(root);
     }
     const dir=down(PB.LEFT)||sx<-.5?'l':down(PB.RIGHT)||sx>.5?'r':down(PB.UP)||sy<-.5?'u':down(PB.DOWN)||sy>.5?'d':'';
-    if(dir&&(dir!==padDir||(padHold-=dt)<=0)){
-      padHold=dir===padDir?.12:.38;
-      document.body.classList.add('padnav');
-      padMove(root,dir==='l'?-1:dir==='r'?1:0,dir==='u'?-1:dir==='d'?1:0);
-    }
+    const step=dir&&(dir!==padDir||(padHold-=dt)<=0);
+    if(step){padHold=dir===padDir?.12:.38;document.body.classList.add('padnav');}
     padDir=dir;
-    if(hit(PB.A)){document.body.classList.add('padnav');padPick(root);}
-    else if(hit(PB.B))padBack(root);
-    else if(hit(PB.MENU)&&root.id==='paused')setPause(false);
+    if(root.id==='stages'){                /* the stage roster moves its own highlight */
+      if(B.some(b=>b.pressed))document.body.classList.add('padnav');
+      stagePad(step?dir:'',hit);
+    }else{
+      if(step)padMove(root,dir==='l'?-1:dir==='r'?1:0,dir==='u'?-1:dir==='d'?1:0);
+      if(hit(PB.A)){document.body.classList.add('padnav');padPick(root);}
+      else if(hit(PB.B))padBack(root);
+      else if(hit(PB.MENU)&&root.id==='paused')setPause(false);
+    }
   }else{
     padDir='';padRoot=null;
     pad.steer=-sx+(down(PB.LEFT)?1:0)-(down(PB.RIGHT)?1:0);

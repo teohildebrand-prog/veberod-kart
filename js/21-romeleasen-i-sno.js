@@ -74,7 +74,10 @@ function romelePisteD(x,z){
   return Math.hypot(x-a[0]-vx*t,z-a[1]-vz*t);
 }
 
-STAGES.push({ id:'romele', group:'vild', name:'ROMELEÅSEN', sub:'SNÖKAOSET', hw:8.6,
+STAGES.push({ id:'romele', group:'vild', name:'ROMELEÅSEN', sub:'SNÖKAOSET',
+  order:13, tag:'Snöoväder över åsen. Is, snöyra och en plog som inte väjer.',
+  view:{i:40,lat:0,h:4,to:{i:80,lat:0,h:2},fov:55},
+  hw:8.6,
   bars:[0.75,0.70,0.80], laps:3,
   blurb:'The one day a year it snows in Skåne, up over the Romeleåsen ridge past the lookout, the ski slope and a ditch full of snowed-in cars. Cut straight across the frozen lake on ice that is quick but barely steers, keep clear of the big yellow plough coming the other way, and drive blind when a snow squall closes in.',
   role:'Snöbyar, en plogbil i mötande och genväg över isen.',

@@ -38,7 +38,10 @@ EDGES.hoor=st=>{
 /* where the elk come out of the forest: [main-road sample, side, period, phase] */
 const HOOR_ELK=[[428,-1,15,3],[566,-1,17,11]];
 
-STAGES.push({ id:'hoor', group:'vild', name:'HÖÖR', sub:'ÄLGSKOGEN', hw:8.6,
+STAGES.push({ id:'hoor', group:'vild', name:'HÖÖR', sub:'ÄLGSKOGEN',
+  order:14, tag:'Grusväg genom djurparkens skog. Älgen kliver ut och vägrar flytta sig.',
+  view:{i:412,lat:2,h:2.2,to:{i:428,lat:-4,h:2.4},fov:50,t:4.5},
+  hw:8.6,
   bars:[0.60,0.80,0.50], laps:3,
   blurb:'A gravel loop through a wildlife park in the deep green woods above Lake Ringsjön, past the bison meadow, the lynx rocks and the lakeshore. The shortcut runs through the bear enclosure and straight through the waterfall, on mud. Elk wander out of the trees, stand in the road and do not move for anyone: steer round them.',
   role:'Grusväg genom djurparken, en genväg rakt genom björnarnas vattenfall och älgar som inte flyttar sig.',
