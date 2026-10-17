@@ -9,6 +9,7 @@ function computeMB(){
 }
 function mapXY(x,z){
   const W=mapCv.width,H=mapCv.height;
+  if(MIRROR)x=MB.x0+MB.x1-x;
   const s=Math.min(W/(MB.x1-MB.x0),H/(MB.z1-MB.z0));
   return [(x-MB.x0)*s+(W-(MB.x1-MB.x0)*s)/2,(z-MB.z0)*s+(H-(MB.z1-MB.z0)*s)/2];
 }
@@ -21,6 +22,7 @@ function drawMap(){
   mctx.strokeStyle='#e8eef2';mctx.lineWidth=3;mctx.stroke();
   mctx.setLineDash([2,2]);mctx.lineWidth=2;mctx.strokeStyle='#f2dfa6';
   for(const R of ALTS){
+    if(R.hidden&&!R.open)continue;
     mctx.beginPath();
     for(let j=0;j<R.n;j+=3){const q=mapXY(R.X[j],R.Z[j]);j===0?mctx.moveTo(q[0],q[1]):mctx.lineTo(q[0],q[1]);}
     const e=mapXY(R.X[R.n-1],R.Z[R.n-1]);mctx.lineTo(e[0],e[1]);mctx.stroke();
@@ -29,6 +31,7 @@ function drawMap(){
   const L=mapXY(sx[0],sz[0]);
   mctx.fillStyle='#fecc02';mctx.fillRect(L[0]-2,L[1]-2,4,4);
   for(const k of karts){
+    if(k.parked)continue;
     const q=mapXY(k.x,k.z);
     mctx.fillStyle='#'+k.color.toString(16).padStart(6,'0');
     const s=k===player?4:3;

@@ -69,12 +69,27 @@ function atPumpNow(si,lat){
   return null;
 }
 
+/** would this kart's fuel last past the next pump to the one after it? */
+function wantsFuel(k){
+  let nx=null,bd=1e9;
+  for(const S of stations){const d=((S.at-k.mi)%N+N)%N;if(d<bd){bd=d;nx=S;}}
+  if(!nx)return false;
+  let gap=N;for(const S of stations)if(S!==nx){const d=((S.at-nx.at)%N+N)%N;if(d<gap)gap=d;}
+  const secs=(bd+gap)*SEG/(k.maxSpeed*0.7);
+  return k.fuel<secs*2.6*k.burn+10;
+}
+/** fuel for the leg from this pump to the next one, with a margin */
+function legFuel(k){
+  const S=atPumpNow(k.si,k.lat);if(!S)return 82;
+  let gap=N;for(const T of stations)if(T!==S){const d=((T.at-S.at)%N+N)%N;if(d<gap)gap=d;}
+  return gap*SEG/(k.maxSpeed*0.7)*2.6*k.burn+14;
+}
 function aiItemLines(){
   for(const k of karts){
-    if(!k.ai)continue;
+    if(!k.ai||k.parked)continue;
     let bias=0;
     for(const it of items){
-      if(it.cool>0)continue;
+      if(it.cool>0||it.type==='sugar')continue;
       let d=it.si-k.mi;
       if(d>N/2)d-=N; else if(d<-N/2)d+=N;
       if(d<2||d>26)continue;
@@ -101,7 +116,9 @@ function aiItemLines(){
       else if(k.held==='pie'&&behind)useItem(k);
       else if(k.held==='shield'&&(behind||Math.random()<0.004))useItem(k);
     }
-    if(k.fuel<64)for(const S of stations){                   /* head for the pumps */
+    if(!k.wantFuel&&!k.atPump&&wantsFuel(k))k.wantFuel=true;  /* decided before the pump */
+    if(k.wantFuel&&k.atPump&&k.fuel>=Math.min(96,Math.max(82,legFuel(k)))||k.fuel>=96)k.wantFuel=false;
+    if(k.wantFuel)for(const S of stations){                   /* head for the pumps */
       let d=S.at-k.mi;
       if(d>N/2)d-=N;else if(d<-N/2)d+=N;
       if(d<-S.len||d>60)continue;

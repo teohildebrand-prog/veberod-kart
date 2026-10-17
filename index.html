@@ -6,7 +6,7 @@
 <title>Veberöd Kart - Jakten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Titillium+Web:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Titillium+Web:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -25,6 +25,7 @@
     <div class="sub">BÄSTA<br><b id="best">-:--.--</b></div>
   </div>
   <div id="slot" class="plate off"><span id="slotv"></span><b id="slotn"></b></div>
+  <div id="sugar" class="plate off" title="Sockerbitar: uppgraderar nästa föremål"><i></i><i></i><i></i></div>
   <canvas id="map" width="72" height="72"></canvas>
   <div id="speedo">
     <div id="spd">0<b>KM/H</b></div>
@@ -42,6 +43,9 @@
   </div>
 </div>
 
+<div id="dbg" hidden></div>
+<pre id="dbgHud" hidden></pre>
+
 <div id="pads">
   <button class="pad" id="pL" aria-label="Steer left">&lt;</button>
   <button class="pad" id="pR" aria-label="Steer right">&gt;</button>
@@ -54,7 +58,7 @@
 <div class="sheet" id="start">
   <div class="sheet-in">
     <h1>VEBERÖD KART<i>JAKTEN</i></h1>
-    <h2>SKÅNE · 5 BANOR · 6 FÖRARE</h2>
+    <h2>SKÅNE · 7 BANOR · 6 FÖRARE</h2>
     <p>Three laps of a closed farm road through the rapeseed. Hold a drift all the way round a bend and you come out with a boost.</p><p>Grab the milk for speed. Miss the pies. Land a long jump and the kart rewards you with a boost.</p>
     <div class="mrow">
       <button class="go" id="btnStart">ENKELT LOPP</button>
@@ -63,6 +67,8 @@
     <div class="mrow">
       <button class="alt" id="btnResumeCup" hidden>FORTSÄTT CUPEN</button>
       <button class="alt" id="btnAlbum">PICKNICKPASSET</button>
+      <button class="alt" id="btnTT">TIDSLOPP</button>
+      <button class="alt" id="btnFree">SANDLÅDA</button>
     </div>
     <div id="shelf"></div>
     <p class="note" id="saveNote" hidden>Den här webbläsaren kan inte spara. Stämplar och cupen sparas inte.</p>
@@ -74,6 +80,7 @@
     <div class="pick-h">SKÅNECUPEN · VÄLJ KLASS</div>
     <div class="cards" id="classcards"></div>
     <p class="cb" id="classblurb"></p>
+    <div class="tabs" id="cupMirror"></div>
     <p class="warn" id="cupWarn" hidden>Du har en cup på gång. Startar du en ny skrivs den över.</p>
     <div class="mrow">
       <button class="go" id="btnCupNext">VÄLJ FÖRARE</button>
@@ -135,23 +142,41 @@
     <div class="pick-h">VÄLJ BANA</div>
     <div class="cards cards3" id="scards"></div>
     <p class="cb" id="sblurb"></p>
+    <p class="note" id="sinfo"></p>
+    <div class="tabs" id="mirrorRow"></div>
     <button class="go" id="btnStageGo">VÄLJ FÖRARE</button>
   </div>
 </div>
 
 <div class="sheet hide" id="pick">
-  <div class="pick-in">
-    <div class="pick-h">VÄLJ FÖRARE</div>
-    <div class="ptag" id="ptag"></div>
-    <div class="cards" id="cards"></div>
-    <p class="cb" id="cblurb"></p>
-    <div class="pick-h">VÄLJ BIL</div>
-    <div class="cards cards3" id="carcards"></div>
-    <p class="cb" id="carblurb"></p>
-    <div id="paints" hidden></div>
-    <div class="pick-h">DIN KOMBINATION</div>
-    <div id="combo"></div>
-    <button class="go" id="btnGo">KÖR</button>
+  <div class="vs">
+    <header class="vs-top">
+      <div class="vs-logo" aria-hidden="true">VEBERÖD KART<i>JAKTEN</i></div>
+      <h1 class="vs-title">VÄLJ FÖRARE</h1>
+      <div class="vs-mode" id="vsMode"></div>
+    </header>
+    <div class="vs-grid" id="cards" role="listbox" aria-label="Förare"></div>
+    <div class="vs-name">
+      <div class="vs-big" id="vsName"></div>
+      <div class="vs-home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span id="vsHome"></span><em id="ptag"></em></div>
+    </div>
+    <div class="vs-panel">
+      <div class="vs-car">
+        <button class="vs-arrow" id="carPrev" aria-label="Föregående bil">◀</button>
+        <div class="vs-carname"><b id="vsCar"></b><small id="vsCarSub"></small></div>
+        <button class="vs-arrow" id="carNext" aria-label="Nästa bil">▶</button>
+      </div>
+      <div class="vs-stats">
+        <div id="combo"></div>
+        <div class="vs-quirk"><b id="vsQuirk"></b><span id="vsQuirkT"></span></div>
+      </div>
+      <p class="vs-blurb" id="cblurb"></p>
+      <div id="paints" class="tabs" hidden></div>
+    </div>
+    <footer class="vs-foot">
+      <button class="vs-back" id="btnBack"><i aria-hidden="true">○</i>TILLBAKA</button>
+      <button class="vs-go" id="btnGo"><i aria-hidden="true">✕</i><span id="btnGoT">KÖR</span></button>
+    </footer>
   </div>
 </div>
 
@@ -164,6 +189,7 @@
       <button class="alt" id="btnRestart" style="margin-left:0">BÖRJA OM</button>
       <button class="alt" id="btnQuit">BYT BANA</button>
       <button class="alt" id="btnCupQuit" hidden>AVSLUTA CUPEN</button>
+      <button class="alt" id="btnDbg">DEBUG</button>
     </div>
   </div>
 </div>
@@ -191,28 +217,33 @@
 <script src="js/08-start-line-gantry-church-village.js"></script>
 <script src="js/09-countryside-props.js"></script>
 <script src="js/10-lund.js"></script>
-<script src="js/11-tollarp.js"></script>
-<script src="js/12-ahus-parken.js"></script>
-<script src="js/13-karts.js"></script>
-<script src="js/14-save.js"></script>
-<script src="js/15-skanecupen.js"></script>
-<script src="js/16-dust.js"></script>
-<script src="js/17-pickups.js"></script>
-<script src="js/18-picknickstamplar.js"></script>
-<script src="js/19-spettekaka-raketer.js"></script>
-<script src="js/20-statolja.js"></script>
-<script src="js/21-landmarks.js"></script>
-<script src="js/22-genvagar.js"></script>
-<script src="js/23-input.js"></script>
-<script src="js/24-audio.js"></script>
-<script src="js/25-physics.js"></script>
-<script src="js/26-kart-drawing.js"></script>
-<script src="js/27-camera.js"></script>
-<script src="js/28-minimap.js"></script>
-<script src="js/29-hud.js"></script>
-<script src="js/30-world.js"></script>
-<script src="js/31-race-flow.js"></script>
-<script src="js/32-aero-bokeh.js"></script>
-<script src="js/33-loop.js"></script>
+<script src="js/11-glimmingehus-by-night.js"></script>
+<script src="js/12-ales-stenar.js"></script>
+<script src="js/13-tollarp.js"></script>
+<script src="js/14-ahus-parken.js"></script>
+<script src="js/15-karts.js"></script>
+<script src="js/16-save.js"></script>
+<script src="js/17-tidslopp.js"></script>
+<script src="js/18-skanecupen.js"></script>
+<script src="js/19-dust.js"></script>
+<script src="js/20-pickups.js"></script>
+<script src="js/21-picknickstamplar.js"></script>
+<script src="js/22-spettekaka-raketer.js"></script>
+<script src="js/23-statolja.js"></script>
+<script src="js/24-landmarks.js"></script>
+<script src="js/25-genvagar.js"></script>
+<script src="js/26-input.js"></script>
+<script src="js/27-audio.js"></script>
+<script src="js/28-physics.js"></script>
+<script src="js/29-kart-drawing.js"></script>
+<script src="js/30-camera.js"></script>
+<script src="js/31-minimap.js"></script>
+<script src="js/32-hud.js"></script>
+<script src="js/33-world.js"></script>
+<script src="js/34-race-flow.js"></script>
+<script src="js/35-debug-menu.js"></script>
+<script src="js/36-sandlada.js"></script>
+<script src="js/37-aero-bokeh.js"></script>
+<script src="js/38-loop.js"></script>
 </body>
 </html>

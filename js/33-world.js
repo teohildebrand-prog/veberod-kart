@@ -9,6 +9,7 @@ function buildWorld(st){
   LAPS=st.laps||3;
   sampleTrack(st);
   buildAlts(st);
+  buildGates();
   computeMB();
   skyMat.uniforms.uLow.value.setHex(st.sky[0]);
   skyMat.uniforms.uHigh.value.setHex(st.sky[1]);
@@ -24,8 +25,12 @@ function buildWorld(st){
   else if(st.id==='lund')sceneryLund();
   else if(st.id==='bron')sceneryBron();
   else if(st.id==='ahus')sceneryAhus();
+  else if(st.id==='glimminge')sceneryGlimminge();
+  else if(st.id==='ales')sceneryAles();
   else sceneryTollarp();
+  moon.visible=st.id==='glimminge';
   buildAltWorld();
   buildItems();
+  hazardsFor(st);
   buildStamps(st);
 }

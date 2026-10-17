@@ -34,7 +34,51 @@ function farmSign(text,picnic){
     }
   });
 }
+/* ───────── boulders in the mouths of secret passages ─────────
+   A rocket that reaches one blows it aside and the passage stays open until whoever
+   fired it crosses the line again. Karts on the main road bounce off a boulder. */
+let BLOCKERS=[];
+function addBlocker(R){
+  const j=COMMIT+3,x=R.X[j],z=R.Z[j],mi=R.MI[j];
+  const g=new THREE.Group();
+  const rock=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(2.6,0)),psMat({color:0x8a8780}));
+  rock.scale.set(1.1,1.25,1);rock.position.y=2.2;g.add(rock);
+  const moss=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(1.4,0)),psMat({color:0x6e7a52}));
+  moss.position.set(.8,3.8,.3);g.add(moss);
+  const y=meshY(x,z);g.position.set(x,y,z);world.add(g);
+  BLOCKERS.push({R,x,z,y,mi,lat:(x-sx[mi])*rx[mi]+(z-sz[mi])*rz[mi],mesh:g,drop:0});
+}
+function shutPassages(k){
+  for(const R of ALTS)if(R.open&&(!k||R.opener===k)){R.open=false;R.opener=null;}
+}
+function openPassage(B,k){
+  if(B.R.open)return;
+  B.R.open=true;B.R.opener=k;
+  for(let p=0;p<22;p++)puff(B.x+rand(-2.5,2.5),B.y+rand(.5,4),B.z+rand(-2.5,2.5),.75,.72,.66,.9);
+  if(k===player){toast('HEMLIG PASSAGE ÖPPEN!');ping(300,900,.25);}
+}
+function updateBlockers(dt){
+  for(const B of BLOCKERS){
+    const want=B.R.open?1:0;B.drop=lerp(B.drop,want,Math.min(1,dt*3));
+    B.mesh.position.y=B.y-B.drop*5.2;B.mesh.rotation.z=B.drop*0.9;
+  }
+}
+/** karts on the main road bump off a closed boulder */
+function bumpBlockers(k){
+  if(k.rib)return;
+  for(const B of BLOCKERS){
+    if(B.R.open)continue;
+    const dx=k.x-B.x,dz=k.z-B.z,d=Math.hypot(dx,dz);
+    if(d>3.1||d<1e-3)continue;
+    k.x=B.x+dx/d*3.1;k.z=B.z+dz/d*3.1;
+    const vn=(k.vx*dx+k.vz*dz)/d;
+    if(vn<0){k.vx-=dx/d*vn*1.4;k.vz-=dz/d*vn*1.4;}
+    k.vx*=0.7;k.vz*=0.7;
+    if(k===player&&Math.abs(vn)>8)shake=Math.min(1,shake+.5);
+  }
+}
 function buildAltWorld(){
+  BLOCKERS=[];
   if(!ALTS.length)return;
   const wood=psMat({color:0x6b5540}),rail=psMat({color:0x8a7259});
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),
@@ -43,7 +87,7 @@ function buildAltWorld(){
   const mainGap=(x,z,pad)=>{const i=nearestGlobal(x,z);return Math.abs((x-sx[i])*rx[i]+(z-sz[i])*rz[i])>HW+pad;};
   for(const R of ALTS){
     /* the lane itself, laid over the main road's edge where they share it */
-    const lm=psMat({map:vergeTex(R.surface==='dirt'?'dirt':'gravel')});
+    const lm=psMat({map:vergeTex(R.surface==='dirt'?'dirt':(R.surface==='sand'?'sand':'gravel'))});
     lm.polygonOffset=true;lm.polygonOffsetFactor=-2;lm.polygonOffsetUnits=-2;
     world.add(new THREE.Mesh(altRibbon(R,-R.hw,R.hw,.03,6,0,R.n-1),lm));
     let j=0;
@@ -54,6 +98,8 @@ function buildAltWorld(){
       world.add(new THREE.Mesh(altRibbon(R,-R.hw-.4,R.hw+.4,.05,5,j,e2),mm));
       j=e2+1;
     }
+    if(R.shoot)addBlocker(R);
+    if(R.hidden)continue;                                 /* a secret passage has no sign */
     /* GENVÄG? boards: one well before the fork, one at the mouth */
     const hasStamp=(stage.stamps||[]).some(s=>s.route===R.id);
     const sm=psMat({map:farmSign('GENVÄG?',hasStamp),unlit:true,side:THREE.DoubleSide});

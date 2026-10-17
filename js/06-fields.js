@@ -8,7 +8,11 @@ const GROUND={
   waste:{cell:46,stripe:0.62,verge:0x5f564a,
     cols:[0x7a736a,0x6a6158,0x8a7c66,0x5a5248,0x8a5a33,0x4a453e,0x6e6a62,0x3e3a34]},
   park:{cell:38,stripe:0.8,verge:0xcbb98c,
-    cols:[0xe0cc96,0xd8c489,0x6ea84e,0x8fbb55,0xc85a4a,0x3f7fbf,0xe8c33a,0xd8d2c4]}
+    cols:[0xe0cc96,0xd8c489,0x6ea84e,0x8fbb55,0xc85a4a,0x3f7fbf,0xe8c33a,0xd8d2c4]},
+  night:{cell:52,stripe:0.5,verge:0x55554f,
+    cols:[0x2c3d2e,0x354832,0x2a3a2a,0x3d4c36,0x30404a,0x434b30,0x283624]},
+  dunes:{cell:40,stripe:0.7,verge:0xd2c08e,
+    cols:[0xe6d6a8,0xdccb98,0xd2c18a,0xa9ad62,0x9ca05a,0xe2d2a0,0xc8b984]}
 };
 const tmpC=new THREE.Color(), verge=new THREE.Color(0x968a6d);
 function landColor(x,z,out){
@@ -31,6 +35,16 @@ function landColor(x,z,out){
   out.setHSL(hsl.h,hsl.s,clamp(hsl.l+(l-0.5)*0.85,0.06,0.94));
   const v=1-smooth(HW+2.6,HW+11,latAt(x,z));
   if(v>0)out.lerp(verge,v*0.92);
+  if(stage.shore&&stage.shore(x,z)<-2)out.setHex(0xe9dcb4);          /* the beach under the cliff */
+}
+/** Glimmingehus stands on a flat island inside its moat */
+function castleMod(x,z){
+  const C=stage.castle,d=Math.hypot(x-C[0],z-C[1]);
+  if(d>64)return 0;
+  const flatTo=4-rolls(x,z);                       /* the island sits at a fixed height */
+  if(d<22)return flatTo;
+  if(d<34)return flatTo-3.2;                        /* the moat */
+  return flatTo*(1-smooth(34,64,d));
 }
 function buildTerrain(st){
   const S=(st.terrain&&st.terrain.size)||780, D=(st.terrain&&st.terrain.seg)||78;

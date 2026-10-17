@@ -111,8 +111,11 @@ function psMat(o){
 const flat=g=>{const n=g.index?g.toNonIndexed():g;n.computeVertexNormals();return n;};
 function pixTex(w,h,draw){
   const c=document.createElement('canvas');c.width=w;c.height=h;
-  draw(c.getContext('2d'),w,h);
+  const g=c.getContext('2d'),ft=g.fillText;let text=false;
+  g.fillText=function(){text=true;return ft.apply(g,arguments);};
+  draw(g,w,h);
   const t=new THREE.CanvasTexture(c);
   t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  t.hasText=text;
   return t;
 }
