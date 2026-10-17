@@ -67,9 +67,9 @@ if(isTouch&&matchMedia('(pointer:coarse)').matches)addEventListener('pointerdown
 function readInput(){
   const up=keys['w']||keys['arrowup'],dn=keys['s']||keys['arrowdown'];
   const lf=keys['a']||keys['arrowleft'],rt=keys['d']||keys['arrowright'];
-  input.throttle=(up||touch.a)?1:0;
-  input.brake=(dn||touch.b)?1:0;
-  input.steer=((lf||touch.l)?1:0)-((rt||touch.r)?1:0);
+  input.throttle=Math.max((up||touch.a)?1:0,pad.throttle);
+  input.brake=Math.max((dn||touch.b)?1:0,pad.brake);
+  input.steer=clamp(((lf||touch.l)?1:0)-((rt||touch.r)?1:0)+pad.steer,-1,1);
   if(MIRROR)input.steer=-input.steer;             /* the world is drawn flipped; the sim is not */
-  input.drift=!!(keys[' ']||keys['shift']||touch.d);
+  input.drift=!!(keys[' ']||keys['shift']||touch.d||pad.drift);
 }
