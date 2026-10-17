@@ -51,6 +51,19 @@ bindPad(document.getElementById('pB'),v=>touch.b=v);
 bindPad(document.getElementById('pD'),v=>touch.d=v);
 document.getElementById('pF').addEventListener('pointerdown',e=>{
   e.preventDefault();bootAudio();useItem(player);});
+document.getElementById('pH').addEventListener('pointerdown',e=>{
+  e.preventDefault();bootAudio();if((state==='race'||state==='grid')&&!paused)honk();});
+document.getElementById('camBtn').addEventListener('click',()=>{camMode=(camMode+1)%3;});
+/* phones: the first tap goes fullscreen and holds landscape where the browser allows it
+   (Android Chrome; iPhone Safari has no fullscreen, add the page to the home screen instead) */
+if(isTouch&&matchMedia('(pointer:coarse)').matches)addEventListener('pointerdown',function goFull(){
+  removeEventListener('pointerdown',goFull);
+  const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!rq||document.fullscreenElement)return;
+  Promise.resolve(rq.call(el,{navigationUI:'hide'})).then(()=>{
+    if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});
+  }).catch(()=>{});
+});
 function readInput(){
   const up=keys['w']||keys['arrowup'],dn=keys['s']||keys['arrowdown'];
   const lf=keys['a']||keys['arrowleft'],rt=keys['d']||keys['arrowright'];

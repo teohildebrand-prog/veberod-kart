@@ -79,3 +79,7 @@ Design sheet: /mnt/project-files/design/new-characters.md, concept art: /mnt/pro
 - Retire option in a cup race (scores 0), route-assist minimap setting, camera-shake slider, auto-accelerate.
 - More LEGO Racers counterparts from the GDD table (Karlskrona, Söderåsen, Limhamn, Ven, Kalmar...).
 - Repo split regenerated 2026-10-17 with the debug menu PR (includes the LEGO Racers round and the new drivers).
+
+## Phone play (2026-10-17)
+- The touch pads already existed (body.touch from isTouch). Added: TUT horn pad, KAM camera button (touch only), pads hidden outside a race, a compact layout for short landscape screens (max-height 540px: smaller pads clear of safe areas, speedo between the pads, driver select fits on one screen), scrollable sheets, a "VRID TELEFONEN" overlay in portrait during a race, fullscreen + landscape lock on the first tap (coarse pointers; Android), home-screen web-app meta tags for iPhone.
+- Hosting: GitHub Pages from main / root (.nojekyll in the repo). URL https://teohildebrand-prog.github.io/veberod-kart/

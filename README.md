@@ -12,7 +12,16 @@ tools/serve.sh            # http://localhost:8000/
 ```
 
 Controls: WASD drive, Space drift, E fire, H horn, C camera, R reset,
-Esc pause, M sound, V CRT filter. Touch pads appear on phones.
+Esc pause, M sound, V CRT filter.
+
+### On a phone
+
+Play at https://teohildebrand-prog.github.io/veberod-kart/ (GitHub Pages,
+served from `main`). Hold the phone sideways. Touch pads appear on touch
+screens: steer left/right, gas, brake, drift (SLADD), item (SKJUT), horn
+(TUT), plus camera (KAM), pause and back-on-track at the top. On Android the
+first tap goes fullscreen; on iPhone use Share → Add to Home Screen for a
+fullscreen icon.
 
 F1 (or § / `) opens the debug menu: track, driver, light, teleport, cheats,
 items, AI, FPS/physics readouts, time scale. SANDLÅDA on the main menu is
