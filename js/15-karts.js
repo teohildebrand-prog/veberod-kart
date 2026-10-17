@@ -12,8 +12,19 @@ const CARS=[
    mul:{maxSpeed:0.93,power:0.94,offRoad:1.06,gripOn:1.24,boostMul:1,burn:1.12,spinResist:0.55}},
   {id:'acc', name:'ÄNGELHOLM CC', sub:'HYPERBIL', bars:[1.0,.35,.20],
    blurb:'Absurd power, a wing you could land a plane on and a fuel gauge that falls while you watch. Fastest thing here by a mile, and the least forgiving.',
-   mul:{maxSpeed:1.14,power:1.12,offRoad:0.74,gripOn:0.86,boostMul:1.10,burn:1.42}}
+   mul:{maxSpeed:1.14,power:1.12,offRoad:0.74,gripOn:0.86,boostMul:1.10,burn:1.42}},
+  /* signature vehicles: each belongs to one driver and never shows in the free car list */
+  {id:'l61', name:'LANDSKRONA 61', sub:'VETERANBIL', sig:'bjorn', bars:[.80,.90,.40],
+   blurb:'Mint green, whitewall tyres and a bicycle on the roof rack. Slow to wind up, lovely in a corner, sips fuel.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:0.80}},
+  {id:'raket',name:'ROSENGÅRD RAKET', sub:'MOPED · 45 KNYCK', sig:'mehmet', bars:[.70,.75,.70],
+   blurb:'A sticker-covered moped with LED underglow. Legally limited, which is the whole joke.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1.15,burn:0.70,spinResist:1.4}},
+  {id:'lant', name:'VEBERÖD LANTMÄSTARE', sub:'TRAKTOR', sig:'anders', bars:[.40,.80,1.0],
+   blurb:'Orange-red, huge rear wheels, a front loader and a bale on the back.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1.15,spinResist:0.5}}
 ];
+const FREECARS=CARS.map((c,i)=>c.sig?-1:i).filter(i=>i>=0);
 
 /** chassis; returns the wheel layout so each car sits on its own footprint */
 function buildBody(car,add,paint,dark,steel){
@@ -63,6 +74,74 @@ function buildBody(car,add,paint,dark,steel){
       add(new THREE.BoxGeometry(.44,.16,.14),psMat({color:0xf6f2d8}),g,.94,2.72);
     return {fx:1.16,fz:1.62,rx:1.2,rz:-1.58,r:.48};
   }
+  if(car==='l61'){                                     /* Björn's sixties convertible */
+    const hood=psMat({color:0x3a2f2a}),rack=psMat({color:0x2b2f36});
+    add(new THREE.BoxGeometry(2.2,.8,4.4),paint,0,.86,0);
+    add(new THREE.BoxGeometry(2.0,.26,1.5),paint,0,1.34,1.3);          /* bonnet hump */
+    add(new THREE.BoxGeometry(1.9,.5,.08),glass,0,1.62,.42).rotation.x=-.35;   /* windscreen */
+    add(new THREE.BoxGeometry(2.0,.06,.1),chrome,0,1.88,.34);
+    add(new THREE.BoxGeometry(1.9,.34,.7),hood,0,1.36,-1.55);          /* folded top */
+    add(new THREE.BoxGeometry(2.36,.2,.32),chrome,0,.62,2.24);
+    add(new THREE.BoxGeometry(2.36,.2,.32),chrome,0,.62,-2.24);
+    add(new THREE.BoxGeometry(2.24,.06,4.3),chrome,0,1.0,0);          /* waist trim */
+    for(const g of [-.7,.7]){
+      add(new THREE.CylinderGeometry(.2,.2,.12,8),psMat({color:0xf6f2d8}),g,.98,2.22).rotation.x=Math.PI/2;
+      add(new THREE.BoxGeometry(.3,.18,.1),psMat({color:0xc83a2a}),g,.98,-2.22);
+    }
+    /* the bicycle on the boot carrier, wobbling in every corner */
+    add(new THREE.BoxGeometry(.08,.9,.08),rack,-.5,1.55,-2.3);
+    add(new THREE.BoxGeometry(.08,.9,.08),rack, .5,1.55,-2.3);
+    add(new THREE.BoxGeometry(1.1,.08,.08),rack,0,1.95,-2.3);
+    const bike=psMat({color:0x2f6e9e}),rub=psMat({color:0x1b1d22});
+    for(const x of [-.62,.62]){const w=add(new THREE.TorusGeometry(.42,.05,4,10),rub,x,1.9,-2.48);void w;}
+    add(new THREE.BoxGeometry(1.2,.06,.06),bike,0,2.05,-2.48);
+    add(new THREE.BoxGeometry(.06,.5,.06),bike,-.2,2.0,-2.48).rotation.z=.4;
+    add(new THREE.BoxGeometry(.06,.5,.06),bike,.35,2.0,-2.48).rotation.z=-.3;
+    add(new THREE.BoxGeometry(.06,.06,.5),bike,.45,2.3,-2.48);
+    add(new THREE.BoxGeometry(.3,.06,.2),psMat({color:0x6b4a2e}),-.25,2.27,-2.48);
+    return {fx:1.06,fz:1.42,rx:1.08,rz:-1.42,r:.46,white:true,cy:.12,cz:-.35};
+  }
+  if(car==='raket'){                                   /* Mehmet's moped */
+    const glow=psMat({color:0xb04cff,unlit:true}),seat=psMat({color:0x1b1d22});
+    add(new THREE.BoxGeometry(.62,.24,2.3),paint,0,.6,-.05);
+    add(new THREE.BoxGeometry(.7,.04,2.1),glow,0,.38,-.05);              /* underglow */
+    add(new THREE.BoxGeometry(.66,.6,.5),paint,0,.95,.9);                 /* leg shield */
+    add(new THREE.BoxGeometry(.24,1.0,.24),dark,0,1.25,1.12).rotation.x=-.3;
+    add(new THREE.BoxGeometry(1.2,.09,.09),steel,0,1.72,1.02);            /* handlebar */
+    add(new THREE.BoxGeometry(.34,.24,.16),psMat({color:0xf6f2d8}),0,1.55,1.22);
+    add(new THREE.BoxGeometry(.18,.5,.06),psMat({color:0x5fb0e6}),.5,1.48,1.02);  /* club scarf */
+    add(new THREE.BoxGeometry(.18,.12,.07),psMat({color:0xf2f4f6}),.5,1.3,1.02);
+    add(new THREE.BoxGeometry(.6,.26,1.1),seat,0,.98,-.55);
+    add(new THREE.BoxGeometry(.66,.36,.9),paint,0,.74,-.6);
+    const box=add(new THREE.BoxGeometry(.86,.66,.74),psMat({color:0xf0a818}),0,1.42,-1.35);  /* snack box */
+    add(new THREE.BoxGeometry(.3,.3,.04),psMat({color:0xe23a4a}),.2,1.48,-.97);
+    add(new THREE.BoxGeometry(.24,.24,.04),psMat({color:0x2ad4a0}),-.22,1.36,-.97);
+    void box;
+    return {fx:0,fz:1.15,rx:0,rz:-1.05,r:.38,two:true,cy:.06,cz:-.28,noWheel:true};
+  }
+  if(car==='lant'){                                    /* Anders' tractor */
+    const rust=psMat({color:0x6b4a2e}),amber=psMat({color:0xf0a818,unlit:true});
+    add(new THREE.BoxGeometry(1.3,1.0,2.3),paint,0,1.3,.9);               /* hood */
+    add(new THREE.BoxGeometry(1.1,.7,.1),dark,0,1.25,2.07);               /* grille */
+    for(const g of [-.36,.36])add(new THREE.BoxGeometry(.24,.18,.1),psMat({color:0xfff2b0,unlit:true}),g,1.62,2.08);
+    add(new THREE.CylinderGeometry(.08,.08,.9,6),dark,.4,2.1,1.5);        /* exhaust */
+    add(new THREE.BoxGeometry(1.6,.5,1.6),paint,0,.95,-.85);              /* body under the seat */
+    for(const g of [-1,1]){
+      add(new THREE.BoxGeometry(.7,.14,1.7),paint,g*1.32,2.08,-1.0);      /* rear fenders */
+      add(new THREE.BoxGeometry(.1,1.9,.1),dark,g*.82,2.55,-.2);          /* cab posts */
+      add(new THREE.BoxGeometry(.1,1.9,.1),dark,g*.82,2.55,-1.75);
+      /* loader arms out to the bucket */
+      add(new THREE.BoxGeometry(.14,.18,2.6),dark,g*.78,1.3,1.75).rotation.x=.3;
+    }
+    add(new THREE.BoxGeometry(1.86,.12,1.8),paint,0,3.52,-.98);           /* roof */
+    add(new THREE.BoxGeometry(.24,.22,.24),amber,0,3.7,-.98);             /* beacon */
+    add(new THREE.BoxGeometry(2.2,.12,.9),rust,0,.42,3.25);               /* the bucket */
+    add(new THREE.BoxGeometry(2.2,.7,.12),rust,0,.75,2.84);
+    add(new THREE.BoxGeometry(.12,.6,.9),rust,-1.04,.7,3.25);
+    add(new THREE.BoxGeometry(.12,.6,.9),rust, 1.04,.7,3.25);
+    addHay(add,0,1.65,-2.4);
+    return {fx:.95,fz:1.65,rx:1.32,rz:-1.0,r:.5,rr:1.0,rw:.6,cy:.5,cz:-.55};
+  }
   add(new THREE.BoxGeometry(1.75,.46,2.9),paint,0,.6,0);
   add(new THREE.BoxGeometry(1.15,.4,1.0),paint,0,.56,1.75);
   add(new THREE.BoxGeometry(1.45,.14,.5),dark,0,.4,2.15);
@@ -78,6 +157,121 @@ function buildBody(car,add,paint,dark,steel){
   return {fx:1.02,fz:1.26,rx:1.1,rz:-1.28,r:.44};
 }
 
+/** the shared blocky face: eyes, nose, mouth, ears. y is the head centre */
+function blockFace(addc,skin,dark,y,o){
+  o=o||{};
+  const w=o.w||.52,eye=psMat({color:0xf4f6f8});
+  addc(new THREE.BoxGeometry(w,.52,.48),skin,0,y,-.60);
+  addc(new THREE.BoxGeometry(.12,.10,.05),eye,-.13,y+.05,-.355);
+  addc(new THREE.BoxGeometry(.12,.10,.05),eye, .13,y+.05,-.355);
+  addc(new THREE.BoxGeometry(.06,.07,.04),dark,-.13,y+.05,-.37);
+  addc(new THREE.BoxGeometry(.06,.07,.04),dark, .13,y+.05,-.37);
+  addc(new THREE.BoxGeometry(.12,.11,.11),skin,0,y-.03,-.35);
+  addc(new THREE.BoxGeometry(.24,.06,.05),psMat({color:o.mouth||0x8c4038}),0,y-.15,-.355);
+  if(o.grin)addc(new THREE.BoxGeometry(.2,.035,.04),eye,0,y-.135,-.36);
+  addc(new THREE.BoxGeometry(.11,.13,.13),skin,-w/2-.03,y-.02,-.60);
+  addc(new THREE.BoxGeometry(.11,.13,.13),skin, w/2+.03,y-.02,-.60);
+  if(o.cheeks){
+    addc(new THREE.BoxGeometry(.11,.08,.05),psMat({color:0xe08a84}),-.21,y-.08,-.35);
+    addc(new THREE.BoxGeometry(.11,.08,.05),psMat({color:0xe08a84}), .21,y-.08,-.35);
+  }
+}
+/** round glasses: four thin bars per lens and a bridge */
+function blockGlasses(addc,y,col){
+  const m=psMat({color:col||0x1b1d22});
+  for(const sx of [-.14,.14]){
+    addc(new THREE.BoxGeometry(.2,.035,.04),m,sx,y+.085,-.345);
+    addc(new THREE.BoxGeometry(.2,.035,.04),m,sx,y-.075,-.345);
+    addc(new THREE.BoxGeometry(.035,.16,.04),m,sx-.09,y+.005,-.345);
+    addc(new THREE.BoxGeometry(.035,.16,.04),m,sx+.09,y+.005,-.345);
+  }
+  addc(new THREE.BoxGeometry(.08,.03,.04),m,0,y+.03,-.345);
+}
+/** Björn, Mehmet, Anders and Britta: torso, arms on the wheel, head, hair and props */
+function buildDriver(kind,addc,add,skin,dark){
+  const torso=(m,front)=>{addc(new THREE.BoxGeometry(.94,.86,.56),m,0,1.24,-.60);
+    if(front)addc(new THREE.BoxGeometry(.96,.62,.1),front,0,1.28,-.31);};
+  const arms=(m,cuff)=>{
+    addc(new THREE.BoxGeometry(.25,.23,.5),m,-.37,1.14,-.28);
+    addc(new THREE.BoxGeometry(.25,.23,.5),m, .37,1.14,-.28);
+    addc(new THREE.BoxGeometry(.21,.19,.4),cuff||skin,-.35,1.13,.15);
+    addc(new THREE.BoxGeometry(.21,.19,.4),cuff||skin, .35,1.13,.15);
+  };
+  if(kind==='bjorn'){                       /* corduroy, elbow patches, beard, tote bag */
+    const cord=pixTex(16,16,g=>{g.fillStyle='#7a4e2c';g.fillRect(0,0,16,16);
+      g.fillStyle='#6a4224';for(let x=0;x<16;x+=3)g.fillRect(x,0,1,16);});
+    const blazer=psMat({map:cord}),shirt=psMat({color:0xa9c8e8}),beard=psMat({color:0x5a3a22});
+    torso(blazer);
+    addc(new THREE.BoxGeometry(.3,.5,.1),shirt,0,1.36,-.3);
+    addc(new THREE.BoxGeometry(.12,.4,.08),psMat({color:0x8b2b1c}),0,1.3,-.25);   /* tie */
+    arms(blazer,skin);
+    addc(new THREE.BoxGeometry(.27,.2,.2),psMat({color:0x4a2e18}),-.37,1.14,-.2); /* elbow patches */
+    addc(new THREE.BoxGeometry(.27,.2,.2),psMat({color:0x4a2e18}), .37,1.14,-.2);
+    blockFace(addc,skin,dark,1.82,{});
+    addc(new THREE.BoxGeometry(.54,.22,.16),beard,0,1.62,-.38);
+    addc(new THREE.BoxGeometry(.56,.3,.4),beard,0,1.66,-.58);
+    addc(new THREE.BoxGeometry(.2,.05,.05),beard,0,1.715,-.355);                 /* moustache */
+    blockGlasses(addc,1.86);
+    addc(new THREE.BoxGeometry(.58,.16,.5),beard,0,2.12,-.62);                   /* hair, opinions */
+    addc(new THREE.BoxGeometry(.2,.16,.2),beard,-.14,2.24,-.5).rotation.z=.4;
+    addc(new THREE.BoxGeometry(.2,.14,.2),beard,.16,2.22,-.66).rotation.z=-.5;
+    addc(new THREE.BoxGeometry(.56,.3,.12),beard,0,1.96,-.86);
+    addc(new THREE.BoxGeometry(.5,.56,.12),psMat({color:0xe6dcc0}),.6,1.16,-.62); /* tote bag */
+    addc(new THREE.BoxGeometry(.06,.5,.06),psMat({color:0xe6dcc0}),.52,1.5,-.62);
+  }else if(kind==='mehmet'){                /* youngest in the field, oldest swagger */
+    const chk=pixTex(16,16,g=>{for(let x=0;x<16;x+=4)for(let y=0;y<16;y+=4){
+      g.fillStyle=((x/4+y/4)%2)?'#f2f4f6':'#1f56b8';g.fillRect(x,y,4,4);}});
+    const shirt=psMat({map:chk}),helm=psMat({color:0x15171b});
+    addc(new THREE.BoxGeometry(.84,.8,.5),shirt,0,1.24,-.60);
+    arms(shirt,skin);
+    addc(new THREE.BoxGeometry(.18,.12,.08),psMat({color:0xf2f4f6}),0,1.5,-.33);   /* collar */
+    blockFace(addc,skin,dark,1.8,{w:.48,grin:true,mouth:0x7a2e2a});
+    /* open-face helmet with grandma's jasmine sticker */
+    addc(new THREE.BoxGeometry(.6,.26,.56),helm,0,2.08,-.62);
+    addc(new THREE.BoxGeometry(.6,.4,.14),helm,0,1.86,-.86);
+    addc(new THREE.BoxGeometry(.1,.42,.5),helm,-.3,1.86,-.62);
+    addc(new THREE.BoxGeometry(.1,.42,.5),helm, .3,1.86,-.62);
+    addc(new THREE.BoxGeometry(.5,.08,.06),psMat({color:0x2a1c14}),0,1.97,-.35);  /* fringe */
+    const pet=psMat({color:0xf8f8f2}),mid=psMat({color:0xf0c030});
+    for(const [dx,dy] of [[-.07,0],[.07,0],[0,-.07],[0,.07]])
+      addc(new THREE.BoxGeometry(.08,.08,.04),pet,.13+dx,2.12+dy,-.335);
+    addc(new THREE.BoxGeometry(.06,.06,.05),mid,.13,2.12,-.33);
+  }else if(kind==='anders'){                /* hi-vis over plaid, green farm cap */
+    const plaid=pixTex(16,16,g=>{g.fillStyle='#b8402c';g.fillRect(0,0,16,16);
+      g.fillStyle='#4a4f58';for(let i=0;i<16;i+=8){g.fillRect(i,0,3,16);g.fillRect(0,i,16,3);}});
+    const shirt=psMat({map:plaid}),vest=psMat({color:0xf07a1a}),cap=psMat({color:0x3f7a33});
+    torso(shirt);
+    addc(new THREE.BoxGeometry(.98,.66,.12),vest,0,1.26,-.31);
+    addc(new THREE.BoxGeometry(.98,.66,.12),vest,0,1.26,-.89);
+    addc(new THREE.BoxGeometry(.98,.08,.13),psMat({color:0xe8ecef}),0,1.14,-.3);   /* reflective band */
+    arms(shirt,skin);
+    blockFace(addc,skin,dark,1.82,{w:.56,grin:true,cheeks:true});
+    addc(new THREE.BoxGeometry(.58,.08,.5),psMat({color:0x8a5a34}),0,2.06,-.62);  /* hair under the cap */
+    addc(new THREE.BoxGeometry(.6,.22,.56),cap,0,2.18,-.62);
+    addc(new THREE.BoxGeometry(.56,.05,.3),cap,0,2.08,-.3);                        /* peak */
+    addc(new THREE.BoxGeometry(.18,.12,.04),psMat({color:0xe8c33a}),0,2.2,-.335);  /* wheat badge */
+    addc(new THREE.CylinderGeometry(.08,.08,.26,6),psMat({color:0x22c46a}),.52,1.06,.1); /* energy drink */
+  }else{                                    /* granny Britta: cardigan, bun, glasses */
+    const card=psMat({color:0x3f8a4a}),blouse=psMat({color:0xf3ece0}),hair=psMat({color:0xc9c8c4});
+    torso(card);
+    addc(new THREE.BoxGeometry(.36,.5,.1),blouse,0,1.36,-.3);
+    for(const y of [1.42,1.24])addc(new THREE.BoxGeometry(.06,.06,.06),psMat({color:0xd84a6a}),0,y,-.24);
+    arms(card,skin);
+    blockFace(addc,skin,dark,1.8,{cheeks:true,mouth:0xb0505a});
+    blockGlasses(addc,1.85,0x8a6a3a);
+    addc(new THREE.BoxGeometry(.6,.24,.54),hair,0,2.1,-.62);
+    addc(new THREE.BoxGeometry(.6,.4,.16),hair,0,1.88,-.86);
+    addc(new THREE.BoxGeometry(.12,.3,.4),hair,-.3,1.92,-.66);
+    addc(new THREE.BoxGeometry(.12,.3,.4),hair, .3,1.92,-.66);
+    addc(new THREE.SphereGeometry(.17,6,5),hair,0,2.3,-.72);                        /* bun */
+    add(new THREE.BoxGeometry(.9,.42,.6),psMat({color:0xb07a3a}),0,1.2,-1.75);       /* knitting basket */
+    add(new THREE.SphereGeometry(.2,6,5),psMat({color:0xd84a6a}),-.18,1.5,-1.75);
+    add(new THREE.SphereGeometry(.18,6,5),psMat({color:0x3f63c8}),.2,1.48,-1.7);
+  }
+}
+function addHay(add,x,y,z){
+  add(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),x,y,z).rotation.z=Math.PI/2;
+}
 function buildKart(color,kind,car){
   const root=new THREE.Group();
   const lean=new THREE.Group();root.add(lean);
@@ -88,7 +282,8 @@ function buildKart(color,kind,car){
   const SPEC=buildBody(car||'kart',add,paint,dark,steel);
   const cab=new THREE.Group();lean.add(cab);
   const addc=(g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);cab.add(e);return e;};
-  cab.position.set(0,car==='acc'?-.06:(car&&car!=='kart'?.32:0),car&&car!=='kart'?-.25:0);
+  cab.position.set(0,SPEC.cy!=null?SPEC.cy:(car==='acc'?-.06:(car&&car!=='kart'?.32:0)),
+                   SPEC.cz!=null?SPEC.cz:(car&&car!=='kart'?-.25:0));
   if(kind==='arne'){            /* blå skjorta, gröna hängselbyxor, halmhatt */
     const shirt=psMat({color:0x7fa8d8}), cuff=psMat({color:0x6b93c4}),
           bib=psMat({color:0x6fa43f}), strap=psMat({color:0x5f9136}),
@@ -200,6 +395,8 @@ function buildKart(color,kind,car){
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}), .26,2.3,-.62).rotation.z=-.7;
     addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
     addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
+  }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'){
+    buildDriver(kind,addc,add,skin,dark);
   }else if(kind==='hillbilly'){                        /* bonnläpp med EPA-stuk */
     const flannel=pixTex(16,16,(g)=>{
       g.fillStyle='#8f2f24';g.fillRect(0,0,16,16);
@@ -250,21 +447,24 @@ function buildKart(color,kind,car){
     helm.scale.set(1,.94,1.05);
     addc(new THREE.BoxGeometry(.48,.18,.14),psMat({color:0x14181c}),0,1.8,-.32);
   }
-  addc(new THREE.BoxGeometry(.5,.12,.5),dark,0,1.18,.55).rotation.x=-.5;
+  if(!SPEC.noWheel)addc(new THREE.BoxGeometry(.5,.12,.5),dark,0,1.18,.55).rotation.x=-.5;
 
-  const tyre=new THREE.CylinderGeometry(SPEC.r,SPEC.r,.4,8);tyre.rotateZ(Math.PI/2);
-  const tG=flat(tyre);
-  const hubG=flat((function(){const c=new THREE.CylinderGeometry(SPEC.r*.45,SPEC.r*.45,.44,6);c.rotateZ(Math.PI/2);return c;})());
+  const wheelG=(r,w)=>{const t=new THREE.CylinderGeometry(r,r,w,8);t.rotateZ(Math.PI/2);return flat(t);};
+  const hubOf=(r,w,k)=>{const c=new THREE.CylinderGeometry(r*k,r*k,w+.04,6);c.rotateZ(Math.PI/2);return flat(c);};
+  const hubM=SPEC.white?psMat({color:0xf2efe6}):steel;
   const wheels=[],pivots=[];
   const mk=(x,z,front)=>{
-    const piv=new THREE.Group();piv.position.set(x,SPEC.r,z);lean.add(piv);
-    const w=new THREE.Mesh(tG,dark);piv.add(w);
-    w.add(new THREE.Mesh(hubG,steel));
+    const r=front?SPEC.r:(SPEC.rr||SPEC.r),wd=front?.4:(SPEC.rw||.4);
+    const piv=new THREE.Group();piv.position.set(x,r,z);lean.add(piv);
+    const w=new THREE.Mesh(wheelG(r,wd),dark);piv.add(w);
+    w.add(new THREE.Mesh(hubOf(r,wd,SPEC.white?.7:.45),hubM));
+    if(SPEC.white)w.add(new THREE.Mesh(hubOf(r,wd,.4),steel));
     wheels.push(w);if(front)pivots.push(piv);
   };
-  mk(-SPEC.fx,SPEC.fz,true);mk(SPEC.fx,SPEC.fz,true);
-  mk(-SPEC.rx,SPEC.rz,false);mk(SPEC.rx,SPEC.rz,false);
-  return {root,lean,wheels,pivots,lamps};
+  if(SPEC.two){mk(0,SPEC.fz,true);mk(0,SPEC.rz,false);}
+  else{mk(-SPEC.fx,SPEC.fz,true);mk(SPEC.fx,SPEC.fz,true);
+       mk(-SPEC.rx,SPEC.rz,false);mk(SPEC.rx,SPEC.rz,false);}
+  return {root,lean,wheels,pivots,lamps,spec:SPEC};
 }
 
 const blobTex=pixTex(32,32,(g)=>{
@@ -278,20 +478,53 @@ const blobTex=pixTex(32,32,(g)=>{
   g.putImageData(im,0,0);
 });
 
+/* drivers. The order is the save format (cup.char is an index), so new ones go on the end;
+   GRID is the order on the select screen. sig = the vehicle that belongs to this driver. */
 const CHARS=[
   {id:'arne',short:'ARNE',name:'BONDEN ARNE',role:'LANTBRUKARE, ÖSTERLEN',
    color:0x8b2b1c,maxSpeed:39.6,power:28,offRoad:0.80,boostMul:1.32,gripOn:10.2,
-   stats:[0.60,0.92,0.96],
+   stats:[0.60,0.92,0.96],quirk:['ÅKERVANA','Gräs och grus bromsar honom knappt.'],
    blurb:'Slowest flat out, but he crosses fields for a living. Grass and gravel barely slow him down, and he plants the kart in a corner like a fence post.'},
   {id:'billy',short:'BILLY',name:'POLISEN BILLY BOOL',role:'ORDNINGSMAKTEN',
    color:0x1d4ea8,maxSpeed:43.2,power:25,offRoad:0.48,boostMul:1.50,gripOn:8.3,
-   stats:[0.96,0.66,0.32],
+   stats:[0.96,0.66,0.32],quirk:['BLÅLJUS','Mjölken ger längre och hårdare fart.'],
    blurb:'The quickest thing on tarmac, and his milk boosts run longer and harder. Put one wheel on the verge and the whole lap is gone.'},
   {id:'cow',short:'MAJROS',name:'KOSSAN MAJROS',role:'MJÖLKKO, VEBERÖD',
    color:0xf0ece2,maxSpeed:38.6,power:30.5,offRoad:0.90,boostMul:1.28,gripOn:11.6,milk:1.45,
-   stats:[0.50,1.00,0.98],
-   blurb:'Slowest of the lot and she knows it. Four hooves of grip, a field is just a shortcut, and every bottle of milk lasts her half as long again. H to moo.'}
+   stats:[0.50,1.00,0.98],quirk:['EGEN MJÖLK','Mjölken räcker 45 % längre. H för att råma.'],
+   blurb:'Slowest of the lot and she knows it. Four hooves of grip, a field is just a shortcut, and every bottle of milk lasts her half as long again. H to moo.'},
+  {id:'bjorn',short:'BJÖRN',name:'DOKTORANDEN BJÖRN',role:'LUND',sig:'l61',
+   color:0x8fd3b0,maxSpeed:41.5,power:24,offRoad:0.55,boostMul:1.34,gripOn:11.4,
+   stats:[0.80,0.90,0.40],quirk:['AKADEMISK KVART','Gasa inte på KÖR! Vänta en sekund, sedan raketstart.'],
+   say:{start:'Intressant. Men metodologiskt tveksamt.',hit:'MIN AVHANDLING!'},
+   blurb:'Year eleven of a four-year PhD. Tidy in the corners, slow off the line, and lost the moment the road turns to mud.'},
+  {id:'mehmet',short:'MEHMET',name:'MEHMET',role:'ROSENGÅRD',sig:'raket',
+   color:0x1f56b8,maxSpeed:40.0,power:33,offRoad:0.70,boostMul:1.40,gripOn:9.6,
+   stats:[0.70,0.75,0.70],quirk:['SUGET','Ligg tätt bakom en bil och ladda en extra stor fartboost.'],
+   say:{start:'Kolla nu, kolla nu!',hit:'AJ! DET DÄR VAR STRAFF!'},
+   blurb:'Fifteen, the youngest in the field and by far the most confident. Best off the line, capped at 45, and light enough to get knocked about.'},
+  {id:'anders',short:'ANDERS',name:'TRAKTOR-ANDERS',role:'VEBERÖD',sig:'lant',
+   color:0xd8461c,maxSpeed:37.5,power:26,offRoad:0.95,boostMul:1.30,gripOn:11.0,mass:2.2,
+   stats:[0.40,0.80,1.00],quirk:['SKOPAN','Blockerar första träffen varje varv.'],
+   say:{start:'Det är bara en åker med asfalt på.',hit:'PAPPA SKULLE HA BROMSAT HÄR.'},
+   blurb:'Arne\'s son, who went big. Slowest in a straight line, best in the mud, and heavy enough to shove anyone off his line.'},
+  {id:'roger',kind:'hillbilly',short:'ROGER',name:'ROGER',role:'TOLLARP',
+   color:0x8f2f24,maxSpeed:43.8,power:25,offRoad:0.52,boostMul:1.55,gripOn:8.0,
+   stats:[1.00,0.44,0.40],quirk:['FULL GAS','Snabbast rakt fram, hopplös i kurvorna.'],
+   blurb:'Fastest thing in a straight line and he will tell you so. Corners are a rumour.'},
+  {id:'linnea',kind:'scholar',short:'LINNÉA',name:'LINNÉA',role:'LUND',
+   color:0x1d1f24,maxSpeed:42.0,power:27,offRoad:0.62,boostMul:1.34,gripOn:10.6,burn:0.88,
+   stats:[0.86,0.86,0.56],quirk:['NOGGRANN','Perfekt linje: greppet håller och bensinen räcker längre.'],
+   blurb:'The postdoc who finished on time. Brakes exactly where she should and never puts a wheel wrong.'},
+  {id:'britta',kind:'granny',short:'BRITTA',name:'FARMOR BRITTA',role:'ÅHUS',
+   color:0x5faf4a,maxSpeed:41.0,power:27,offRoad:0.64,boostMul:1.38,gripOn:10.4,shieldMul:2,
+   stats:[0.80,0.80,0.60],quirk:['HEMBAKAT','Hennes äggkaka skyddar dubbelt så länge.'],
+   blurb:'Bakes for the whole village and drives like she is late for the bus. Her own äggkaka holds twice as long.'}
 ];
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','roger','linnea','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
+const kindOf=c=>c.kind||c.id;
+/* an AI who is also the player's driver races as a twin */
+const TWIN={cow:[1,'STJÄRNA'],roger:[2,'RONNY'],linnea:[3,'LOVISA'],britta:[5,'BIRGITTA']};
 let LAPS=3;
 const ROSTER=[
   {name:'DU',     color:0xd8362a,ai:false,kind:'generic'},
@@ -310,7 +543,7 @@ const ROSTER=[
   {name:'NISSE',  color:0x1fa8a0,ai:true,kind:'generic',car:'t96',
    maxSpeed:42.4,power:27,offRoad:.62,boostMul:1.38,gripOn:9.9,
    lineSpread:3.0,caution:2.6,lookAdd:1,driftLove:1.15,lean:{traffic:2}},
-  {name:'BRITTA', color:0x5faf4a,ai:true,kind:'generic',car:'t240',
+  {name:'BRITTA', color:0x5faf4a,ai:true,kind:'granny',car:'t240',
    maxSpeed:41.6,power:26,offRoad:.60,boostMul:1.38,gripOn:10.0,
    lineSpread:3.4,caution:2.7,lookAdd:2,driftLove:0.85,lean:{fuel:2,defend:true}}
 ];
@@ -331,6 +564,7 @@ const karts=ROSTER.map((r,i)=>{
     line:0,lapStart:0,best:null,total:null,done:false,
     fuel:TANK,atPump:false,warned:0,held:null,shield:0,spun:0,burn:1,spinResist:1,milk:1,
     rib:0,plan:0,planned:{},mi:0,recoverT:0,ghost:0,stuckT:0,stuckP:-1e9,bandMax:1.16,rival:false,
+    gate:0,mass:1,shieldMul:1,bucket:false,bucketLap:-1,kvart:false,suck:0,wheelie:false,lineVar:0,wantFuel:false,rtp:false,rtpT:0,offT:0,sfx:'',sugar:0,curse:0,hazAt:-9,parked:false,lapTimes:[],ghostBuf:null,
     maxSpeed:41,power:25,offRoad:.58,boostMul:1.36,gripOn:9.0};
 });
 const player=karts[0];

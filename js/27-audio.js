@@ -17,7 +17,10 @@ function bootAudio(){
   const bp=actx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2000;bp.Q.value=1.3;
   const sg=actx.createGain();sg.gain.value=0;
   src.connect(bp);bp.connect(sg);sg.connect(actx.destination);src.start();
-  skid={g:sg};
+  const rbp=actx.createBiquadFilter();rbp.type='bandpass';rbp.frequency.value=1000;rbp.Q.value=2.2;
+  const rg=actx.createGain();rg.gain.value=0;
+  src.connect(rbp);rbp.connect(rg);rg.connect(actx.destination);
+  skid={g:sg,bp,road:{bp:rbp,g:rg}};
 }
 function ping(f0,f1,dur){
   if(!actx)return;
@@ -75,4 +78,9 @@ function audioUpdate(){
   engine.lp.frequency.setTargetAtTime(600+r*1700,actx.currentTime,.08);
   engine.g.gain.setTargetAtTime(state==='race'?(0.028+r*0.05):0.012,actx.currentTime,.1);
   if(skid)skid.g.gain.setTargetAtTime(player.drift!==0?0.03:(player.onRoad?0:0.014),actx.currentTime,.06);
+  if(skid&&skid.road){                            /* the surface underneath, from the table */
+    const S=SFX[player.sfx],n=S&&S.noise,on=n&&state==='race'&&player.speed>6&&!player.air;
+    if(n)skid.road.bp.frequency.setTargetAtTime(n.f*(0.7+0.5*r),actx.currentTime,.05);
+    skid.road.g.gain.setTargetAtTime(on?n.g*(0.5+r)*(S.rattle?(Math.random()<.5?1:.35):1):0,actx.currentTime,.02);
+  }
 }

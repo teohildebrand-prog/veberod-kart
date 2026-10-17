@@ -14,6 +14,10 @@ tools/serve.sh            # http://localhost:8000/
 Controls: WASD drive, Space drift, E fire, H horn, C camera, R reset,
 Esc pause, M sound, V CRT filter. Touch pads appear on phones.
 
+F1 (or § / `) opens the debug menu: track, driver, light, teleport, cheats,
+items, AI, FPS/physics readouts, time scale. SANDLÅDA on the main menu is
+free roam: any track, no AI, no laps or clock, a full tank.
+
 ## Layout
 
 ```

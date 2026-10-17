@@ -5,7 +5,7 @@ let HW=8.2, BANKLAT=12.7, SEG=1, JUMPS=[];
 const sx=new Float32Array(N),sy=new Float32Array(N),sz=new Float32Array(N);
 const fx=new Float32Array(N),fz=new Float32Array(N);
 const rx=new Float32Array(N),rz=new Float32Array(N);
-const curv=new Float32Array(N), bank=new Float32Array(N);
+const curv=new Float32Array(N), bank=new Float32Array(N), scurv=new Float32Array(N);
 
 const STAGES=[
 { id:'lund', name:'LUND', sub:'GAMLA STADEN', hw:7.0,
@@ -93,7 +93,63 @@ const STAGES=[
         [ 182, 16, -20],[ 200, 18,  44],[ 182, 12, 108],[ 126,  6, 150],
         [  54,  8, 146],[  -6, 14, 112],[ -56, 16,  72],[-112, 12,  92],
         [-166,  8, 124],[-206, 12,  66],[-188, 18,   0],[-140, 22, -40],
-        [-152, 15,-100],[-188,  8,-140],[-120,  3,-172],[ -50,  0,-178]] }
+        [-152, 15,-100],[-188,  8,-140],[-120,  3,-172],[ -50,  0,-178]] },
+
+/* Knightmare-athon's counterpart: no shortcut, a castle ghost */
+{ id:'glimminge', name:'GLIMMINGEHUS', sub:'BORGEN I MÅNSKEN', hw:8.0,
+  bars:[0.55,0.85,0.45], laps:3,
+  blurb:'Round the medieval stone castle on Österlen under a full moon, on cobbles lit by torches and through the gatehouse arch. No shortcut, like the old castle track it borrows from, and the castle ghost drifts through the walls and spins whoever it touches.',
+  sky:[0x23304f,0x05070f], fog:[0x18203a,45,280], amb:0x46506c, dif:0xa8bce8,
+  road:'cobble', verge:'kerb', edge:'wall', ground:'night',
+  jumpSpec:[{h:3.4,drop:2.4,up:12,dn:7,rec:16},{h:2.6,drop:1.8,up:10,dn:6,rec:14}],
+  ctrl:[[   0, 0,-180],[  84, 0,-178],[ 144, 2,-144],[ 180, 5, -84],[ 168, 6, -24],
+        [ 118, 5,   4],[  84, 3,  48],[ 110, 2, 108],[  72, 1, 162],[   0, 0, 180],
+        [ -60, 1, 144],[ -70, 3,  84],[-130, 5,  72],[-182, 7,  24],[-168, 6, -48],
+        [-120, 3, -84],[ -84, 1,-132],[ -48, 0,-180]],
+  castle:[6,6],
+  hazards:H=>hazardsGlimminge(H),
+  stamps:[
+    {id:'glm1',dish:'Svartsoppa',ini:'S',kind:'intro',route:'main',i:606,lat:-6.2,
+     hint:'Strax innanför porttornet, vid vägkanten.',
+     story:'Black soup: goose blood and stock spiced with cloves, ginger and a dash of port, served on Mårten Gås eve in November with apple, prunes and a slice of goose liver sausage. Skåne\'s darkest dish, eaten by candlelight, which suits a castle at night.'},
+    {id:'glm2',dish:'Ålagille',ini:'Å',kind:'line',route:'main',i:'tight',lat:'inside',
+     hint:'Tätt intill innerkanten, där vägen svänger tvärast.',
+     story:'An Österlen eel feast. In autumn the eel fishers along the coast invite everyone in, and the eel comes smoked, fried, boiled, in aspic and grilled on straw, a dozen ways in one evening, with schnapps between the courses.'},
+    {id:'glm3',dish:'Äppelkaka',ini:'Ä',kind:'air',route:'main',jump:0,after:5,lat:0,air:4.6,
+     hint:'Högt i luften över det första hoppet.',
+     story:'Österlen grows Sweden\'s apples, around Kivik and all the way up the coast. Äppelkaka is the autumn answer to a full orchard: sliced apples, cinnamon and a crumb of butter and breadcrumbs, baked soft and eaten warm with vanilla sauce.'}] },
+
+/* Desert Adventure Dragway's counterpart: two secret passages, opened with a rocket */
+{ id:'ales', name:'ALES STENAR', sub:'SANDDRAGET', hw:9.0,
+  bars:[0.95,0.35,0.60], laps:3,
+  blurb:'A drag strip over the Sandhammaren dunes out to the stone ship on the cliff above the sea. Two secret passages run between the standing stones, but a boulder sits in each mouth: blow it out of the way with a spettekaka. Drive the ship backwards and Ale\'s curse swaps your steering.',
+  sky:[0xf6eed4,0x3a8ad6], fog:[0xe8dec4,90,430], amb:0x6c6a62, dif:0xfff4dc,
+  road:'sand', verge:'sand', edge:'fence', ground:'dunes', terrain:{size:900,seg:84},
+  jumpSpec:[{h:4.0,drop:3.0,up:13,dn:7,rec:20},{h:3.2,drop:2.4,up:12,dn:7,rec:16}],
+  ctrl:[[-260, 3, -40],[-130, 4, -44],[   0, 4, -40],[ 130, 6, -44],[ 240, 9, -42],
+        [ 300,14, -24],[ 322,16,  14],[ 306,16,  52],[ 250,13,  66],[ 170, 9,  58],
+        [ 100, 7,  72],[  56, 8, 124],[  -6, 9, 138],[ -52, 7,  96],[-120, 5,  82],
+        [-220, 3,  64],[-300, 2,  40],[-322, 2,   4],[-306, 2, -30]],
+  /* the sea lies north and east, below the cliff */
+  shore:(x,z)=>-24*smooth(0,46,Math.max(x-342,-(z+92))),
+  hazards:H=>hazardsAles(H),
+  routes:[
+    {id:'skepp',name:'SKEPPSSÄTTNINGEN',a:248,b:350,hw:4.5,side:1,lead:9,leadLat:10,
+     mid:[[0.3,-20],[0.7,-20]],surface:'sand',risk:0.4,hidden:true,shoot:true,
+     blurb:'Straight down the length of the stone ship. A boulder blocks the way in.'},
+    {id:'stenar',name:'STENRADEN',a:414,b:536,hw:4.5,side:1,lead:9,leadLat:10,
+     mid:[[0.5,0]],surface:'gravel',risk:0.3,hidden:true,shoot:true,
+     blurb:'Between two rows of standing stones over the dune. A boulder blocks the way in.'}],
+  stamps:[
+    {id:'ale1',dish:'Böckling',ini:'B',kind:'intro',route:'main',i:64,lat:-6.4,
+     hint:'Vid rökeriet på långa rakan, mot havet.',
+     story:'Kåseberga below the stones is a fishing village of smokehouses. Herring goes in over alder smoke and comes out golden as böckling, eaten warm on the harbour wall with a slice of bread and the wind straight off the Baltic.'},
+    {id:'ale2',dish:'Fiskesoppa',ini:'F',kind:'route',route:'skepp',f:0.5,lat:0,
+     hint:'Mitt i skeppet. Porten är spärrad: kanske en spettekaka?',
+     story:'The fish soup of the south coast: whatever the boats brought in, cod, salmon and a few prawns, in a saffron and tomato broth with a spoon of aioli. It is what everyone eats after a cold walk out to the stones.'},
+    {id:'ale3',dish:'Sandkaka',ini:'S',kind:'air',route:'main',jump:1,after:5,lat:0,air:4.6,
+     hint:'Högt i luften över det andra hoppet.',
+     story:'Sand cake is named for its crumb, not the beach: a pound cake of butter, sugar, eggs and potato flour that falls apart like dry sand. It belongs on the coffee table of every summer cottage in the dunes.'}] }
 ];
 let stage=STAGES[1];
 
@@ -147,6 +203,7 @@ function sampleTrack(st){
   for(let i=0;i<N;i++){
     const a=(i-7+N)%N,b=(i+7)%N;
     raw[i]=wrapAng(Math.atan2(fx[b],fz[b])-Math.atan2(fx[a],fz[a]));
+    scurv[i]=raw[i];                           /* signed: >0 bends toward -right */
   }
   for(let i=0;i<N;i++){
     let acc=0;for(let k=-12;k<=12;k++)acc+=raw[(i+k+N)%N];
@@ -169,6 +226,25 @@ const SURF={
   dirt:  {top:o=>o+(1-o)/2,   grip:o=>1-0.45*(1-o), fuel:1.2,name:'JORD'},
   mud:   {top:o=>o,           grip:o=>1-0.60*(1-o), fuel:1.3,name:'LERA'}
 };
+/* the effects columns of the surface table: what the wheels throw up, the noise
+   under the tyres, and what happens the moment a kart rolls onto it */
+SURF.cobble={top:o=>1,grip:o=>1,fuel:1.0,name:'KULLERSTEN'};
+SURF.sand={top:o=>o+(1-o)/2,grip:o=>1-0.40*(1-o),fuel:1.2,name:'SAND'};
+const SFX={
+  road:  {dust:null,                    noise:null},
+  cobble:{dust:null,                    noise:{f:820,g:.024},rattle:true},
+  gravel:{dust:[.80,.72,.55],           noise:{f:1500,g:.020}},
+  dirt:  {dust:[.55,.42,.28],field:true,noise:{f:700,g:.022}},
+  mud:   {dust:[.33,.25,.16],field:true,spray:true,noise:{f:420,g:.026}},
+  grass: {dust:[.45,.62,.30],field:true,noise:{f:1100,g:.014}},
+  sand:  {dust:[.93,.85,.66],           noise:{f:2600,g:.018}}
+};
+const isCow=k=>k===player?CHARS[charSel].id==='cow':k.cfg.kind==='cow';
+function surfaceEnter(k,s){
+  const S=SFX[s];
+  if(S&&S.field&&isCow(k)&&clock-(k.mooT||-9)>4&&
+     (k===player||Math.hypot(k.x-player.x,k.z-player.z)<45)){k.mooT=clock;moo();}
+}
 const COMMIT=10, MERGE=12;           /* samples where you can still change your mind */
 let ALTS=[];
 const MAIN={X:sx,Y:sy,Z:sz,FX:fx,FZ:fz,RX:rx,RZ:rz,CURV:curv,get hw(){return HW;}};
@@ -320,7 +396,7 @@ function meshMain(x,z){
   const base=sy[i]+(sy[j]-sy[i])*(fwd/SEG);
   const t=smooth(HW+8,HW+50,lat);
   return base+clamp(dx*rx[i]+dz*rz[i],-BANKLAT,BANKLAT)*bank[i]*(1-t)
-         +rolls(x,z)*t-DIP*(1-t);
+         +rolls(x,z)*t-DIP*(1-t)+(stage.shore?stage.shore(x,z)*t:0)+(stage.castle?castleMod(x,z)*t:0);
 }
 function latAt(x,z){
   const k=nearestGlobal(x,z);
@@ -393,6 +469,16 @@ function roadTex(kind){
         g.fillRect((c*4+o)%64,r*4,3,3);
       }
     });
+  }else if(kind==='sand'){                        /* packed sand with tyre ruts */
+    t=pixTex(64,64,(g)=>{
+      g.fillStyle='#cdb88a';g.fillRect(0,0,64,64);
+      for(let i=0;i<800;i++){
+        g.fillStyle=Math.random()>.5?'rgba(232,216,172,.55)':'rgba(150,128,90,.45)';
+        g.fillRect((Math.random()*64)|0,(Math.random()*64)|0,1,1);
+      }
+      g.fillStyle='rgba(140,118,82,.35)';
+      for(const x of [14,20,42,48])g.fillRect(x,0,3,64);
+    });
   }else if(kind==='concrete'){
     t=pixTex(64,64,(g)=>{
       g.fillStyle='#8d8a82';g.fillRect(0,0,64,64);
@@ -421,7 +507,8 @@ function roadTex(kind){
 function vergeTex(kind){
   const C={kerb:['#8e8a84','#a8a49c','#6e6a64'],
            gravel:['#9b8f74','#b4aa91','#6e6450'],
-           dirt:['#6d6152','#82755f','#4a4238']}[kind]||['#9b8f74','#b4aa91','#6e6450'];
+           dirt:['#6d6152','#82755f','#4a4238'],
+           sand:['#d9c79a','#ebdcb4','#b8a476']}[kind]||['#9b8f74','#b4aa91','#6e6450'];
   const t=pixTex(32,32,(g)=>{
     g.fillStyle=C[0];g.fillRect(0,0,32,32);
     for(let i=0;i<300;i++){
@@ -451,7 +538,7 @@ function buildRoad(st){
     world.add(new THREE.Mesh(ribbon(-HW-2.6,-HW+.1,-.12,5,ROADSTEP),psMat({map:vg})));
     world.add(new THREE.Mesh(ribbon(HW-.1,HW+2.6,-.12,5,ROADSTEP),psMat({map:vg})));
   }
-  if(st.road==='cobble')return;                      /* no paint on cobbles */
+  if(st.road==='cobble'||st.road==='sand')return;    /* no paint on cobbles or sand */
   const solid=st.road==='concrete';
   const col=solid?'#d8c257':'#dfe4e8';
   const edge=pixTex(4,16,(g)=>{

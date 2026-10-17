@@ -124,9 +124,26 @@ function makeAggkaka(){
   }
   return g;
 }
+const sugarMat=psMat({color:0xffffff});
+function makeSugar(){
+  const g=new THREE.Group();
+  const c=new THREE.Mesh(flat(new THREE.BoxGeometry(.62,.62,.62)),sugarMat);
+  c.rotation.set(.6,.3,.5);g.add(c);
+  const c2=new THREE.Mesh(flat(new THREE.BoxGeometry(.4,.4,.4)),sugarMat);
+  c2.position.set(.42,-.18,.2);c2.rotation.set(.2,.9,.1);g.add(c2);
+  return g;
+}
+/** an item somewhere other than the main road's centreline grid, e.g. in a lane */
+function addItemAt(type,x,z,y,si,lat,rib){
+  const mesh=type==='sugar'?makeSugar():type==='milk'?makeMilk():makeBox();
+  mesh.position.set(x,y+1.15,z);world.add(mesh);
+  const o={type,si,lat,x,z,y,mesh,cool:0,base:mesh.position.y,rib:rib||0};
+  items.push(o);return o;
+}
 function addItem(type,si,lat){
   const x=sx[si]+rx[si]*lat, z=sz[si]+rz[si]*lat, y=groundAt(x,z,si);
   const mesh=type==='fuel'?makeDunk():type==='box'?makeBox():type==='milk'?makeMilk():type==='pie'?makePie():
+             type==='sugar'?makeSugar():
              type==='rocket'?makeSpettekaka():makeAggkaka();
   mesh.position.set(x,y+(type==='pie'?.04:1.15),z);
   if(type==='pie')mesh.rotation.y=rand(0,6.283);
@@ -155,6 +172,25 @@ function buildItems(){
       if(Math.min(Math.abs(at-J.at),N-Math.abs(at-J.at))<J.up+J.dn+8)at=(at+30)%N;
     while(!clearOfForks(at,6))at=(at+8)%N;
     addItem('fuel',at,(k%2?1:-1)*HW*0.62);
+  }
+  /* sockerbitar: two in every lane, then the risky lines of the main road: just past
+     each jump's landing and on the inside verge of the two tightest corners */
+  for(const R of ALTS)for(const f of [0.35,0.7]){
+    const j=Math.round(f*(R.n-1));addItemAt('sugar',R.X[j],R.Z[j],R.Y[j],R.MI[j],0,R.idx);}
+  for(const J of JUMPS)addItem('sugar',(J.at+J.dn+5)%N,(hash2(J.at*.37,3.1)*2-1)*HW*0.45);
+  const tight=[];
+  for(let i=0;i<N;i++){
+    if(Math.abs(scurv[i])<0.22||!clearOfForks(i,8))continue;
+    if(Math.abs(scurv[i])<Math.abs(scurv[(i+1)%N])||Math.abs(scurv[i])<Math.abs(scurv[(i-1+N)%N]))continue;
+    tight.push(i);
+  }
+  tight.sort((a,b)=>Math.abs(scurv[b])-Math.abs(scurv[a]));
+  const used=[];
+  for(const i of tight){
+    if(used.length>=2)break;
+    if(used.some(j=>Math.min(Math.abs(i-j),N-Math.abs(i-j))<90)||Math.min(i,N-i)<40)continue;
+    if((stage.stamps||[]).some(d=>d.i==='tight')&&Math.min(Math.abs(i-tightestCorner()),N-Math.abs(i-tightestCorner()))<40)continue;
+    used.push(i);addItem('sugar',(i+7)%N,-Math.sign(scurv[i])*(HW-0.6));
   }
 }
 
@@ -210,21 +246,26 @@ function checkPickups(){
         if(k===player){toast('SPETTEKAKA!');ping(440,760,.10);}
         it.cool=8;
       }else if(it.type==='shield'){
-        k.shield=Math.max(k.shield,9);
+        k.shield=Math.max(k.shield,9*k.shieldMul);
         for(let p=0;p<12;p++)puff(it.x+rand(-.9,.9),it.y+rand(.3,1.4),it.z+rand(-.9,.9),.95,.82,.4,.5);
         if(k===player){toast('ÄGGKAKA! SKÖLD');ping(380,720,.14);}
         it.cool=9;
+      }else if(it.type==='sugar'){
+        if(k.sugar>=3)continue;
+        k.sugar++;
+        for(let p=0;p<10;p++)puff(it.x+rand(-.6,.6),it.y+rand(.3,1.4),it.z+rand(-.6,.6),1,1,1,.4);
+        if(k===player){toast('SOCKERBIT '+k.sugar+'/3');ping(900,1400,.08);}
+        it.cool=12;
       }else if(milk){
         k.boost=Math.max(k.boost,1.3*k.milk);k.slow=0;
         for(let p=0;p<12;p++)puff(it.x+rand(-.8,.8),it.y+rand(.3,1.5),it.z+rand(-.8,.8),1,1,1,.55);
         if(k===player){toast(k.milk>1?'EGEN MJÖLK! MUUU':'MJÖLK! FULL FART');ping(560,980,.10);if(k.milk>1)moo();}
         it.cool=7;
-      }else if(k.shield>0&&it.type==='pie'){             /* äggkakan tar smällen */
-        k.shield=0;
+      }else if(it.type==='pie'&&blockHit(k)){             /* äggkakan eller skopan tar smällen */
         for(let p=0;p<14;p++)puff(it.x+rand(-1,1),it.y+rand(.3,1.3),it.z+rand(-1,1),.95,.82,.4,.6);
-        if(k===player){toast('BLOCKERAT!');ping(700,300,.12);}
         it.cool=5;
       }else{
+        dropSugar(k);
         k.boost=0;k.slow=1.45;k.drift=0;k.charge=0;
         for(let p=0;p<16;p++)puff(it.x+rand(-1.1,1.1),it.y+rand(.2,1.2),it.z+rand(-1.1,1.1),.88,.44,.48,.75);
         if(k===player){toast('PAJ I ANSIKTET!');ping(300,90,.22);shake=Math.min(1,shake+.45);}

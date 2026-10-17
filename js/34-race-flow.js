@@ -3,7 +3,7 @@
 let state='menu',clock=0,raceTime=0,countdown=0,lastBeep=-1;
 const sheetStart=document.getElementById('start'),sheetDone=document.getElementById('done');
 function order(){
-  const s=karts.slice().sort((a,b)=>{
+  const s=karts.filter(k=>!k.parked).sort((a,b)=>{
     if(a.done&&b.done)return a.total-b.total;
     if(a.done)return -1;if(b.done)return 1;
     return b.progress-a.progress;
@@ -13,16 +13,24 @@ function order(){
 }
 function resetRace(){
   raceSeed=Math.random()*100;
+  LAPS=TT?4:FREE?1e9:(stage.laps||3);                       /* a time trial gets three flying laps */
+  if(TT)recordArne(stage);
   placeOnGrid();
+  setMirror(CUP?!!CUP.mirror:(!TT&&mirrorSel&&!!SAVE.unlock['mirror_'+stage.id]));
   previewOn=false;setPause(false);
-  raceTime=0;countdown=3.6;lastBeep=-1;camInit=false;shake=0;state='grid';
-  hideSheets();
+  raceTime=0;countdown=FREE?0.6:3.6;lastBeep=-1;camInit=false;shake=0;state='grid';
+  hideSheets();document.body.classList.toggle('free',FREE);
   document.body.classList.add('racing');
   for(let i=0;i<PMAX;i++){pLife[i]=0;pPos[i*3+1]=-9999;}
   resetItems();
+  shutPassages(null);
+  if(TT)for(const it of items){it.cool=1e9;it.mesh.visible=false;}   /* no items in a time trial */
+  for(const o of stampObjs)o.mesh.visible=!TT;
   for(const r of rockets)scene.remove(r.holder);
   rockets.length=0;
   for(const k of karts)k.dome.visible=false;
+  dbgOnReset();
+  if(FREE)toast('SANDLÅDA · F1 FÖR DEBUG');
 }
 function finish(){
   state='over';setPause(false);
@@ -30,6 +38,7 @@ function finish(){
   showDone();
 }
 function showDone(){
+  if(TT){showTTDone();return;}
   const sorted=order(),me=player.place,c=CUP;
   document.getElementById('doneTitle').textContent=(me===1?'SEGER!':'PLATS '+me);
   document.getElementById('doneSub').textContent=
@@ -48,6 +57,22 @@ function showDone(){
   document.getElementById('doneStamps').textContent=of?'PICKNICKSTÄMPLAR PÅ '+stage.name+': '+got+'/'+of:'';
   for(const id of ['btnAgain','btnSwap','btnStage','btnMenu'])document.getElementById(id).hidden=!!c;
   document.getElementById('btnTable').hidden=!c;
+  sheetDone.classList.remove('hide');
+}
+function showTTDone(){
+  const A=ARNE_GHOST[stage.id],G=SAVE.ghosts[stage.id],beat=A&&player.best!=null&&player.best<A.t;
+  document.getElementById('doneTitle').textContent=beat?'ARNE SLAGEN!':'TIDSLOPP';
+  document.getElementById('doneSub').textContent=stage.name+' · BÄSTA VARV '+fmt(player.best)+'  ·  ARNE '+fmt(A&&A.t);
+  const row=(n,nm,t,me,col)=>'<li'+(me?' class="me"':'')+'><span class="p">'+n+'</span><span class="chip" style="background:'+col+
+    '"></span><span class="nm">'+nm+'</span><span class="t">'+t+'</span></li>';
+  let h=player.lapTimes.map((t,i)=>row(i+1,i?'FLYGANDE VARV':'START',fmt(t),t===player.best,'#'+player.color.toString(16).padStart(6,'0'))).join('');
+  if(A)h+=row('A','BONDEN ARNE',fmt(A.t),false,'#8b2b1c');
+  if(G)h+=row('★','DITT REKORD',fmt(G.t),false,'#ffffff');
+  document.getElementById('grid').innerHTML=h;
+  document.getElementById('doneStamps').textContent=SAVE.unlock['mirror_'+stage.id]?
+    'SPEGELVÄND '+stage.name+' ÄR UPPLÅST: VÄLJ DEN PÅ BANVALET.':'SLÅ ARNES VARV FÖR ATT LÅSA UPP SPEGELVÄND '+stage.name+'.';
+  for(const id of ['btnAgain','btnSwap','btnStage','btnMenu'])document.getElementById(id).hidden=false;
+  document.getElementById('btnTable').hidden=true;
   sheetDone.classList.remove('hide');
 }
 const HORN='<svg class="horn" viewBox="0 0 16 16" role="img" aria-label="Rivalen"><title>Rivalen</title>'+
@@ -90,9 +115,16 @@ function commitRound(){
   if(c.round>=CUP_ROUNDS.length){
     c.done=true;
     const pl=standings(c).indexOf(0)+1;c.final=pl;c.unlocked=[];
-    if(pl<=3&&(!SAVE.trophies[c.cls]||pl<SAVE.trophies[c.cls]))SAVE.trophies[c.cls]=pl;
+    const tk=c.cls+(c.mirror?'_m':'');
+    if(pl<=3&&(!SAVE.trophies[tk]||pl<SAVE.trophies[tk]))SAVE.trophies[tk]=pl;
     if(!SAVE.unlock.cup){SAVE.unlock.cup=true;c.unlocked.push('KORNBLÅ LACK');}
     if(pl===1&&c.cls!=='easy'&&!SAVE.unlock.gold){SAVE.unlock.gold=true;c.unlocked.push('GULDKANNAN-LACK');}
+    if(pl===1){                            /* beat the rival: their paint, and their pennant on your kart */
+      const rk='rival'+c.rival,P=PAINTS.find(p=>p.unlock===rk);
+      if(!SAVE.unlock[rk]){SAVE.unlock[rk]=true;c.unlocked.push(P.name+'-LACK');}
+      SAVE.unlock.pennant=true;SAVE.pennant=ROSTER[c.rival].color;SAVE.pennantOn=true;
+      c.unlocked.push(ROSTER[c.rival].name+'S VIMPEL');
+    }
   }
   writeSave();
 }
@@ -110,15 +142,26 @@ function drawRivalTag(){
 }
 const sheetPick=document.getElementById('pick');
 let cupSetup=false;
+/** a pixel portrait per driver, drawn once by the game renderer into a data URL */
+function portrait(ci){
+  const c=CHARS[ci],v=buildKart(c.color,kindOf(c),'kart'),ps=new THREE.Scene();
+  ps.add(v.root);
+  const cam=new THREE.PerspectiveCamera(30,1,.1,50);
+  const hy=kindOf(c)==='cow'?1.92:1.86;
+  cam.position.set(.7,hy+.32,1.55);cam.lookAt(0,hy-.12,-.6);
+  const keep=RES.clone(),cc=new THREE.Color();renderer.getClearColor(cc);const ca=renderer.getClearAlpha();
+  RES.set(72,72);renderer.setSize(72,72,false);renderer.setClearColor(0x3d86dc,1);
+  renderer.render(ps,cam);
+  const url=canvas.toDataURL('image/png');
+  RES.copy(keep);renderer.setSize(keep.x,keep.y,false);renderer.setClearColor(cc,ca);
+  return url;
+}
 (function buildCards(){
-  const LBL=['FART','GREPP','ÅKER'];
-  document.getElementById('cards').innerHTML=CHARS.map((c,i)=>
-    '<button class="card'+(i===0?' sel':'')+'" data-i="'+i+'">'+
-    '<div class="cn">'+c.name+'</div><div class="cr">'+c.role+'</div>'+
-    c.stats.map((v,n)=>'<div class="bar"><span>'+LBL[n]+
-      '</span><i><b style="width:'+Math.round(v*100)+'%"></b></i></div>').join('')+
-    '</button>').join('');
-  document.querySelectorAll('#cards .card').forEach(el=>{
+  document.getElementById('cards').innerHTML=GRID.map(i=>
+    '<button class="vcard" role="option" data-i="'+i+'" aria-label="'+CHARS[i].name+'"><img alt="" src="'+portrait(i)+'"><span>'+
+    CHARS[i].short+'</span></button>').join('');
+  resize();
+  document.querySelectorAll('#cards .vcard').forEach(el=>{
     const i=+el.dataset.i;
     el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyCharacter(i);});
     el.addEventListener('pointerenter',()=>peekCharacter(i));
@@ -126,17 +169,11 @@ let cupSetup=false;
     el.addEventListener('pointerleave',unpeek);
     el.addEventListener('blur',unpeek);
   });
-  const CL=['FART','GREPP','ÅKER'];
-  document.getElementById('carcards').innerHTML=CARS.map((c,i)=>
-    '<button class="card'+(i===0?' sel':'')+'" data-i="'+i+'">'+
-    '<div class="cn">'+c.name+'</div><div class="cr">'+c.sub+'</div>'+
-    c.bars.map((v,k)=>'<div class="bar"><span>'+CL[k]+
-      '</span><i><b style="width:'+Math.round(v*100)+'%"></b></i></div>').join('')+
-    '</button>').join('');
-  document.querySelectorAll('#carcards .card').forEach(el=>{
-    el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyCar(+el.dataset.i);});
-  });
-  applyCar(0);
+  document.getElementById('carPrev').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(-1);});
+  document.getElementById('carNext').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(1);});
+  document.getElementById('btnBack').addEventListener('click',()=>{bootAudio();
+    if(cupSetup){previewOn=false;unpeek();showCupSetup();}else showStages();});
+  applyCharacter(0);
 })();
 const sheetStages=document.getElementById('stages');
 let stageSel=1;
@@ -152,15 +189,26 @@ let stageSel=1;
     el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyStage(+el.dataset.i);});
   });
 })();
+let mirrorSel=false;
+function renderStageInfo(){
+  const S=STAGES[stageSel],host=document.getElementById('mirrorRow'),open=!TT&&!!SAVE.unlock['mirror_'+S.id];
+  host.innerHTML=open?'<button class="tab'+(mirrorSel?' sel':'')+'" id="btnMirror">SPEGELVÄND: '+(mirrorSel?'PÅ':'AV')+'</button>':'';
+  if(open)document.getElementById('btnMirror').addEventListener('click',()=>{mirrorSel=!mirrorSel;renderStageInfo();});
+  const G=SAVE.ghosts[S.id],A=ARNE_GHOST[S.id];
+  document.getElementById('sinfo').textContent=TT?'TIDSLOPP · DITT REKORD '+(G?fmt(G.t):'—')+
+    ' · ARNE '+(A?fmt(A.t):'kör sitt varv när du startar')+(SAVE.unlock['mirror_'+S.id]?' · SPEGELVÄND UPPLÅST':''):'';
+  document.querySelector('#stages .pick-h').textContent=TT?'TIDSLOPP · VÄLJ BANA':'VÄLJ BANA';
+}
 function applyStage(i){
   stageSel=i;
   document.querySelectorAll('#scards .card').forEach((el,k)=>el.classList.toggle('sel',k===i));
   document.getElementById('sblurb').textContent=STAGES[i].blurb;
+  renderStageInfo();
   buildWorld(STAGES[i]);
   placeOnGrid();camInit=false;
 }
 function showStages(){
-  hideSheets();
+  hideSheets();setMirror(false);
   previewOn=false;unpeek();setPause(false);
   state='select';camInit=false;
   document.body.classList.remove('racing');
@@ -171,7 +219,8 @@ function showStages(){
 function showSelect(){
   hideSheets();
   previewOn=true;
-  document.getElementById('btnGo').textContent=cupSetup?'STARTA CUPEN':'KÖR';
+  document.getElementById('vsMode').textContent=(cupSetup?'SKÅNECUPEN · '+CLASSES[classSel].name:TT?'TIDSLOPP':FREE?'SANDLÅDA':'ENKELLOPP')+
+    ' · '+STAGES[stageSel].name;
   renderPaints();
   sheetStages.classList.add('hide');
   state='select';camInit=false;
@@ -199,11 +248,12 @@ function goFromSelect(){
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
   SAVE.cup={v:1,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
-    round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false};
+    round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:!!SAVE.unlock.cup&&cupMirrorSel};
   writeSave();                             /* autosave after setup */
   showBrief();
 }
-document.getElementById('btnStart').addEventListener('click',()=>{bootAudio();CUP=null;cupSetup=false;showStages();});
+document.getElementById('btnStart').addEventListener('click',()=>{bootAudio();CUP=null;cupSetup=false;TT=false;FREE=false;showStages();});
+document.getElementById('btnTT').addEventListener('click',()=>{bootAudio();CUP=null;cupSetup=false;TT=true;FREE=false;showStages();});
 document.getElementById('btnGo').addEventListener('click',()=>{bootAudio();goFromSelect();});
 document.getElementById('btnMenu').addEventListener('click',showMenu);
 document.getElementById('btnCupQuit').addEventListener('click',()=>{setPause(false);showMenu();});
@@ -223,15 +273,17 @@ function refreshMenu(){
   b.hidden=!(c&&!c.done);
   if(c&&!c.done)b.textContent='FORTSÄTT CUPEN · RUNDA '+(c.round+1)+'/'+CUP_ROUNDS.length;
   document.getElementById('btnAlbum').textContent='PICKNICKPASSET · '+stampCount()+'/'+allStamps().length;
-  document.getElementById('shelf').innerHTML=CLASSES.map(C=>{const t=SAVE.trophies[C.id];
-    return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.sub+
-      '<b>'+(t?MEDAL[t]:'—')+'</b></div>';}).join('');
+  const shelf=(C,m)=>{const t=SAVE.trophies[C.id+m];
+    return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.sub+(m?' · SPEGEL':'')+
+      '<b>'+(t?MEDAL[t]:'—')+'</b></div>';};
+  document.getElementById('shelf').innerHTML=CLASSES.map(C=>shelf(C,'')).join('')+
+    (SAVE.unlock.cup?CLASSES.map(C=>shelf(C,'_m')).join(''):'');
   document.getElementById('saveNote').hidden=saveOK;
 }
 function showMenu(){
   hideSheets();setPause(false);previewOn=false;unpeek();
-  state='menu';camInit=false;CUP=null;cupSetup=false;
-  document.body.classList.remove('racing');
+  state='menu';camInit=false;CUP=null;cupSetup=false;TT=false;FREE=false;setMirror(false);
+  document.body.classList.remove('racing','free');
   refreshMenu();sheetStart.classList.remove('hide');
 }
 let classSel=1;
@@ -247,19 +299,28 @@ function pickClass(i){
   document.querySelectorAll('#classcards .card').forEach((el,n)=>el.classList.toggle('sel',n===i));
   document.getElementById('classblurb').textContent=CLASSES[i].blurb;
 }
+let cupMirrorSel=false;
+function renderCupMirror(){
+  const host=document.getElementById('cupMirror'),open=!!SAVE.unlock.cup;
+  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">SPEGELCUPEN: '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
+  if(open)document.getElementById('btnCupMirror').addEventListener('click',()=>{cupMirrorSel=!cupMirrorSel;renderCupMirror();});
+}
 function showCupSetup(){
-  hideSheets();state='menu';CUP=null;
-  pickClass(classSel);
+  hideSheets();state='menu';CUP=null;TT=false;
+  pickClass(classSel);renderCupMirror();
   document.getElementById('cupWarn').hidden=!(SAVE.cup&&!SAVE.cup.done);
   document.getElementById('cupsetup').classList.remove('hide');
 }
 function renderPaints(){
   const host=document.getElementById('paints'),open=PAINTS.filter(p=>!p.id||SAVE.unlock[p.unlock]);
-  host.hidden=open.length<2;
+  host.hidden=open.length<2&&!SAVE.unlock.pennant;
   host.innerHTML=open.map(p=>'<button class="tab'+(p.id===paintSel||(!p.id&&!open.some(q=>q.id&&q.id===paintSel))?' sel':'')+
-    '" data-p="'+(p.id||'')+'">LACK: '+p.name+'</button>').join('');
-  host.querySelectorAll('.tab').forEach(el=>el.addEventListener('click',()=>{
+    '" data-p="'+(p.id||'')+'">LACK: '+p.name+'</button>').join('')+
+    (SAVE.unlock.pennant?'<button class="tab'+(SAVE.pennantOn?' sel':'')+'" id="btnPennant">VIMPEL: '+(SAVE.pennantOn?'PÅ':'AV')+'</button>':'');
+  host.querySelectorAll('.tab[data-p]').forEach(el=>el.addEventListener('click',()=>{
     paintSel=el.dataset.p||null;SAVE.paint=paintSel;writeSave();showRig();renderPaints();}));
+  const pb=document.getElementById('btnPennant');
+  if(pb)pb.addEventListener('click',()=>{SAVE.pennantOn=!SAVE.pennantOn;writeSave();showRig();renderPaints();});
 }
 function showBrief(){
   const c=SAVE.cup;CUP=c;
@@ -269,7 +330,7 @@ function showBrief(){
   const si=STAGES.findIndex(S=>S.id===CUP_ROUNDS[c.round]),S=STAGES[si];
   applyStage(si);
   document.getElementById('briefTitle').innerHTML=S.name+'<i>RUNDA '+(c.round+1)+' AV '+CUP_ROUNDS.length+'</i>';
-  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name;
+  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name+(c.mirror?' · SPEGELCUPEN':'');
   const surf=['ASFALT'].concat((S.routes||[]).map(R=>SURF[R.surface].name),(S.routes||[]).some(R=>R.mud)?['LERA']:[]);
   const [got,of]=stageStamps(S),st=standings(c),me=st.indexOf(0);
   const gap=i=>{const d=c.pts[0]-c.pts[i];return (d>0?'+':'')+d+' p';};
@@ -317,10 +378,10 @@ function showPodium(){
   moo();                                   /* Majros moos whoever won */
 }
 let albumTab=1,albumBack=showMenu;
-const KIND={intro:'VID VÄGEN',route:'PÅ GENVÄGEN',master:'MÄSTARPROVET'};
+const KIND={intro:'VID VÄGEN',route:'PÅ GENVÄGEN',master:'MÄSTARPROVET',line:'INNERLINJEN',air:'I LUFTEN'};
 const REWARDS=[[1,'Varje stämpel: sin sida i passet och sin historia'],[3,'Alla 3 på en bana: banans vykort'],
   [6,'6 stämplar: muu-tutan för alla förare (H)'],[9,'9 stämplar: picknickkorg på taket'],
-  [15,'Alla 15: Gyllene Picknickpasset och titeln Picknickmästare']];
+  [21,'Alla 21: Gyllene Picknickpasset och titeln Picknickmästare']];
 function showAlbum(back){
   albumBack=back||showMenu;
   hideSheets();state='menu';document.body.classList.remove('racing');

@@ -8,12 +8,18 @@ addEventListener('keydown',e=>{
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
   keys[k]=true;
   if(state==='select'&&!sheetStages.classList.contains('hide')){
-    if(k>='1'&&k<='5')applyStage(+k-1);
+    if(k>='1'&&k<=String(STAGES.length))applyStage(+k-1);
     if(k==='enter'||k===' '){bootAudio();showSelect();}
   }else if(state==='select'){
-    if(k==='arrowleft'||k==='a')applyCharacter((charSel+CHARS.length-1)%CHARS.length);
-    if(k==='arrowright'||k==='d')applyCharacter((charSel+1)%CHARS.length);
-    if(k>='1'&&k<='4')applyCar(+k-1);
+    const g=GRID.indexOf(charSel),mv=d=>{unpeek();applyCharacter(GRID[(g+d+GRID.length)%GRID.length]);ping(700,980,.04);};
+    if(k==='arrowleft'||k==='a')mv(-1);
+    if(k==='arrowright'||k==='d')mv(1);
+    if(k==='arrowup'||k==='w')mv(-3);
+    if(k==='arrowdown'||k==='s')mv(3);
+    if(k==='q')stepCar(-1);
+    if(k==='e')stepCar(1);
+    if(k>='1'&&k<=String(FREECARS.length))applyCar(FREECARS[+k-1]);
+    if(k==='backspace')document.getElementById('btnBack').click();
     if(k==='enter'||k===' '){bootAudio();goFromSelect();}
   }else if((state==='menu'||state==='over')&&k==='enter'&&
            !(document.activeElement&&document.activeElement.tagName==='BUTTON')){
@@ -51,5 +57,6 @@ function readInput(){
   input.throttle=(up||touch.a)?1:0;
   input.brake=(dn||touch.b)?1:0;
   input.steer=((lf||touch.l)?1:0)-((rt||touch.r)?1:0);
+  if(MIRROR)input.steer=-input.steer;             /* the world is drawn flipped; the sim is not */
   input.drift=!!(keys[' ']||keys['shift']||touch.d);
 }

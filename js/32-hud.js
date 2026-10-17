@@ -9,12 +9,13 @@ const el={lap:document.getElementById('lap'),pos:document.getElementById('pos'),
   slotn:document.getElementById('slotn'),
   meter:document.getElementById('meter'),flash:document.getElementById('flashtxt'),
   toast:document.getElementById('toast')};
-let toastT=0, lastSlot='';
+let toastT=0, lastSlot='', lastSugar=-1;
+const sugarEl=document.getElementById('sugar');
 function toast(m){el.toast.textContent=m;el.toast.classList.add('on');toastT=1.5;}
 function flash(m){el.flash.textContent=m;el.flash.classList.remove('pop');void el.flash.offsetWidth;el.flash.classList.add('pop');}
 function drawHUD(dt){
   el.lap.textContent=Math.min(player.lap+1,LAPS);
-  el.laps.textContent='/'+LAPS;
+  el.laps.textContent=FREE?'/∞':'/'+LAPS;
   el.pos.textContent=player.place;
   el.time.textContent=fmt(player.done?player.total:raceTime);
   el.best.textContent=fmt(player.best);
@@ -33,6 +34,10 @@ function drawHUD(dt){
     lastSlot=key;
   }
   el.slotn.textContent=(!player.held&&player.shield>0)?Math.ceil(player.shield):'';
+  if(player.sugar!==lastSugar){
+    lastSugar=player.sugar;sugarEl.classList.toggle('off',!lastSugar);
+    sugarEl.querySelectorAll('i').forEach((e,n)=>e.classList.toggle('on',n<lastSugar));
+  }
   const fr=clamp(player.fuel/TANK,0,1);
   el.ffill.style.width=(fr*100)+'%';
   el.fmeter.className='meter fuelm'+(fr<=0?' dry':(fr<0.26?' warn':''));

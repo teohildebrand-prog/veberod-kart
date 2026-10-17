@@ -66,6 +66,13 @@
   #slot{top:104px;left:14px;width:74px;height:74px;padding:0;border-radius:17px;
         display:grid;place-items:center}
   #slot.off{display:none}
+  #sugar{position:absolute;top:184px;left:14px;padding:6px 8px;border-radius:11px;display:flex;gap:5px;align-items:center}
+  #sugar.off{display:none}
+  #sugar i{display:block;width:13px;height:13px;border-radius:3px;background:#fff;opacity:.22;
+           box-shadow:inset -2px -2px 0 rgba(160,180,200,.7)}
+  #sugar i.on{opacity:1}
+  #mirrorRow,#cupMirror{margin:4px 0 10px}
+  #sinfo:empty{display:none}
   #slotv{display:block;width:48px;height:48px;
          filter:drop-shadow(0 2px 5px rgba(0,28,56,.6))}
   #slotv svg{display:block;width:100%;height:100%}
@@ -231,7 +238,7 @@
   .ptag.peek{color:var(--amber);text-shadow:0 0 12px rgba(255,213,74,.6)}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:7px}
   .cards3{grid-template-columns:repeat(4,1fr);gap:8px}
-  #scards{grid-template-columns:repeat(5,1fr);gap:7px}
+  #scards{grid-template-columns:repeat(4,1fr);gap:7px}
   #scards .card{padding:8px 7px}
   #scards .cr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card{pointer-events:auto;font:inherit;text-align:left;cursor:pointer;color:var(--ink);
@@ -273,6 +280,113 @@
        box-shadow:inset 0 1px 0 rgba(255,255,255,.6);transition:filter .12s,transform .08s}
   .alt:hover{filter:brightness(1.2)}
   .alt:active{transform:translateY(2px)}
+
+
+  /* ── driver select: the console-style screen from Teo's concept art ── */
+  #pick{display:block;padding:0;background:
+    linear-gradient(90deg,rgba(6,24,74,.55) 0%,rgba(6,24,74,.15) 46%,rgba(6,24,74,0) 60%),
+    linear-gradient(180deg,rgba(6,24,74,.0) 70%,rgba(6,24,74,.45));
+    backdrop-filter:none;-webkit-backdrop-filter:none}
+  #pick.hide{display:none}
+  .vs{position:absolute;inset:0;display:grid;gap:12px 22px;
+    padding:max(12px,env(safe-area-inset-top)) 22px max(14px,env(safe-area-inset-bottom));
+    grid-template-columns:minmax(300px,44%) 1fr;
+    grid-template-rows:auto auto 1fr auto auto;
+    grid-template-areas:"top top" "grid name" "grid ." "grid panel" "foot foot"}
+  .vs-top{grid-area:top;display:flex;align-items:center;gap:22px;margin:0 -22px;padding:8px 22px;
+    background:linear-gradient(180deg,#1a3f9e,#0c2466);border-bottom:3px solid #4f86e8;
+    box-shadow:0 4px 0 #071746,0 10px 22px rgba(0,10,40,.45)}
+  .vs-logo{font:italic 900 22px/1 "Titillium Web",sans-serif;color:#ffd54a;letter-spacing:-.01em;
+    text-shadow:2px 2px 0 #0a1a4a,-1px -1px 0 #0a1a4a;transform:skew(-6deg)}
+  .vs-logo i{display:block;font-size:11px;letter-spacing:.42em;color:#fff;margin-top:2px}
+  #pick .vs-title{flex:1;margin:0;font:italic 900 clamp(24px,4.4vw,48px)/1 "Titillium Web",sans-serif;
+    color:#eef2fb;letter-spacing:.02em;text-shadow:3px 3px 0 #07163f;
+    background:none;-webkit-text-fill-color:currentColor;filter:none}
+  .vs-mode{font:700 13px/1.2 "Titillium Web",sans-serif;letter-spacing:.12em;color:#9fb6e6;text-align:right}
+  .vs-grid{grid-area:grid;align-self:start;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    padding:10px;border-radius:10px;background:linear-gradient(180deg,#1b3f9a,#10276b);
+    border:3px solid #3f74d8;box-shadow:0 0 0 3px #0a1a4a,0 14px 30px rgba(0,10,40,.5)}
+  .vcard{pointer-events:auto;position:relative;padding:0;border:3px solid #2a55b8;border-radius:4px;
+    background:#2e6fd0;cursor:pointer;overflow:hidden;font:inherit;display:flex;flex-direction:column;
+    transition:transform .1s}
+  .vcard img{display:block;width:100%;aspect-ratio:1/1;image-rendering:pixelated;
+    background:linear-gradient(180deg,#5aa8f0,#2e6fd0)}
+  .vcard span{display:block;padding:4px 2px 5px;background:#0d2463;color:#fff;
+    font:700 clamp(11px,1.4vw,17px)/1 "Titillium Web",sans-serif;letter-spacing:.06em;text-align:center}
+  .vcard:hover{transform:translateY(-2px)}
+  .vcard.sel{border-color:#ffd54a;box-shadow:0 0 0 2px #ffd54a,0 0 18px rgba(255,213,74,.6)}
+  .vcard.sel::after{content:'1P';position:absolute;left:0;top:0;padding:2px 6px;background:#ffd54a;
+    color:#10276b;font:italic 900 14px/1.1 "Titillium Web",sans-serif}
+  .vcard.peek{border-color:#9fd0ff}
+  .vcard:focus-visible{outline:3px solid #9ad73f;outline-offset:2px}
+  .vs-name{grid-area:name;justify-self:start}
+  .vs-big{font:italic 900 clamp(26px,4.6vw,54px)/1 "Titillium Web",sans-serif;color:#ffd54a;
+    letter-spacing:.01em;text-shadow:3px 3px 0 #0a1a4a,-1px -1px 0 #0a1a4a,0 0 22px rgba(255,180,40,.35)}
+  .vs-home{display:flex;align-items:center;gap:8px;margin-top:6px;
+    font:700 clamp(15px,2vw,24px)/1 "Titillium Web",sans-serif;color:#fff;letter-spacing:.08em;
+    text-shadow:2px 2px 0 #0a1a4a}
+  .vs-home svg{width:22px;height:22px;fill:#ffd54a;filter:drop-shadow(1px 1px 0 #0a1a4a)}
+  .vs-home em{font-style:normal;font-size:12px;color:#ffd54a;letter-spacing:.1em}
+  .vs-panel{grid-area:panel;align-self:end;padding:12px 14px;border-radius:10px;
+    background:linear-gradient(180deg,#1b3f9a,#10276b);border:3px solid #3f74d8;
+    box-shadow:0 0 0 3px #0a1a4a,0 14px 30px rgba(0,10,40,.5)}
+  .vs-car{display:flex;align-items:center;gap:10px;padding-bottom:8px;margin-bottom:9px;
+    border-bottom:2px solid #3f74d8}
+  .vs-carname{flex:1;min-width:0}
+  .vs-carname b{display:block;font:italic 900 clamp(17px,2.2vw,26px)/1.05 "Titillium Web",sans-serif;color:#fff;
+    letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vs-carname small{display:block;font:700 11px/1.3 "Titillium Web",sans-serif;color:#9fb6e6;letter-spacing:.12em}
+  .vs-arrow{pointer-events:auto;font:inherit;font-size:14px;color:#ffd54a;background:#0c2466;border:2px solid #3f74d8;
+    border-radius:6px;width:34px;height:34px;cursor:pointer;flex:none}
+  .vs-arrow:disabled{opacity:.25;cursor:default}
+  .vs-stats{display:grid;grid-template-columns:1fr minmax(120px,38%);gap:14px}
+  #pick #combo{display:block;margin:0}
+  .vbar{display:grid;grid-template-columns:62px 1fr 44px;align-items:center;gap:8px;margin:2px 0 7px}
+  .vbar span{font:700 15px/1 "Titillium Web",sans-serif;color:#fff;letter-spacing:.06em}
+  .vbar em{font:700 15px/1 "Titillium Web",sans-serif;font-style:normal;color:#fff;text-align:right}
+  .vbar i{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;height:14px;padding:2px;
+    background:#0a1a4a;border:1px solid #3f74d8}
+  .vbar i b{background:#1c3170}
+  .vbar i b.on{background:linear-gradient(180deg,#8dff7a,#2fd13a 55%,#16a324)}
+  .vs-quirk{border-left:2px solid #3f74d8;padding-left:12px}
+  .vs-quirk b{display:block;font:italic 900 17px/1.1 "Titillium Web",sans-serif;color:#fff;letter-spacing:.04em;margin-bottom:4px}
+  .vs-quirk span{display:block;font:600 13px/1.35 "Titillium Web",sans-serif;color:#cfdcf6}
+  .vs-blurb{margin:8px 0 0;font:400 12.5px/1.45 "Titillium Web",sans-serif;color:#cfdcf6}
+  #pick #paints{margin:8px 0 0;justify-content:flex-start}
+  .vs-foot{grid-area:foot;display:flex;justify-content:space-between;gap:14px}
+  .vs-back,.vs-go{pointer-events:auto;display:flex;align-items:center;gap:12px;cursor:pointer;
+    font:italic 900 clamp(17px,2.2vw,26px)/1 "Titillium Web",sans-serif;letter-spacing:.05em;
+    padding:10px 26px 10px 12px;border-radius:12px;transform:skew(-6deg);transition:filter .1s,transform .08s}
+  .vs-back i,.vs-go i{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-style:normal;
+    font-size:18px;background:#14234f;border:2px solid #9fb6e6}
+  .vs-back{color:#fff;background:linear-gradient(180deg,#2552b8,#12307a);border:3px solid #4f86e8;
+    box-shadow:0 0 0 3px #0a1a4a}
+  .vs-back i{color:#ff6fa0}
+  .vs-go{color:#10276b;background:linear-gradient(180deg,#ffe680,#ffcc1a 55%,#e8a810);border:3px solid #fff3b0;
+    box-shadow:0 0 0 3px #0a1a4a,0 0 22px rgba(255,204,26,.45)}
+  .vs-go i{color:#7fb0ff}
+  .vs-back:hover,.vs-go:hover{filter:brightness(1.1)}
+  .vs-back:active,.vs-go:active{transform:skew(-6deg) translateY(2px)}
+  .vs-back:focus-visible,.vs-go:focus-visible{outline:3px solid #9ad73f;outline-offset:3px}
+  @media(max-width:760px){
+    .vs{gap:8px;padding:8px 12px max(10px,env(safe-area-inset-bottom));
+      grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr auto auto;
+      grid-template-areas:"top" "grid" "name" "." "panel" "foot";overflow-y:auto}
+    .vs-top{margin:0 -12px;padding:6px 12px;gap:10px}
+    .vs-logo{display:none}
+    .vs-mode{font-size:10px}
+    .vs-grid{gap:5px;padding:6px}
+    .vcard img{aspect-ratio:16/10;object-fit:cover;object-position:50% 35%}
+    .vs-blurb{display:none}
+    .vs-stats{grid-template-columns:1fr}
+    .vs-quirk{border-left:0;padding-left:0}
+    .vbar{grid-template-columns:52px 1fr 40px;margin:0 0 5px}
+    .vbar span,.vbar em{font-size:13px}
+    .vs-back,.vs-go{padding:8px 16px 8px 8px}
+    .vs-back i,.vs-go i{width:26px;height:26px;font-size:14px}
+  }
+  @media(max-height:640px) and (min-width:761px){.vs-blurb{display:none}.vcard span{padding:2px}}
+  @media (prefers-reduced-motion:reduce){.vcard:hover{transform:none}}
 
   /* results */
   #grid{list-style:none;margin:0 0 20px;padding:0}
@@ -390,3 +504,21 @@
   #pod svg{width:44px;height:52px;display:block;margin:0 auto 2px}
   #podNote svg{width:54px;height:30px;vertical-align:middle;margin-right:6px}
   @media(max-width:470px){.slots{grid-template-columns:1fr}#classcards{grid-template-columns:1fr}}
+
+  /* ── debug panel and readouts ── */
+  #dbg{position:fixed;top:10px;right:10px;z-index:30;width:min(360px,calc(100vw - 32px));max-height:calc(100vh - 20px);
+    overflow:auto;border-radius:16px;padding:10px 12px 12px;color:#fff;pointer-events:auto;
+    background:linear-gradient(180deg,rgba(20,60,96,.86),rgba(8,30,52,.9));border:1px solid var(--rim);
+    box-shadow:0 10px 28px rgba(2,22,44,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #dbg[hidden],#dbgHud[hidden]{display:none}
+  #dbg .dtop{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  #dbg .dtop b{font-size:15px;letter-spacing:.12em;color:var(--amber)}
+  #dbg .dtop span{flex:1;font-size:10px;opacity:.7;letter-spacing:.08em}
+  #dbg .dh{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--sky);margin:9px 0 5px}
+  #dbg .dr{display:flex;flex-wrap:wrap;gap:5px}
+  #dbg .tab[disabled]{opacity:.35;cursor:default}
+  #dbg .dn{font-size:11px;margin:6px 0 0;opacity:.8}
+  #dbgHud{position:fixed;left:10px;top:190px;z-index:29;pointer-events:none;white-space:pre;margin:0;
+    font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#d8ffb0;background:rgba(0,10,20,.62);
+    padding:6px 8px;border-radius:8px}
+  body.free #board,body.free #clock{display:none}

@@ -20,6 +20,8 @@ Condensed from the original claude.ai chat Teo pasted on 2026-10-17. Original pu
 15. Design-review pass: pickup height gate, sim-time race clock, AI corner-speed model (sqrt(G*R), G=30), AI drifting, 8 ordered checkpoints, mobile brake + pause, "DIN KOMBINATION" ratings.
 16. (This project) Majros the cow made playable, H horn/moo.
 17. (This project, 2026-10-17) GDD v2 release 1: genvägar on Veberöd, Arne's tractor recovery, picnic stamps, Picknickpasset, Skånecupen. Details below.
+18. (This project, 2026-10-17) The GDD's LEGO Racers ideas (6 adopted + sugar cubes, time trial, rival's paint) and two new tracks, Glimmingehus and Ales stenar. Details below.
+19. (This project, 2026-10-17) Debug menu (F1/§/`) and SANDLÅDA free roam. Details below.
 
 ## Decisions to keep
 - No real trademarks: STATOLJA instead of Statoil; cars named after towns (Saab -> Trollhättan 96, Volvo -> Torslanda 240, Koenigsegg -> Ängelholm CC).
@@ -42,9 +44,38 @@ GDD: https://claude.ai/code/artifact/b1d72590-d7d1-4f32-8072-428974ec1551
 - Skånecupen: Veberöd, Lund, Tollarp, Åhus, Öresundsbron. Classes scale AI speed, caution, rubber band, shortcut appetite. Points 10-7-5-3-2-1, countback ties, player last in round 1, reverse standings after. Rival (horn icon) keeps the full rubber band, others 70%. After the player finishes, the field races on for up to 30 s (simulated instantly). Points commit exactly once (round id in applied, same write). Leaving mid-race resumes that round. Trophies per class on the menu shelf. Finishing any cup unlocks KORNBLÅ paint; gold on Bygdemästare or harder unlocks GULDKANNAN paint (paint row appears on the driver sheet).
 - Single race fix: the race clock keeps running after your finish so AI behind you get real times.
 
+## LEGO Racers ideas + two tracks (built 2026-10-17)
+Ideas only from isledecomp/racers, no code or data. Teo chose: build the 6 adopted ideas plus sugar cubes, time trial and the rival's paint; keep points 10-7-5-3-2-1.
+- Gate graph (GATES): main gates on the 8 sector lines with lap fractions; a lane that skips main gates gets twins of them; next[] links. Position = laps + gate fraction + distance to the next gate (clamped, so skipping gains nothing).
+- Mirror (SPEGELVÄND): deviation from the GDD's "negate x at load", because scenery is hand-placed in world coordinates. The sim is untouched; scene.scale.x = -1, the camera is mirrored after updateCamera, steering input and minimap x are flipped, and meshes whose texture has text (pixTex sets hasText) flip back so signs read. Unlocked per track by beating Arne in the time trial; Spegelcupen toggle in cup setup after any finished cup, trophies keyed cls+'_m'.
+- Return to path: AI stuck >1.2 s or crawling off-road >1 s steers to a point ~1 s up its route (reverses if facing away); tractor only after 3 s of that, or 5 s stuck in total.
+- Line variants: each AI gets inside/middle/outside (lineVar) per race, offset by signed curvature (scurv).
+- Surface table (SFX): dust colour, mud spray, tyre noise per surface (second bandpass on the noise source), cobble rattle + camera shake, a moo when a cow kart enters grass/dirt/mud. New SURF entries cobble, sand.
+- Hazards (HAZARDS, period/phase off raceTime so restarts reset them; shield blocks; a hit drops sugar): Rapsfältet hay bale, Grusvägen cow, Öresundsbron gulls, Glimmingehus ghosts (spin), Ales curse (drive back through the stone ship: steering swaps 3 s).
+- Sockerbitar: 2 per lane, one past each jump landing, two on the inside verge of the tightest corners. Up to 3; using an item spends them: milk longer up to a 3.4 s churn turbo, pie 3 pies then pie rain on the two leaders, rocket faster then 2 then 3, shield longer. HUD row under the item slot.
+- Tidslopp: menu button. AI parked (k.parked), no items, stamps, fuel use. Arne's ghost = Arne in the plain kart, AI, no rubber band, flying lap 2, recorded at 10 Hz when the trial starts (~0.6 s) and cached for the visit. Player's best flying lap saved as SAVE.ghosts[id]. 4 laps (3 flying). Glimmingehus Arne lap 34.4 s.
+- Cup win: rival's paint (PAINTS r1-r5) + rival's pennant on a whip aerial (VIMPEL toggle). Picnic basket on the kart at 9 stamps.
+- Glimmingehus (glimminge): night, cobbles, stone walls, castle with crow-stepped gables on a moated island (castleMod flattens the terrain), gatehouse arch at sample 598, torches, orchards, moon on the sky dome. No shortcut. Stamps Svartsoppa (intro), Ålagille (apex of the tightest corner, kind 'line'), Äppelkaka (in the air over jump 0, kind 'air').
+- Ales stenar (ales): sand road/verge, dunes palette, cliff + sea to the north and east (stage.shore), stone ship of standing stones, Kåseberga smokehouses, lighthouse. Two hidden shortcuts (Skeppssättningen 248-350, Stenraden 414-536) behind boulders: a rocket homes onto a closed boulder and opens the passage until its shooter's next lap; karts bounce off closed boulders; only the cup rival AI uses an open one. Stamps Böckling, Fiskesoppa (inside the ship), Sandkaka (in the air over jump 1).
+- AI fuel fix: AI now plans fuel (wantsFuel: would it reach the pump after the next one), aims at the forecourt with a short look-ahead and brakes for it. This fixed the old Tollarp DNFs and dry karts on Glimmingehus and Åhus; the tractor also tips in 14 fuel. Side effect: AI about 5-10 s slower per race on Veberöd because they stop properly.
+- Not in the cup: CUP_ROUNDS stays the 5 GDD rounds.
+
+## New drivers + driver select screen (built 2026-10-17)
+Design sheet: /mnt/project-files/design/new-characters.md, concept art: /mnt/project-files/design/concept-character-select.png.
+- Nine playable drivers. New: Björn (Lund), Mehmet (Rosengård), Anders (Veberöd, Arne's son, green farm cap). Roger, Linnéa and Britta are playable too, because the concept's 3x3 grid shows them. CHARS order is the save format (cup.char is an index), so new ones are appended; GRID is the screen order. Picking a driver who is also an AI makes that AI a twin (TWIN: STJÄRNA, RONNY, LOVISA, BIRGITTA).
+- Own vehicles locked to their driver (CARS[].sig): Landskrona 61 (Björn, burns 20% less; a convertible with the bike on a boot carrier, because a roof hid him), Rosengård Raket (Mehmet, 2 wheels, boost x1.15, spins 40% longer), Veberöd Lantmästare (Anders, spins half as long). FREECARS = the 4 cars anyone else can pick; the last free car is remembered.
+- Quirks: Björn's akademisk kvart (no throttle until 0.8 s after the start, then press before 2.2 s: 1.7 s boost; "NU!" cue). Mehmet's suget (3-15 m behind a kart for 1.1 s: 1.2 s boost, then 1.5 s cooldown) and a wheelie on every boost. Anders' skopan (blockHit: after the äggkaka, the bucket eats the first hit each lap) and mass 2.2 in separate(). Britta's äggkaka lasts twice as long (shieldMul). Linnéa burns 12% less fuel.
+- Britta's AI model is now the granny (kind 'granny'). Start and hit lines for the new three show as toasts (CHARS[].say).
+- Select screen: console-style layout from the concept, portraits rendered once at load by the game renderer, the driver on a stone turntable in the stage, panel with FART/GREPP/ÅKER (driver stats x car), quirk, ◀ ▶ (or Q/E, 1-4) for the car, TILLBAKA back to stages or cup setup. Arrows/WASD move in the grid.
+- Not built from the sheet: item flavours (thesis rocket, muck pie, straw shield), Anders recovering himself, a Rosengård track (Mehmet's home is Öresundsbron for now).
+
+## Debug menu + sandlåda (built 2026-10-17)
+- Debug menu: F1, § or `, or DEBUG in the pause sheet. Glass panel over the running game (does not pause). Track, driver, car (own vehicles stay with their driver; locked during a cup), light presets BANANS/DAG/KVÄLL/NATT/DIMMA (no real weather exists, so presets borrow Veberöd/Bron/Glimminge sky, fog and light), teleport to the 8 checkpoints (gate counts as passed so laps still add up), GUDALÄGE (blockHit returns true for the player), infinite fuel, infinite items (refills the last item), give any item / 3 sugar cubes / turbo, SISTA VARVET, AI SOM VANLIGT/KÖR/FRYST/BORTA, FPS and physics readouts, time scale 0.25-3x (scales dt before the fixed step). State lives in DBG, nothing saved; light and AI mode survive restarts via dbgOnReset() in resetRace.
+- SANDLÅDA: main-menu button, flag FREE (like TT). AI parked, LAPS=1e9 (HUD shows /∞), full tank, 0.6 s countdown, clock and position boards hidden (body.free), lap time toast on each line crossing. Stamps still collectable under their normal rules.
+
 ## Deferred ideas
-- The other 7 shortcuts and 12 stamps (GDD build step 7), one track at a time.
-- Picnic basket (9 stamps), blanket paints per track, Gyllene Picknickpasset (15).
+- The other 7 shortcuts and stamps on the original five tracks (GDD build step 7), one track at a time.
+- Blanket paints per track, Gyllene Picknickpasset (21 stamps now).
 - Retire option in a cup race (scores 0), route-assist minimap setting, camera-shake slider, auto-accelerate.
-- AI still runs dry on Tollarp sometimes (pre-existing fuel planning); the tractor can't fix an empty tank.
-- Spegelcupen (mirror mode).
+- More LEGO Racers counterparts from the GDD table (Karlskrona, Söderåsen, Limhamn, Ven, Kalmar...).
+- Repo split regenerated 2026-10-17 with the debug menu PR (includes the LEGO Racers round and the new drivers).

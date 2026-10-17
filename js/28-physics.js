@@ -1,5 +1,26 @@
 "use strict";
 /* ───────── physics ───────── */
+/** Mehmet: tucked in behind another kart he charges a slingshot */
+function suget(k,dt){
+  const Fx=Math.sin(k.yaw),Fz=Math.cos(k.yaw);
+  let behind=false;
+  if(!k.air&&k.speed>14)for(const o of karts){
+    if(o===k||o.parked||o.ghost>0)continue;
+    const dx=o.x-k.x,dz=o.z-k.z,f=dx*Fx+dz*Fz,l=Math.abs(dx*Fz-dz*Fx);
+    if(f>3&&f<15&&l<2.4){behind=true;break;}
+  }
+  if(behind){
+    const was=k.suck;k.suck+=dt;
+    if(k===player&&was<0.6&&k.suck>=0.6)ping(600,700,.05);
+    if(Math.random()<.4)puff(k.x+Fx*2.5+rand(-.5,.5),k.y+1,k.z+Fz*2.5+rand(-.5,.5),.85,.9,1,.25);
+    if(k.suck>=1.1){
+      k.suck=-1.5;                                   /* a short cooldown before the next one */
+      k.boost=Math.max(k.boost,1.2);
+      if(k===player){toast('SUGET!');ping(500,1300,.15);}
+    }
+  }else if(k.suck>0)k.suck=Math.max(0,k.suck-dt*2);
+  else if(k.suck<0)k.suck=Math.min(0,k.suck+dt);
+}
 function drive(k,dt,ctl){
   if(k.recoverT>0){k.recoverT-=dt;if(k.recoverT<=0)recoverKart(k);}
   if(k.ghost>0)k.ghost-=dt;
@@ -21,16 +42,31 @@ function drive(k,dt,ctl){
     else if(k.fuel>40)k.warned=0;
   }
   const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.atPump;
+  if(TT||FREE)k.fuel=TANK;                                /* nothing to manage in a time trial */
+  {const sf=RT?(surf?RT.S[i]:'grass'):(onRoad||stage.ground==='sea'?(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road')):
+      (stage.ground==='dunes'?'sand':'grass'));
+   if(sf!==k.sfx){const was=k.sfx;k.sfx=sf;if(was)surfaceEnter(k,sf);}}
   if(k.boost>0)k.boost=Math.max(0,k.boost-dt);
   if(k.slow>0)k.slow=Math.max(0,k.slow-dt);
   if(k.shield>0)k.shield=Math.max(0,k.shield-dt);
   if(k.spun>0){k.spun=Math.max(0,k.spun-dt);k.yaw+=11*dt;}   /* spettekaka-träff */
+  if(k.kvart){                       /* Björn: wait out the academic quarter, then launch */
+    if(ctl.throttle>0||raceTime>2.2){
+      if(raceTime>=0.8&&raceTime<=2.2&&ctl.throttle>0){
+        k.boost=Math.max(k.boost,1.7);
+        if(k===player){toast('AKADEMISK KVART!');ping(520,1250,.2);}
+      }
+      k.kvart=false;
+    }else if(k===player&&raceTime>=0.8&&!k.kvartCue){k.kvartCue=true;toast('NU!');ping(880,880,.08);}
+  }
+  if(k.wheelie)suget(k,dt);
 
   const sp=Math.hypot(k.vx,k.vz);
   let turn=2.35*Math.min(1,sp/7)*(1-0.26*clamp(sp/k.maxSpeed,0,1));
   if(k.drift!==0)turn*=1.42;
   if(k.air)turn*=0.5;                              /* half authority airborne */
-  k.yaw+=(k.spun>0?0:ctl.steer)*turn*dt;
+  if(k.curse>0)k.curse=Math.max(0,k.curse-dt);     /* Ale's curse: left is right */
+  k.yaw+=(k.spun>0?0:ctl.steer*(k.curse>0?-1:1))*turn*dt;
   if(k.slow>0)k.yaw+=Math.sin(k.slow*31.0)*1.5*dt;   /* pie wobble */
 
   const Fx=Math.sin(k.yaw),Fz=Math.cos(k.yaw),Rx=-Fz,Rz=Fx;
@@ -96,6 +132,7 @@ function drive(k,dt,ctl){
     if(Math.hypot(k.vx,k.vz)<6){const d=wrapAng(Math.atan2(T.FX[j],T.FZ[j])-k.yaw);
       if(Math.abs(d)<2.2)k.yaw+=d*Math.min(1,dt*2.5);}
   }
+  if(BLOCKERS.length)bumpBlockers(k);
   if(routeSwitch(k,lat)){
     const T2=k.rib?ALTS[k.rib-1]:MAIN,s2=k.si;
     lat=(k.x-T2.X[s2])*T2.RX[s2]+(k.z-T2.Z[s2])*T2.RZ[s2];
@@ -124,22 +161,10 @@ function drive(k,dt,ctl){
   /* a lap counts only once every gate has been passed in order. Gates sit on the
      sector boundaries of the main loop; on a shortcut the kart's progress is mapped
      onto the same interval, so a lane's own stretch of gates must be driven too */
-  k.mi=mappedIdx(k);
-  const cur=((Math.floor(k.mi)%N)+N)%N, sec=Math.floor(cur*CPN/N)%CPN;
-  if(k===player&&state==='race'&&sec!==k.cp&&sec!==(k.cp+1)%CPN&&
-     (sec-k.cp+CPN)%CPN<CPN/2&&clock-missT>3){missT=clock;toast('MISSAD KONTROLLPUNKT');ping(240,180,.2);}
-  if(sec===(k.cp+1)%CPN){
-    k.cp=sec;
-    if(sec===0){
-    k.lap++;
-    const t=raceTime,lt=t-k.lapStart;k.lapStart=t;
-    if(k.lap>=2&&(k.best==null||lt<k.best))k.best=lt;
-    if(k.lap>=LAPS&&!k.done){k.done=true;k.total=t;if(k===player)finish();}
-    else if(k===player)toast('VARV '+Math.min(k.lap+1,LAPS)+'/'+LAPS);
-    }
-  }
-  k.prev=cur;
-  k.progress=k.lap*N+k.mi;
+  const m0=k.mi;k.mi=mappedIdx(k);
+  passGates(k,m0);
+  k.progress=gateProgress(k);
+  if(k.ghostBuf&&k.lap>=1&&!k.done)ghostSample(k,k.ghostBuf);
 
   if(k.drift!==0&&k.speed>12){
     for(const s of [-1.05,1.05])
@@ -147,8 +172,12 @@ function drive(k,dt,ctl){
         k.charge>1.45?1:(k.charge>0.55?.45:.8),
         k.charge>1.45?.66:(k.charge>0.55?.72:.8),
         k.charge>1.45?.18:(k.charge>0.55?.92:.82),.55);
-  }else if(!k.onRoad&&k.speed>8&&Math.random()<0.5){
-    puff(k.x+rand(-1,1),k.y+.2,k.z+rand(-1,1),.72,.64,.44,.75);
+  }else if(k.speed>8&&!k.air){                     /* the surface table's wheel particles */
+    const S=SFX[k.sfx],c=S&&S.dust;
+    if(c&&Math.random()<(S.spray?0.8:(k.onRoad?0.3:0.5))){
+      if(S.spray)puff(k.x-Fx*1.7+rand(-.9,.9),k.y+rand(.3,1.2),k.z-Fz*1.7+rand(-.9,.9),c[0],c[1],c[2],.7);
+      else puff(k.x+rand(-1,1),k.y+.2,k.z+rand(-1,1),c[0],c[1],c[2],.75);
+    }
   }
   if(k.slow>0&&Math.random()<0.6)
     puff(k.x+rand(-1,1),k.y+rand(.3,1.1),k.z+rand(-1,1),.9,.52,.56,.5);
@@ -157,6 +186,62 @@ function drive(k,dt,ctl){
 }
 
 let missT=-9, raceSeed=0;
+/* ───────── one gate graph ─────────
+   Main-loop gates sit on the CPN sector lines with lap fractions 0, 1/8, ... A lane
+   that skips main gates gets twins of them at the same fraction, so its own stretch is
+   driven gate by gate too. next[] lists the gates that may come after each one.
+   Race position = laps + the last gate's fraction + the way on toward the next. */
+let GATES=[];
+function buildGates(){
+  GATES=[];
+  for(let s=0;s<CPN;s++)GATES.push({id:s,sec:s,route:0,at:s*N/CPN,frac:s/CPN,next:[(s+1)%CPN]});
+  for(const R of ALTS){
+    const span=((R.b-R.a)%N+N)%N,off=s=>((s*N/CPN-R.a)%N+N)%N;
+    const tw=[];for(let s=0;s<CPN;s++){const d=off(s);if(d>0&&d<span)tw.push(s);}
+    if(!tw.length)continue;
+    tw.sort((p,q)=>off(p)-off(q));
+    const ids=tw.map(s=>{const H={id:GATES.length,sec:s,route:R.idx,at:s*N/CPN,frac:s/CPN,next:[]};
+      GATES.push(H);return H.id;});
+    ids.forEach((id,n)=>GATES[id].next.push(n+1<ids.length?ids[n+1]:(tw[n]+1)%CPN));
+    GATES[(tw[0]-1+CPN)%CPN].next.push(ids[0]);      /* the gate before the fork leads into the lane too */
+  }
+}
+/** did this step carry the kart over a gate on its own route? */
+function passGates(k,m0){
+  let d=k.mi-m0;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
+  if(d<=0||d>24)return;                           /* standing, reversing, or lifted by the tractor */
+  const cur=GATES[k.gate]||GATES[0];
+  for(const H of GATES){
+    if(H.id===k.gate||H.route!==k.rib)continue;
+    const a=((H.at-m0)%N+N)%N;
+    if(a<=0||a>d)continue;
+    /* a twin of the gate already passed just re-anchors; the next sector is always fine */
+    if(cur.next.includes(H.id)||H.sec===cur.sec||H.sec===(cur.sec+1)%CPN)enterGate(k,H);
+    else if(k===player&&state==='race'&&clock-missT>3&&(H.sec-cur.sec+CPN)%CPN<CPN/2){
+      missT=clock;toast('MISSAD KONTROLLPUNKT');ping(240,180,.2);}
+    return;
+  }
+}
+function enterGate(k,H){
+  const lapLine=H.sec===0&&k.cp!==0;
+  k.gate=H.id;k.cp=H.sec;
+  if(!lapLine)return;
+  k.lap++;
+  const t=raceTime,lt=t-k.lapStart;k.lapStart=t;
+  if(k.lapTimes)k.lapTimes.push(lt);
+  if(k.lap>=2&&(k.best==null||lt<k.best))k.best=lt;
+  if(TT&&k===player)ttLap(lt);
+  if(k.ghostBuf)k.ghostBuf=[];
+  shutPassages(k);                                /* your passage closes as you start a new lap */
+  if(k.lap>=LAPS&&!k.done){k.done=true;k.total=t;if(k===player)finish();}
+  else if(k===player&&FREE)toast('VARV '+fmt(lt));
+  else if(k===player&&!TT)toast('VARV '+Math.min(k.lap+1,LAPS)+'/'+LAPS);
+}
+function gateProgress(k){
+  const H=GATES[k.gate]||GATES[0],nx=GATES[H.next[0]];
+  const span=((nx.at-H.at)%N+N)%N||N, d=((k.mi-H.at)%N+N)%N;
+  return k.lap*N+H.frac*N+(d>N/2?0:Math.min(d,span));
+}
 /** hop between the main road and a lane at a fork or merge: whichever centreline
     is nearer wins. Returns true when the kart changed route. */
 function routeSwitch(k,lat){
@@ -166,6 +251,7 @@ function routeSwitch(k,lat){
       const d=((k.si-R.a)%N+N)%N;
       if(d>COMMIT+16)continue;
       if(k.ai&&k.plan!==R.idx)continue;            /* the AI only goes where it planned */
+      if(R.hidden&&!R.open)continue;               /* a boulder in the mouth */
       const j=nearestAlt(R,k.x,k.z,Math.min(d,R.n-1));
       if(j>COMMIT+6)continue;
       const la=Math.abs(altLat(R,j,k.x,k.z));
@@ -232,10 +318,13 @@ function chooseRoute(k,R){
 }
 function planRoutes(k){
   if(k.rib)return;
+  if(k.plan&&ALTS[k.plan-1].hidden&&!ALTS[k.plan-1].open)k.plan=0;   /* shut again */
   for(const R of ALTS){
     const d=((R.a-k.si)%N+N)%N;
     if(d<12||d>90||k.planned[R.idx]===k.lap)continue;
     k.planned[R.idx]=k.lap;
+    /* secret passages: only the cup rival dares, and only once someone has opened one */
+    if(R.hidden&&!(R.open&&k.rival)){k.plan=0;continue;}
     k.plan=chooseRoute(k,R)?R.idx:0;
   }
 }
@@ -260,7 +349,8 @@ function recoverKart(k){
   }else i=((k.si-10)%N+N)%N;
   k.si=i;k.x=T.X[i];k.z=T.Z[i];k.yaw=Math.atan2(T.FX[i],T.FZ[i]);
   k.vx=k.vz=k.vy=0;k.speed=0;k.drift=0;k.charge=0;k.dstage=0;k.boost=0;k.spun=0;k.slow=0;
-  k.y=groundK(k,k.x,k.z);k.air=false;k.airT=0;k.ghost=1.5;k.stuckT=0;k.stuckP=-1e9;k.recoverT=0;
+  k.y=groundK(k,k.x,k.z);k.air=false;k.airT=0;k.ghost=1.5;k.stuckT=0;k.stuckP=-1e9;k.recoverT=0;k.rtp=false;k.offT=0;
+  if(k.fuel<14)k.fuel=14;                 /* Arne tips a can in: dry on a climb is not a dead end */
   tractor.position.set(k.x+T.RX[i]*3.4,k.y,k.z+T.RZ[i]*3.4);
   tractor.rotation.y=k.yaw;tractor.visible=true;tractorT=1.7;
   for(let p=0;p<14;p++)puff(k.x+rand(-1.4,1.4),k.y+rand(.2,1.6),k.z+rand(-1.4,1.4),.78,.72,.56,.6);
@@ -276,8 +366,12 @@ function aiControl(k){
   planRoutes(k);
   /* a farm lane is too twisty to aim far ahead: look closer while in one */
   const inLane=k.rib||(k.plan&&((ALTS[k.plan-1].a-k.si)%N+N)%N<8);
-  const [T,t]=walkPt(k,inLane?Math.round(5+k.speed*0.3):Math.round(12+k.lookAdd+k.speed*0.55));
-  const L=T===MAIN?clamp(k.line+(k.rib?0:k.itemBias),-HW+2,HW-2)
+  /* pulling in for fuel: aim close, or a forecourt on a bend gets cut past */
+  const pitS=k.wantFuel&&!k.rib?stations.find(S=>{let d=S.at-k.si;if(d>N/2)d-=N;else if(d<-N/2)d+=N;return d>-S.len&&d<34;}):null;
+  const pit=!!pitS;
+  const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round(12+k.lookAdd+k.speed*0.55));
+  /* each AI drives one of three lines this race: inside, middle or outside */
+  const L=pit?pitS.side*(HW-1.5):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
                   :clamp(k.line*0.3,-(T.hw-1),T.hw-1);
   const err=wrapAng(Math.atan2(T.X[t]+T.RX[t]*L-k.x,T.Z[t]+T.RZ[t]*L-k.z)-k.yaw);
   let steer=clamp(err*(k.drift!==0?2.0:2.85),-1,1);  /* calmer hands mid-slide */
@@ -294,10 +388,15 @@ function aiControl(k){
   const sg=T===MAIN?1:SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
   const hold=AI_G*(k.gripOn*sg/9.5)*(2.7/k.caution)*(k.drift!==0?1.18:1);
   const limit=Math.min(k.maxSpeed,Math.sqrt(hold*R));
-  let band=clamp(1+((player.progress-k.progress)/N)*0.095,0.95,k.bandMax);
+  let band=k.noBand?1:clamp(1+((player.progress-k.progress)/N)*0.095,0.95,k.bandMax);
   if(typeof CUP!=='undefined'&&CUP&&!k.rival)band=1+(band-1)*0.7;  /* only the rival chases hard */
   let throttle=1,brake=0;
-  if(k.atPump&&k.fuel<82){throttle=0;brake=k.speed>14?1:0;}   /* fill up */
+  if(k.atPump&&k.wantFuel){throttle=0;brake=k.speed>14?1:0;}   /* fill up */
+  else if(k.wantFuel&&!k.rib)for(const S of stations){        /* slow in time to stop on it */
+    let d=S.at-k.mi;if(d>N/2)d-=N;else if(d<-N/2)d+=N;
+    if(d<0||d>45)continue;
+    if(k.speed>Math.sqrt(400+2*34*d*SEG)){throttle=0;brake=1;}
+  }
   if(k.speed>limit*band){throttle=0;brake=k.speed>limit*band*1.16?1:0;}
   if(Math.abs(k.lat)>(k.rib?ALTS[k.rib-1].hw:HW))throttle=1;
   /* stuck against something: back out for a second, then call the tractor */
@@ -305,23 +404,38 @@ function aiControl(k){
   if(state==='race'&&!k.atPump&&!k.done&&k.recoverT<=0){
     if(k.progress>k.stuckP+6/SEG){k.stuckP=k.progress;k.stuckT=0;}else k.stuckT+=FIXED;   /* 6 m */
   }
-  if(k.stuckT>2.5){throttle=0;brake=1;steer=-steer;drift=false;
-    if(k.stuckT>3.5){k.stuckT=0;askRecover(k);}}
+  /* return to path: stuck, or crawling off the road, first drive back to a point about
+     a second up the route. Arne's tractor only if that has not worked within 3 s. */
+  const hwR=k.rib?ALTS[k.rib-1].hw:HW;
+  k.offT=Math.abs(k.lat)>hwR+2.5&&k.speed<12&&!k.atPump?k.offT+FIXED:0;
+  if(!k.rtp&&state==='race'&&!k.done&&k.recoverT<=0&&(k.stuckT>1.2||k.offT>1)){k.rtp=true;k.rtpT=0;}
+  if(k.rtp){
+    k.rtpT+=FIXED;
+    const [T2,t2]=walkPt(k,Math.round(Math.max(10,k.speed)/SEG)+3);
+    const e=wrapAng(Math.atan2(T2.X[t2]-k.x,T2.Z[t2]-k.z)-k.yaw);
+    steer=clamp(e*3,-1,1);drift=false;
+    if(Math.abs(e)>1.9){throttle=0;brake=1;}      /* facing away: back round */
+    else{throttle=Math.abs(e)>0.7?0.55:1;brake=0;}
+    if(Math.abs(k.lat)<hwR-0.5&&Math.abs(e)<0.5&&k.stuckT<0.4)k.rtp=false;
+    else if(k.rtpT>3){k.rtp=false;k.stuckT=0;askRecover(k);}
+  }
+  if(k.stuckT>5){k.stuckT=0;k.rtp=false;askRecover(k);}
   return {throttle,brake,steer,drift};
 }
 function separate(){
   for(let a=0;a<karts.length;a++)for(let b=a+1;b<karts.length;b++){
     const A=karts[a],B=karts[b];
-    if(A.ghost>0||B.ghost>0)continue;
+    if(A.ghost>0||B.ghost>0||A.parked||B.parked)continue;
     let dx=B.x-A.x,dz=B.z-A.z;
     const d=Math.hypot(dx,dz);
     if(d>2.9||d<1e-4)continue;
     dx/=d;dz/=d;
+    const wa=2*B.mass/(A.mass+B.mass),wb=2*A.mass/(A.mass+B.mass);   /* the tractor barely moves */
     const push=(2.9-d)*0.5;
-    A.x-=dx*push;A.z-=dz*push;B.x+=dx*push;B.z+=dz*push;
+    A.x-=dx*push*wa;A.z-=dz*push*wa;B.x+=dx*push*wb;B.z+=dz*push*wb;
     const rel=(B.vx-A.vx)*dx+(B.vz-A.vz)*dz;
     if(rel<0){
-      A.vx+=dx*rel*0.4;A.vz+=dz*rel*0.4;B.vx-=dx*rel*0.4;B.vz-=dz*rel*0.4;
+      A.vx+=dx*rel*0.4*wa;A.vz+=dz*rel*0.4*wa;B.vx-=dx*rel*0.4*wb;B.vz-=dz*rel*0.4*wb;
       if(A===player||B===player)shake=Math.min(1,shake+0.22);
     }
   }
