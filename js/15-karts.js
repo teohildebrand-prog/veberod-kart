@@ -251,6 +251,49 @@ function buildDriver(kind,addc,add,skin,dark){
     addc(new THREE.BoxGeometry(.56,.05,.3),cap,0,2.08,-.3);                        /* peak */
     addc(new THREE.BoxGeometry(.18,.12,.04),psMat({color:0xe8c33a}),0,2.2,-.335);  /* wheat badge */
     addc(new THREE.CylinderGeometry(.08,.08,.26,6),psMat({color:0x22c46a}),.52,1.06,.1); /* energy drink */
+  }else if(kind==='teo'){                  /* Teo: crest beanie, ginger stubble, navy puffer */
+    const puff=pixTex(16,16,g=>{g.fillStyle='#2b3242';g.fillRect(0,0,16,16);
+      g.fillStyle='#1d2330';for(let y=3;y<16;y+=4)g.fillRect(0,y,16,1);});
+    const jacket=psMat({map:puff}),hair=psMat({color:0xc98a4a}),stub=psMat({color:0xb5784a}),
+          hat=psMat({color:0x17181c});
+    const crest=pixTex(16,16,g=>{                 /* an original crest: wreath round a Skåne shield */
+      g.fillStyle='#17181c';g.fillRect(0,0,16,16);
+      g.fillStyle='#c9a640';for(let a=0;a<12;a++){const t=a/12*6.283;g.fillRect(7+Math.round(Math.cos(t)*6),7+Math.round(Math.sin(t)*6),2,2);}
+      g.fillStyle='#d8362a';g.fillRect(5,4,6,7);g.fillRect(6,11,4,1);g.fillRect(7,12,2,1);
+      g.fillStyle='#ffd23a';g.fillRect(7,4,2,8);g.fillRect(5,7,6,2);});
+    torso(jacket);
+    addc(new THREE.BoxGeometry(.9,.3,.5),jacket,0,1.66,-.66);                     /* high collar */
+    addc(new THREE.BoxGeometry(.9,.36,.3),psMat({color:0x1d2330}),0,1.72,-.96);   /* hood */
+    addc(new THREE.BoxGeometry(.05,.6,.04),psMat({color:0x9aa2ad}),.08,1.3,-.3);  /* zip */
+    arms(jacket,skin);
+    blockFace(addc,skin,dark,1.86,{w:.54,grin:true,cheeks:true});
+    addc(new THREE.BoxGeometry(.5,.14,.16),stub,0,1.66,-.4);                      /* short beard */
+    addc(new THREE.BoxGeometry(.56,.24,.36),stub,0,1.7,-.58);
+    addc(new THREE.BoxGeometry(.26,.06,.05),stub,0,1.76,-.355);                    /* moustache */
+    addc(new THREE.BoxGeometry(.6,.3,.56),hat,0,2.18,-.62);                       /* beanie */
+    addc(new THREE.BoxGeometry(.62,.1,.58),psMat({color:0x22242a}),0,2.05,-.62);   /* rib cuff */
+    addc(new THREE.BoxGeometry(.2,.2,.03),psMat({map:crest}),0,2.18,-.335);
+    addc(new THREE.BoxGeometry(.14,.1,.1),hair,-.24,2.02,-.38).rotation.z=.4;     /* tufts escaping */
+    addc(new THREE.BoxGeometry(.12,.1,.1),hair,.25,2.0,-.4).rotation.z=-.5;
+    addc(new THREE.BoxGeometry(.1,.2,.2),hair,-.31,1.96,-.7);
+    addc(new THREE.BoxGeometry(.1,.2,.2),hair, .31,1.96,-.7);
+  }else if(kind==='amanda'){               /* Amanda: cream knit beanie, blonde bob, black puffer */
+    const puff=pixTex(16,16,g=>{g.fillStyle='#1d1f24';g.fillRect(0,0,16,16);
+      g.fillStyle='#121317';for(let y=3;y<16;y+=4)g.fillRect(0,y,16,1);});
+    const jacket=psMat({map:puff}),hair=psMat({color:0xd9b56e}),
+          knit=psMat({map:pixTex(16,16,g=>{g.fillStyle='#e9e1cf';g.fillRect(0,0,16,16);
+            g.fillStyle='#d6ccb6';for(let x=0;x<16;x+=2)for(let y=x%4?0:1;y<16;y+=2)g.fillRect(x,y,1,1);})});
+    torso(jacket);
+    addc(new THREE.BoxGeometry(.86,.28,.5),jacket,0,1.64,-.64);                    /* collar */
+    arms(jacket,skin);
+    blockFace(addc,skin,dark,1.84,{w:.5,grin:true,cheeks:true,mouth:0xa8484e});
+    addc(new THREE.BoxGeometry(.58,.12,.08),hair,0,2.04,-.355);                    /* fringe */
+    addc(new THREE.BoxGeometry(.12,.62,.42),hair,-.3,1.74,-.64);                   /* bob to the shoulders */
+    addc(new THREE.BoxGeometry(.12,.62,.42),hair, .3,1.74,-.64);
+    addc(new THREE.BoxGeometry(.6,.62,.14),hair,0,1.76,-.88);
+    addc(new THREE.BoxGeometry(.66,.26,.6),knit,0,2.16,-.64);                      /* slouchy beanie */
+    addc(new THREE.BoxGeometry(.58,.18,.44),knit,0,2.26,-.86).rotation.x=.35;        /* the slouch, falling back */
+    addc(new THREE.BoxGeometry(.68,.1,.62),psMat({color:0xd6ccb6}),0,2.04,-.64);
   }else{                                    /* granny Britta: cardigan, bun, glasses */
     const card=psMat({color:0x3f8a4a}),blouse=psMat({color:0xf3ece0}),hair=psMat({color:0xc9c8c4});
     torso(card);
@@ -395,50 +438,8 @@ function buildKart(color,kind,car){
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}), .26,2.3,-.62).rotation.z=-.7;
     addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
     addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
-  }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'){
+  }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark);
-  }else if(kind==='hillbilly'){                        /* bonnläpp med EPA-stuk */
-    const flannel=pixTex(16,16,(g)=>{
-      g.fillStyle='#8f2f24';g.fillRect(0,0,16,16);
-      g.fillStyle='#2a2320';
-      for(let i=0;i<16;i+=8){g.fillRect(i,0,3,16);g.fillRect(0,i,16,3);}
-      g.fillStyle='rgba(230,200,150,.35)';
-      for(let i=4;i<16;i+=8){g.fillRect(i,0,1,16);g.fillRect(0,i,16,1);}
-    });
-    const shirt=psMat({map:flannel});
-    addc(new THREE.BoxGeometry(.9,.84,.54),shirt,0,1.24,-.62);
-    addc(new THREE.BoxGeometry(.26,.22,.88),shirt,-.36,1.12,.02);
-    addc(new THREE.BoxGeometry(.26,.22,.88),shirt, .36,1.12,.02);
-    addc(new THREE.BoxGeometry(.5,.5,.46),skin,0,1.78,-.6);
-    addc(new THREE.BoxGeometry(.44,.2,.12),psMat({color:0x5a4634}),0,1.58,-.34);
-    addc(new THREE.BoxGeometry(.46,.16,.06),psMat({color:0x14181c}),0,1.84,-.36);
-    addc(new THREE.BoxGeometry(.5,.3,.3),psMat({color:0x6b4a2e}),0,1.66,-.86);  /* mullet */
-    addc(new THREE.BoxGeometry(.56,.24,.5),psMat({color:0x2d5a3a}),0,2.1,-.62);
-    addc(new THREE.BoxGeometry(.5,.07,.3),psMat({color:0xe0d8c4}),0,2.02,-.34);
-    for(const sg of [-1,1]){                            /* älghorn på nosen */
-      addc(new THREE.BoxGeometry(.7,.1,.5),psMat({color:0xcfc4a8}),sg*.62,.92,2.05).rotation.z=sg*.4;
-      addc(new THREE.BoxGeometry(.16,.1,.34),psMat({color:0xcfc4a8}),sg*.92,1.04,1.8);
-    }
-    addc(new THREE.BoxGeometry(1.1,.6,.7),psMat({color:0x2f6d3f}),0,1.5,-2.1);  /* backe med öl */
-    addc(new THREE.CylinderGeometry(.12,.14,1.7,6),psMat({color:0x6e757b}),-.66,1.85,-1.4).rotation.x=.25;
-    addc(new THREE.CylinderGeometry(.12,.14,1.7,6),psMat({color:0x6e757b}), .66,1.85,-1.4).rotation.x=.25;
-  }else if(kind==='scholar'){                          /* lundensisk akademiker */
-    const gown=psMat({color:0x1d1f24});
-    addc(new THREE.BoxGeometry(.84,.84,.52),gown,0,1.24,-.62);
-    addc(new THREE.BoxGeometry(.12,.34,.1),psMat({color:0xf2f4f6}),-.1,1.46,-.37);
-    addc(new THREE.BoxGeometry(.12,.34,.1),psMat({color:0xf2f4f6}), .1,1.46,-.37);
-    addc(new THREE.BoxGeometry(.24,.22,.88),gown,-.36,1.12,.02);
-    addc(new THREE.BoxGeometry(.24,.22,.88),gown, .36,1.12,.02);
-    addc(new THREE.BoxGeometry(.5,.5,.46),skin,0,1.78,-.6);
-    addc(new THREE.BoxGeometry(.54,.3,.42),psMat({color:0x6b5540}),0,1.94,-.72);  /* hair */
-    addc(new THREE.BoxGeometry(.16,.16,.05),psMat({color:0x22262c}),-.14,1.8,-.35);
-    addc(new THREE.BoxGeometry(.16,.16,.05),psMat({color:0x22262c}), .14,1.8,-.35);
-    addc(new THREE.BoxGeometry(.12,.04,.05),psMat({color:0x22262c}),0,1.8,-.35);
-    addc(new THREE.BoxGeometry(.6,.14,.56),psMat({color:0xf4f6f8}),0,2.09,-.6);   /* studentmössa */
-    addc(new THREE.BoxGeometry(.62,.07,.58),psMat({color:0x1d1f24}),0,2.0,-.6);
-    addc(new THREE.BoxGeometry(.63,.05,.59),psMat({color:0xe8c33a}),0,2.05,-.6);
-    const books=[0x8b2b1c,0x2a5fa8,0x3f7a33];
-    books.forEach((c,q)=>add(new THREE.BoxGeometry(1.0,.22,.72),psMat({color:c}),0,1.32+q*.24,-2.05));
   }else{
     addc(new THREE.BoxGeometry(.78,.78,.5),dark,0,1.22,-.62);
     addc(new THREE.BoxGeometry(.22,.2,.88),skin,-.34,1.12,.02);
@@ -508,23 +509,26 @@ const CHARS=[
    stats:[0.40,0.80,1.00],quirk:['SKOPAN','Blockerar första träffen varje varv.'],
    say:{start:'Det är bara en åker med asfalt på.',hit:'PAPPA SKULLE HA BROMSAT HÄR.'},
    blurb:'Arne\'s son, who went big. Slowest in a straight line, best in the mud, and heavy enough to shove anyone off his line.'},
-  {id:'roger',kind:'hillbilly',short:'ROGER',name:'ROGER',role:'TOLLARP',
+  /* an easter egg: the people who made the game */
+  {id:'teo',short:'TEO',name:'TEO',role:'TOLLARP',
    color:0x8f2f24,maxSpeed:43.8,power:25,offRoad:0.52,boostMul:1.55,gripOn:8.0,
    stats:[1.00,0.44,0.40],quirk:['FULL GAS','Snabbast rakt fram, hopplös i kurvorna.'],
-   blurb:'Fastest thing in a straight line and he will tell you so. Corners are a rumour.'},
-  {id:'linnea',kind:'scholar',short:'LINNÉA',name:'LINNÉA',role:'LUND',
+   say:{start:'Jag byggde den här banan!',hit:'DET DÄR ÄR EN BUGG!'},
+   blurb:'He made this game, and it shows: flat out on every straight and still working out the corners.'},
+  {id:'amanda',short:'AMANDA',name:'AMANDA',role:'LUND',
    color:0x1d1f24,maxSpeed:42.0,power:27,offRoad:0.62,boostMul:1.34,gripOn:10.6,burn:0.88,
    stats:[0.86,0.86,0.56],quirk:['NOGGRANN','Perfekt linje: greppet håller och bensinen räcker längre.'],
-   blurb:'The postdoc who finished on time. Brakes exactly where she should and never puts a wheel wrong.'},
+   say:{start:'Nu kör vi!',hit:'TEO! VAD HAR DU BYGGT?!'},
+   blurb:'Smiles the whole way round, never puts a wheel wrong, and somehow always has fuel left at the end.'},
   {id:'britta',kind:'granny',short:'BRITTA',name:'FARMOR BRITTA',role:'ÅHUS',
    color:0x5faf4a,maxSpeed:41.0,power:27,offRoad:0.64,boostMul:1.38,gripOn:10.4,shieldMul:2,
    stats:[0.80,0.80,0.60],quirk:['HEMBAKAT','Hennes äggkaka skyddar dubbelt så länge.'],
    blurb:'Bakes for the whole village and drives like she is late for the bus. Her own äggkaka holds twice as long.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','roger','linnea','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','amanda','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
 const kindOf=c=>c.kind||c.id;
 /* an AI who is also the player's driver races as a twin */
-const TWIN={cow:[1,'STJÄRNA'],roger:[2,'RONNY'],linnea:[3,'LOVISA'],britta:[5,'BIRGITTA']};
+const TWIN={cow:[1,'STJÄRNA'],teo:[2,'TEODOR'],amanda:[3,'MANDY'],britta:[5,'BIRGITTA']};
 let LAPS=3;
 const ROSTER=[
   {name:'DU',     color:0xd8362a,ai:false,kind:'generic'},
@@ -532,12 +536,12 @@ const ROSTER=[
   {name:'MAJROS', color:0xf0ece2,ai:true,kind:'cow',car:'t240',
    maxSpeed:39.8,power:31,offRoad:.90,boostMul:1.26,gripOn:12.2,
    lineSpread:1.3,caution:3.0,lookAdd:3,driftLove:0.55,lean:{rough:-0.6}},
-  /* bonnläppen: snabbast rakt fram, hopplös i kurvorna */
-  {name:'ROGER',  color:0x8f2f24,ai:true,kind:'hillbilly',car:'acc',
+  /* Teo: snabbast rakt fram, hopplös i kurvorna */
+  {name:'TEO',    color:0x8f2f24,ai:true,kind:'teo',car:'acc',
    maxSpeed:44.8,power:25,offRoad:.52,boostMul:1.58,gripOn:7.9,
    lineSpread:4.8,caution:2.0,lookAdd:-3,driftLove:1.40,lean:{risk:0.5}},
-  /* akademikern: perfekt linje, bromsar i tid, aldrig utanför */
-  {name:'LINNÉA', color:0x1d1f24,ai:true,kind:'scholar',car:'t96',
+  /* Amanda: perfekt linje, bromsar i tid, aldrig utanför */
+  {name:'AMANDA', color:0x1d1f24,ai:true,kind:'amanda',car:'t96',
    maxSpeed:42.8,power:28,offRoad:.66,boostMul:1.36,gripOn:10.8,
    lineSpread:0.6,caution:2.8,lookAdd:7,driftLove:1.05,lean:{risk:1.5,traffic:1.5}},
   {name:'NISSE',  color:0x1fa8a0,ai:true,kind:'generic',car:'t96',
