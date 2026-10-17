@@ -1,5 +1,7 @@
 "use strict";
 /* ───────── genvägar: lanes, signs and furniture ───────── */
+/** a secret passage the player has driven stays on the stage picker's route outline */
+function foundRoute(R){const key=stage.id+'.'+R.id;if(!SAVE.routes[key]){SAVE.routes[key]=true;writeSave();}}
 function altRibbon(R,inner,outer,up,vScale,j0,j1){
   const pos=[],uv=[],idx=[];
   for(let j=j0;j<=j1;j++){

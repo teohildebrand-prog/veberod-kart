@@ -60,7 +60,7 @@ function frame(now){
   drawGhosts();
   stepParticles(dt);updateCamera(dt);drawHUD(dt);drawMap();audioUpdate();
   if(MIRROR)mirrorCam();
-  renderer.render(scene,camera);
+  if(sheetStages.classList.contains('hide'))renderer.render(scene,camera);   /* the stage picker covers the world */
 }
 requestAnimationFrame(frame);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)prevT=performance.now();});

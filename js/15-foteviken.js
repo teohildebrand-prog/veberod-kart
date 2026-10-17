@@ -51,7 +51,10 @@ function fotevikenPumps(st){
 /* the bay lies north and west of the village; d > 0 is out in the water */
 const fotevikenSea=(x,z)=>Math.max(-(z+162),-(x+262));
 
-STAGES.push({ id:'foteviken', group:'kust', name:'FOTEVIKEN', sub:'VIKINGASTADEN', hw:8.4,
+STAGES.push({ id:'foteviken', group:'kust', name:'FOTEVIKEN', sub:'VIKINGASTADEN',
+  order:15, tag:'En vikingastad på stranden och en väg rakt genom ett uppvänt långskepp. Katapulten slänger tunnor.',
+  view:{x:-240,z:-8,h:3,to:{x:-266,z:-28,h:5},fov:60},
+  hw:8.4,
   bars:[0.65,0.70,0.55], laps:3,
   blurb:'The rebuilt Viking town on the shore at Höllviken: turf-roofed longhouses, a palisade, a market and longships pulled up on the beach. Just past the shield wall a sharp left takes you over the sand and straight through an upturned longship. Mind the rings on the road: the Vikings are lobbing barrels from a catapult, and a hit spins you round.',
   role:'Strandsand, en vikingaby och tunnor som regnar över vägen.',

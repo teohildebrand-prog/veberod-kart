@@ -6,11 +6,9 @@ const touch={l:false,r:false,a:false,b:false,d:false};
 addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+  if(stageKeys(e,k))return;               /* the stage picker has its own keys, V and Esc included */
   keys[k]=true;
-  if(state==='select'&&!sheetStages.classList.contains('hide')){
-    if(k>='1'&&k<=String(STAGES.length))applyStage(+k-1);
-    if(k==='enter'||k===' '){bootAudio();showSelect();}
-  }else if(state==='select'){
+  if(state==='select'){
     const g=GRID.indexOf(charSel),mv=d=>{unpeek();applyCharacter(GRID[(g+d+GRID.length)%GRID.length]);ping(700,980,.04);};
     if(k==='arrowleft'||k==='a')mv(-1);
     if(k==='arrowright'||k==='d')mv(1);

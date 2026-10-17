@@ -19,6 +19,11 @@ tools/serve.sh            # http://localhost:8000/
 Controls: WASD drive, Space drift, E fire, H horn, C camera, R reset,
 Esc pause, M sound, V CRT filter.
 
+Stage select (VÄLJ BANA): arrows/WASD move the highlight, Q/E turn the page,
+Enter picks, Backspace/Esc goes back, V toggles SPEGELVÄND where it is
+unlocked. On a controller: D-pad/stick, LB/RB, A, B and X. On a phone: tap a
+card, swipe sideways for the next page, then VÄLJ BANA.
+
 With a controller (Xbox layout, any pad the browser reports in the standard
 mapping): left stick steer, RT gas, LT brake/reverse, A drift, X item,
 Y camera, Menu pause. In menus the stick or D-pad moves, A picks, B goes
@@ -48,6 +53,8 @@ vendor/three.min.js   three.js r128 (MIT, see vendor/three.LICENSE)
 tools/serve.sh        local web server
 tools/smoke_test.py   headless test: start a race, fail on JS errors
 tools/split.py        regenerate index.html/css/js from a single-file build
+tools/join.py         build the single-file game from the repo (split.py's inverse)
+tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
 docs/                 design notes and build history
 Jenkinsfile           CI: runs the smoke test
 ```
@@ -59,6 +66,19 @@ every later one. Order matters: the number prefix is the load order, and
 section, or a new numbered file added to `index.html`. Code that runs at
 load time (like wiring a button) can only use functions from its own file or
 earlier files; `tools/smoke_test.py` catches it when that breaks.
+
+### Stage portraits
+
+Each stage in `STAGES` carries its own `order` (place in the stage roster),
+`tag` (one or two Swedish sentences for the preview) and `view` (the camera
+for its portrait). After changing a stage's scenery or view, re-bake:
+
+```bash
+python3 tools/stage_art.py
+```
+
+A stage without a baked portrait still shows up; the picker renders one live
+when the highlight rests on it.
 
 ## Test
 

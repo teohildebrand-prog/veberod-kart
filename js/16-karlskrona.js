@@ -49,7 +49,10 @@ EDGES.kkrPollare=st=>{                               /* cast-iron bollards with 
 /* the harbour lies south and east of the yard; d > 0 is open water, the quay edge sits on a terrain grid line */
 const karlskronaSea=(x,z)=>Math.max(z-160,x-300);
 
-STAGES.push({ id:'karlskrona', group:'kust', name:'KARLSKRONA', sub:'ÖRLOGSVARVET', hw:8.4,
+STAGES.push({ id:'karlskrona', group:'kust', name:'KARLSKRONA', sub:'ÖRLOGSVARVET',
+  order:8, tag:'Fullt ös genom det gamla örlogsvarvet längs repslagarbanan. Fortet på andra sidan vattnet skjuter kanonkulor.',
+  view:{x:20,z:140,h:9,to:{x:70,z:330,h:2},fov:55},
+  hw:8.4,
   bars:[0.85,0.55,0.45], laps:3,
   blurb:'The old naval dockyard: three hundred metres of red ropewalk beside the long straight, granite quays, wooden warships at their moorings and a ship up in the dry dock. A secret passage runs along the quay, but a stack of herring barrels blocks the mouth: blow it apart with a spettekaka. Across the water Kungsholms fort is firing, and a cannonball landing on its mark spins you round.',
   role:'Långa raka på kullersten och kanonkulor från fästningen.',

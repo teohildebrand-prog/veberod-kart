@@ -43,7 +43,10 @@ EDGES.angelholm=st=>{
 const ANG_MEM={i:396,side:-1,off:15};
 const ANG_UFO={i0:140,len:70,period:12,lats:[-4.2,4.2,0]};
 
-STAGES.push({ id:'angelholm', group:'vild', name:'ÄNGELHOLM', sub:'UFO-SKOGEN', hw:8.4,
+STAGES.push({ id:'angelholm', group:'vild', name:'ÄNGELHOLM', sub:'UFO-SKOGEN',
+  order:17, tag:'Mörk skog där ett flygande tefat svävar över vägen. Strålen lyfter och snurrar den som kommer under.',
+  view:{i:125,lat:0,h:2,to:{i:155,lat:0,h:9},fov:60,t:1.1},
+  hw:8.4,
   bars:[0.70,0.70,0.55], laps:3,
   blurb:'Sandy tracks through the tall pines of Kronoskogen at dusk, where a man met a flying saucer in 1946 and the landing marks are still in the moss. A strange triangle marks a sealed bunker hallway behind the dunes: a spettekaka slides its door open. A saucer patrols the forest road and its green beam lifts you off the sand and leaves you wobbling.',
   role:'Lång skogsväg i skymningen, ett hemligt bunkerhål och ett tefat som inte vill vara ifred.',
