@@ -1,0 +1,124 @@
+"use strict";
+/* ───────── genvägar: lanes, signs and furniture ───────── */
+function altRibbon(R,inner,outer,up,vScale,j0,j1){
+  const pos=[],uv=[],idx=[];
+  for(let j=j0;j<=j1;j++){
+    pos.push(R.X[j]+R.RX[j]*inner,R.Y[j]+up,R.Z[j]+R.RZ[j]*inner);
+    pos.push(R.X[j]+R.RX[j]*outer,R.Y[j]+up,R.Z[j]+R.RZ[j]*outer);
+    uv.push(0,j*SEG/vScale,1,j*SEG/vScale);
+  }
+  for(let q=0;q<j1-j0;q++){const p=2*q;idx.push(p,p+1,p+2,p+1,p+3,p+2);}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);g.computeVertexNormals();
+  return g;
+}
+const mudTex=pixTex(32,32,(g)=>{
+  g.fillStyle='#4a3a2a';g.fillRect(0,0,32,32);
+  for(let i=0;i<260;i++){g.fillStyle=Math.random()>.5?'#5d4a35':'#33281d';
+    g.fillRect((Math.random()*32)|0,(Math.random()*32)|0,2,1);}
+  g.fillStyle='#6d7f8a';for(let i=0;i<5;i++)g.fillRect((Math.random()*28)|0,(Math.random()*28)|0,4,2);
+});
+mudTex.wrapS=mudTex.wrapT=THREE.RepeatWrapping;
+/** hand-painted farm sign: GENVÄG? and, where a stamp hides, a picnic check */
+function farmSign(text,picnic){
+  return pixTex(64,32,(g)=>{
+    g.fillStyle='#7a5a3a';g.fillRect(0,0,64,32);
+    g.fillStyle='#8d6a46';for(let y=2;y<32;y+=8)g.fillRect(0,y,64,3);
+    g.fillStyle='#f4ecd8';g.font='9px "Press Start 2P",monospace';
+    g.textAlign='left';g.textBaseline='middle';g.fillText(text,4,picnic?11:16);
+    if(picnic){
+      for(let i=0;i<4;i++)for(let j=0;j<2;j++){g.fillStyle=(i+j)%2?'#f4ecd8':'#c8281c';g.fillRect(4+i*5,19+j*5,5,5);}
+      g.fillStyle='#f4ecd8';g.font='7px "Press Start 2P",monospace';g.fillText('PICKNICK',27,24);
+    }
+  });
+}
+function buildAltWorld(){
+  if(!ALTS.length)return;
+  const wood=psMat({color:0x6b5540}),rail=psMat({color:0x8a7259});
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),
+        p=new THREE.Vector3(),sc=new THREE.Vector3(1,1,1);
+  const at=(R,j,l,up)=>{const x=R.X[j]+R.RX[j]*l,z=R.Z[j]+R.RZ[j]*l;return new THREE.Vector3(x,meshY(x,z)+(up||0),z);};
+  const mainGap=(x,z,pad)=>{const i=nearestGlobal(x,z);return Math.abs((x-sx[i])*rx[i]+(z-sz[i])*rz[i])>HW+pad;};
+  for(const R of ALTS){
+    /* the lane itself, laid over the main road's edge where they share it */
+    const lm=psMat({map:vergeTex(R.surface==='dirt'?'dirt':'gravel')});
+    lm.polygonOffset=true;lm.polygonOffsetFactor=-2;lm.polygonOffsetUnits=-2;
+    world.add(new THREE.Mesh(altRibbon(R,-R.hw,R.hw,.03,6,0,R.n-1),lm));
+    let j=0;
+    while(j<R.n){                                         /* mud patches */
+      if(R.S[j]!=='mud'){j++;continue;}
+      let e2=j;while(e2+1<R.n&&R.S[e2+1]==='mud')e2++;
+      const mm=psMat({map:mudTex});mm.polygonOffset=true;mm.polygonOffsetFactor=-3;mm.polygonOffsetUnits=-3;
+      world.add(new THREE.Mesh(altRibbon(R,-R.hw-.4,R.hw+.4,.05,5,j,e2),mm));
+      j=e2+1;
+    }
+    /* GENVÄG? boards: one well before the fork, one at the mouth */
+    const hasStamp=(stage.stamps||[]).some(s=>s.route===R.id);
+    const sm=psMat({map:farmSign('GENVÄG?',hasStamp),unlit:true,side:THREE.DoubleSide});
+    for(const back of [70,8]){
+      const i=((R.a-back)%N+N)%N,o=R.side*(HW+3.2);
+      const x=sx[i]+rx[i]*o,z=sz[i]+rz[i]*o,y=meshY(x,z);
+      const post=new THREE.Mesh(flat(new THREE.CylinderGeometry(.12,.14,2.6,5)),wood);
+      post.position.set(x,y+1.3,z);world.add(post);
+      const pl=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.6),sm);
+      pl.position.set(x,y+2.7,z);pl.rotation.y=Math.atan2(fx[i],fz[i])+Math.PI;world.add(pl);
+    }
+    if(R.id==='grus'){
+      /* gate posts at the mouth, then a post-and-rail fence down both sides */
+      const gp=new THREE.Mesh(flat(new THREE.BoxGeometry(.5,2.4,.5)),psMat({color:0xeceee8}));
+      for(const sg of [-1,1]){const g2=gp.clone();g2.position.copy(at(R,COMMIT+2,sg*(R.hw+1.3),1.2));world.add(g2);}
+      const posts=new THREE.InstancedMesh(flat(new THREE.BoxGeometry(.2,1.4,.2)),wood,R.n);
+      const rails=new THREE.InstancedMesh(flat(new THREE.BoxGeometry(.1,.18,SEG*3+.3)),rail,R.n*2);
+      let a=0,b=0;
+      for(let j=COMMIT+4;j<R.n-MERGE-2;j+=3)for(const sg of [-1,1]){
+        const v=at(R,j,sg*(R.hw+1.5),.7);if(!mainGap(v.x,v.z,4.5))continue;
+        e.set(0,Math.atan2(R.FX[j],R.FZ[j]),0);q.setFromEuler(e);
+        m4.compose(v,q,sc);posts.setMatrixAt(a++,m4);
+        const jj=Math.min(j+1,R.n-1),w=at(R,jj,sg*(R.hw+1.5),.95);
+        e.set(0,Math.atan2(R.FX[jj],R.FZ[jj]),0);q.setFromEuler(e);
+        m4.compose(w,q,sc);rails.setMatrixAt(b++,m4);
+      }
+      posts.count=a;rails.count=b;world.add(posts);world.add(rails);
+      /* the farmyard: a house, a coop and the hens */
+      const mid=Math.round(R.n*.5);
+      for(const sg of [1,-1]){
+        const v=at(R,mid,sg*(R.hw+9));
+        if(!mainGap(v.x,v.z,14))continue;
+        const h=house(8,6,3.4,0xc8b48a,0x8b2b1c,2.4);h.position.copy(v);
+        h.rotation.y=Math.atan2(R.FX[mid],R.FZ[mid]);world.add(h);break;
+      }
+      const hen=flat(new THREE.BoxGeometry(.5,.45,.7)),comb=flat(new THREE.BoxGeometry(.1,.16,.2));
+      const henM=psMat({color:0xf2efe6}),combM=psMat({color:0xc8281c});
+      for(let n=0;n<12;n++){
+        const jj=Math.round(R.n*(.3+.45*hash2(n,3.1))),sg=n%2?1:-1;
+        const v=at(R,jj,sg*(R.hw+.6+hash2(n,7.7)*2.2),.25);
+        const g=new THREE.Group();g.position.copy(v);g.rotation.y=hash2(n,1.3)*6.28;
+        const b2=new THREE.Mesh(hen,henM);g.add(b2);
+        const c2=new THREE.Mesh(comb,combM);c2.position.set(0,.3,.28);g.add(c2);
+        world.add(g);
+      }
+      const coop=new THREE.Mesh(flat(new THREE.BoxGeometry(3,2,2.2)),psMat({color:0x8b2b1c}));
+      coop.position.copy(at(R,Math.round(R.n*.62),-(R.hw+4.5),1));world.add(coop);
+    }
+    if(R.id==='raps'){
+      /* rapeseed above head height down both sides, right up to the blind exit */
+      const stalk=flat(new THREE.BoxGeometry(1.3,3.0,1.3));
+      const yA=new THREE.InstancedMesh(stalk,psMat({color:0xe4c624}),R.n*10);
+      const yB=new THREE.InstancedMesh(stalk,psMat({color:0xc9b21d}),R.n*10);
+      let a=0,b=0;
+      for(let j=COMMIT+2;j<R.n-5;j++)for(const sg of [-1,1])for(let r=0;r<3;r++){
+        const l=sg*(R.hw+1.7+r*1.3+hash2(j,r+sg)*.6);
+        const v=at(R,j,l,1.2+hash2(j*.7,r)*.5);
+        if(!mainGap(v.x,v.z,3.2))continue;
+        if(sg===1&&(stage.stamps||[]).some(d=>d.bale&&d.route===R.id&&Math.abs(j-Math.round(d.f*(R.n-1)))<=2))continue;
+        e.set(0,hash2(j,r)*3,0);q.setFromEuler(e);sc.set(1,.85+hash2(r,j)*.35,1);
+        m4.compose(v,q,sc);
+        if((j+r)%2){if(a<yA.count)yA.setMatrixAt(a++,m4);}else if(b<yB.count)yB.setMatrixAt(b++,m4);
+      }
+      sc.set(1,1,1);
+      yA.count=a;yB.count=b;world.add(yA);world.add(yB);
+    }
+  }
+}

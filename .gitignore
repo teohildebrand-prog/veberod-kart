@@ -1,0 +1,4 @@
+smoke.png
+__pycache__/
+*.pyc
+.venv/
