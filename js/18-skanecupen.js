@@ -18,8 +18,8 @@ const PAINTS=[{id:null,name:'ORIGINAL'},
   {id:'blue',name:'KORNBLÅ',color:0x3f63c8,unlock:'cup'},
   {id:'gold',name:'GULDKANNAN',color:0xd4a62a,unlock:'gold'},
   {id:'r1',name:'MAJROS-VIT',color:0xf0ece2,unlock:'rival1'},
-  {id:'r2',name:'ROGERS RÖD',color:0x8f2f24,unlock:'rival2'},
-  {id:'r3',name:'LINNÉAS SVART',color:0x1d1f24,unlock:'rival3'},
+  {id:'r2',name:'TEOS RÖD',color:0x8f2f24,unlock:'rival2'},
+  {id:'r3',name:'AMANDAS SVART',color:0x1d1f24,unlock:'rival3'},
   {id:'r4',name:'NISSES TURKOS',color:0x1fa8a0,unlock:'rival4'},
   {id:'r5',name:'BRITTAS GRÖN',color:0x5faf4a,unlock:'rival5'}];
 let paintSel=SAVE.paint;
