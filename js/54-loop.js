@@ -7,6 +7,7 @@ function frame(now){
   requestAnimationFrame(frame);
   let dt=(now-prevT)/1000;prevT=now;
   if(dt>0.1)dt=0.1;
+  pollPad();
   dbgFrame(dt);dt*=DBG.ts;                 /* debug time scale */
   if(paused){renderer.render(scene,camera);return;}   /* prevT already advanced: no jump on resume */
   clock+=dt;

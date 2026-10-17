@@ -19,6 +19,12 @@ tools/serve.sh            # http://localhost:8000/
 Controls: WASD drive, Space drift, E fire, H horn, C camera, R reset,
 Esc pause, M sound, V CRT filter.
 
+With a controller (Xbox layout, any pad the browser reports in the standard
+mapping): left stick steer, RT gas, LT brake/reverse, A drift, X item,
+Y camera, Menu pause. In menus the stick or D-pad moves, A picks, B goes
+back. The KONTROLLER screen shows the first time a pad is used, and from the
+pause menu after that.
+
 ### On a phone
 
 Play at https://teohildebrand-prog.github.io/veberod-kart/ (GitHub Pages,
