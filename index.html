@@ -204,6 +204,7 @@
       <button class="alt" id="btnRestart" style="margin-left:0">BÖRJA OM</button>
       <button class="alt" id="btnQuit">BYT BANA</button>
       <button class="alt" id="btnCupQuit" hidden>AVSLUTA CUPEN</button>
+      <button class="alt" id="btnPadHelp">KONTROLLER</button>
       <button class="alt" id="btnDbg">DEBUG</button>
     </div>
   </div>
@@ -217,6 +218,117 @@
     <p class="note" id="doneStamps"></p>
     <button class="go" id="btnAgain">EN GÅNG TILL</button><button class="alt" id="btnSwap">BYT FÖRARE</button><button class="alt" id="btnStage">BYT BANA</button><button class="alt" id="btnMenu">MENY</button>
     <button class="go" id="btnTable" hidden>TABELLEN</button>
+  </div>
+</div>
+
+<div class="sheet hide" id="padhelp">
+  <div class="ph-in">
+    <svg class="ph-art" viewBox="0 0 1000 760" role="img" aria-labelledby="phTitle">
+      <title id="phTitle">Kontroller, Xbox One: vänster spak styr, RT gas, LT bromsa och backa, A sladda, X använd föremål, Y byt kamera, Meny paus. I menyer: spak eller D-pad navigerar, A väljer, B tillbaka.</title>
+      <defs>
+        <pattern id="phChk" width="28" height="28" patternUnits="userSpaceOnUse">
+          <rect width="14" height="14" fill="#2a5bc8"/><rect x="14" y="14" width="14" height="14" fill="#2a5bc8"/>
+        </pattern>
+        <linearGradient id="phBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2a78"/><stop offset="1" stop-color="#071a4d"/></linearGradient>
+        <linearGradient id="phTitleG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f9ff"/><stop offset=".55" stop-color="#a9cdf6"/><stop offset="1" stop-color="#5f93d6"/></linearGradient>
+        <linearGradient id="phLogoG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe46a"/><stop offset="1" stop-color="#f08a12"/></linearGradient>
+        <linearGradient id="phBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3e48"/><stop offset=".35" stop-color="#25282f"/><stop offset="1" stop-color="#15171c"/></linearGradient>
+        <radialGradient id="phStick"><stop offset="0" stop-color="#3b3f48"/><stop offset=".7" stop-color="#202329"/><stop offset="1" stop-color="#0c0d10"/></radialGradient>
+      </defs>
+      <!-- frame -->
+      <rect x="4" y="4" width="992" height="752" rx="18" fill="url(#phBg)" stroke="#8fc0ff" stroke-width="6"/>
+      <rect x="18" y="18" width="964" height="724" rx="10" fill="none" stroke="#3f74d6" stroke-width="3"/>
+      <rect x="22" y="470" width="190" height="130" fill="url(#phChk)" opacity=".45"/>
+      <rect x="790" y="490" width="190" height="110" fill="url(#phChk)" opacity=".45"/>
+      <rect x="770" y="40" width="190" height="70" fill="url(#phChk)" opacity=".55"/>
+      <!-- header -->
+      <g transform="translate(40 34) rotate(-8)">
+        <rect x="0" y="0" width="56" height="70" fill="url(#phChk)" opacity=".9"/>
+        <text class="ph-logo" x="20" y="38">VEBERÖD</text>
+        <text class="ph-logo" x="56" y="78">KART</text>
+      </g>
+      <text class="ph-title" x="560" y="98" text-anchor="middle">KONTROLLER</text>
+      <path d="M360 126h400l-30 30H390z" fill="#0b2363" stroke="#3f74d6" stroke-width="3"/>
+      <text class="ph-sub" x="560" y="150" text-anchor="middle">XBOX ONE</text>
+      <!-- controller -->
+      <g class="ph-pad">
+        <path d="M330 262q-26-40 10-48l70-12q24-2 30 22z" fill="#2b2e36" stroke="#0a0b0e" stroke-width="4"/>
+        <path d="M670 262q26-40-10-48l-70-12q-24-2-30 22z" fill="#2b2e36" stroke="#0a0b0e" stroke-width="4"/>
+        <path d="M298 290q10-30 58-36l90-8q54-6 108 0l90 8q48 6 58 36l42 230q12 70-36 86q-40 12-74-28l-52-62q-18-18-44-18H446q-26 0-44 18l-52 62q-34 40-74 28q-48-16-36-86z"
+              fill="url(#phBody)" stroke="#0a0b0e" stroke-width="6"/>
+        <circle cx="500" cy="300" r="26" fill="#14161a" stroke="#444a55" stroke-width="3"/>
+        <circle cx="500" cy="300" r="14" fill="none" stroke="#dfe5ee" stroke-width="5"/>
+        <circle cx="365" cy="345" r="44" fill="#0e0f12"/><circle cx="365" cy="345" r="32" fill="url(#phStick)" stroke="#000" stroke-width="3"/>
+        <circle cx="580" cy="440" r="44" fill="#0e0f12"/><circle cx="580" cy="440" r="32" fill="url(#phStick)" stroke="#000" stroke-width="3"/>
+        <circle cx="425" cy="440" r="42" fill="#191b20"/>
+        <path d="M413 404h24v24h24v24h-24v24h-24v-24h-24v-24h24z" fill="#30343c" stroke="#000" stroke-width="3"/>
+        <circle cx="452" cy="350" r="13" fill="#15171b" stroke="#4a505a" stroke-width="2"/>
+        <rect x="446" y="345" width="9" height="7" fill="none" stroke="#c9d0da" stroke-width="1.6"/>
+        <circle cx="548" cy="350" r="13" fill="#15171b" stroke="#4a505a" stroke-width="2"/>
+        <path d="M542 345h12M542 350h12M542 355h12" stroke="#c9d0da" stroke-width="1.8"/>
+        <g class="ph-abxy">
+          <circle cx="660" cy="312" r="22" fill="#15171b"/><text x="660" y="321" fill="#ffd21f">Y</text>
+          <circle cx="620" cy="352" r="22" fill="#15171b"/><text x="620" y="361" fill="#2f8cff">X</text>
+          <circle cx="700" cy="352" r="22" fill="#15171b"/><text x="700" y="361" fill="#ff3b3b">B</text>
+          <circle cx="660" cy="392" r="22" fill="#15171b"/><text x="660" y="401" fill="#33d34a">A</text>
+        </g>
+      </g>
+      <!-- callouts -->
+      <g class="ph-line">
+        <path d="M262 214h40l48 30"/>
+        <path d="M548 214v123"/>
+        <path d="M738 214h-40l-48 30"/>
+        <path d="M262 344h100"/>
+        <path d="M770 298H692l-24 10"/>
+        <path d="M770 360h-42l-38-30l-48 16"/>
+        <path d="M770 450H700l-34-52"/>
+      </g>
+      <g class="ph-box">
+        <rect x="70" y="182" width="192" height="64"/>
+        <rect x="478" y="168" width="140" height="46"/>
+        <rect x="738" y="182" width="192" height="64"/>
+        <rect x="40" y="312" width="222" height="64"/>
+        <rect x="770" y="272" width="200" height="52"/>
+        <rect x="770" y="334" width="200" height="52"/>
+        <rect x="770" y="424" width="200" height="52"/>
+      </g>
+      <g class="ph-key">
+        <text x="84" y="208">LT</text>
+        <text x="548" y="186" text-anchor="middle">MENY</text>
+        <text x="752" y="208">RT</text>
+        <text x="54" y="338">VÄNSTER SPAK</text>
+      </g>
+      <g class="ph-act">
+        <text x="84" y="236">Bromsa / backa</text>
+        <text x="548" y="208" text-anchor="middle">Paus</text>
+        <text x="752" y="236">Gas</text>
+        <text x="54" y="366">Styr</text>
+        <text x="820" y="305">Byt kamera</text>
+        <text x="820" y="367">Använd föremål</text>
+        <text x="820" y="457">Sladda</text>
+      </g>
+      <g class="ph-abxy">
+        <circle cx="796" cy="298" r="17" fill="#ffd21f"/><text x="796" y="306" fill="#1b1500">Y</text>
+        <circle cx="796" cy="360" r="17" fill="#2f8cff"/><text x="796" y="368" fill="#001233">X</text>
+        <circle cx="796" cy="450" r="17" fill="#33d34a"/><text x="796" y="458" fill="#002b08">A</text>
+      </g>
+      <!-- in menus -->
+      <path d="M18 612h964" stroke="#3f74d6" stroke-width="3"/>
+      <text class="ph-key ph-menuh" x="500" y="646" text-anchor="middle">I MENYER</text>
+      <rect x="40" y="664" width="920" height="72" fill="#081b52" stroke="#3f74d6" stroke-width="3"/>
+      <circle cx="96" cy="700" r="22" fill="url(#phStick)" stroke="#000" stroke-width="3"/>
+      <path d="M140 682h12v12h12v12h-12v12h-12v-12h-12v-12h12z" fill="#30343c" stroke="#000" stroke-width="2"/>
+      <text class="ph-key" x="186" y="694">Spak / D-pad:</text>
+      <text class="ph-act" x="186" y="722">Navigera</text>
+      <path d="M520 676v48M760 676v48" stroke="#3f74d6" stroke-width="3"/>
+      <g class="ph-abxy">
+        <circle cx="580" cy="700" r="20" fill="#33d34a"/><text x="580" y="709" fill="#002b08">A</text>
+        <circle cx="810" cy="700" r="20" fill="#ff3b3b"/><text x="810" y="709" fill="#2b0000">B</text>
+      </g>
+      <text class="ph-act" x="614" y="710">Välj</text>
+      <text class="ph-act" x="844" y="710">Tillbaka</text>
+    </svg>
+    <button class="go" id="btnPadClose">STÄNG</button>
   </div>
 </div>
 
@@ -274,6 +386,7 @@
 <script src="js/50-debug-menu.js"></script>
 <script src="js/51-sandlada.js"></script>
 <script src="js/52-aero-bokeh.js"></script>
-<script src="js/53-loop.js"></script>
+<script src="js/53-gamepad.js"></script>
+<script src="js/54-loop.js"></script>
 </body>
 </html>
