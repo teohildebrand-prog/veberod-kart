@@ -36,6 +36,7 @@ function landColor(x,z,out){
   const v=1-smooth(HW+2.6,HW+11,latAt(x,z));
   if(v>0)out.lerp(verge,v*0.92);
   if(stage.shore&&stage.shore(x,z)<-2)out.setHex(0xe9dcb4);          /* the beach under the cliff */
+  if(stage.land)stage.land(x,z,out);
 }
 /** Glimmingehus stands on a flat island inside its moat */
 function castleMod(x,z){

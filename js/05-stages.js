@@ -152,6 +152,10 @@ const STAGES=[
      story:'Sand cake is named for its crumb, not the beach: a pound cake of butter, sugar, eggs and potato flour that falls apart like dry sand. It belongs on the coffee table of every summer cottage in the dunes.'}] }
 ];
 let stage=STAGES[1];
+/* the stage picker's tabs, one per championship; tracks added later say their own */
+for(const S of STAGES)S.group=S.id==='glimminge'||S.id==='ales'?'osterlen':'skane';
+/* registries a track section can add to: road and verge looks, roadside edges */
+const ROADTEX={}, VERGEC={}, EDGES={};
 
 /** put the ramps on the straightest bits of whatever layout we just sampled */
 function autoJumps(spec,spans){
@@ -396,7 +400,8 @@ function meshMain(x,z){
   const base=sy[i]+(sy[j]-sy[i])*(fwd/SEG);
   const t=smooth(HW+8,HW+50,lat);
   return base+clamp(dx*rx[i]+dz*rz[i],-BANKLAT,BANKLAT)*bank[i]*(1-t)
-         +rolls(x,z)*t-DIP*(1-t)+(stage.shore?stage.shore(x,z)*t:0)+(stage.castle?castleMod(x,z)*t:0);
+         +rolls(x,z)*t-DIP*(1-t)+(stage.shore?stage.shore(x,z)*t:0)+(stage.castle?castleMod(x,z)*t:0)
+         +(stage.mod?stage.mod(x,z,t):0);
 }
 function latAt(x,z){
   const k=nearestGlobal(x,z);
@@ -460,7 +465,9 @@ const ROADSTEP=4;
 
 function roadTex(kind){
   let t;
-  if(kind==='cobble'){
+  if(ROADTEX[kind]){
+    t=ROADTEX[kind]();
+  }else if(kind==='cobble'){
     t=pixTex(64,64,(g)=>{
       g.fillStyle='#4f4b45';g.fillRect(0,0,64,64);
       for(let r=0;r<16;r++)for(let c=0;c<16;c++){
@@ -505,7 +512,7 @@ function roadTex(kind){
   t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 function vergeTex(kind){
-  const C={kerb:['#8e8a84','#a8a49c','#6e6a64'],
+  const C=VERGEC[kind]||{kerb:['#8e8a84','#a8a49c','#6e6a64'],
            gravel:['#9b8f74','#b4aa91','#6e6450'],
            dirt:['#6d6152','#82755f','#4a4238'],
            sand:['#d9c79a','#ebdcb4','#b8a476']}[kind]||['#9b8f74','#b4aa91','#6e6450'];
@@ -538,7 +545,7 @@ function buildRoad(st){
     world.add(new THREE.Mesh(ribbon(-HW-2.6,-HW+.1,-.12,5,ROADSTEP),psMat({map:vg})));
     world.add(new THREE.Mesh(ribbon(HW-.1,HW+2.6,-.12,5,ROADSTEP),psMat({map:vg})));
   }
-  if(st.road==='cobble'||st.road==='sand')return;    /* no paint on cobbles or sand */
+  if(st.road==='cobble'||st.road==='sand'||st.paint===false)return;    /* no paint on cobbles or sand */
   const solid=st.road==='concrete';
   const col=solid?'#d8c257':'#dfe4e8';
   const edge=pixTex(4,16,(g)=>{

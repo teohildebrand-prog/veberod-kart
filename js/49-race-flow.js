@@ -112,14 +112,24 @@ function commitRound(){
   c.res.push(places);c.applied.push(c.round);
   c.last={before,earned:places.map(p=>POINTS[p-1]||0)};
   c.round++;
-  if(c.round>=CUP_ROUNDS.length){
+  if(c.round>=cupRounds(c).length){
     c.done=true;
-    const pl=standings(c).indexOf(0)+1;c.final=pl;c.unlocked=[];
-    const tk=c.cls+(c.mirror?'_m':'');
+    const pl=standings(c).indexOf(0)+1,C=cupDef(c);c.final=pl;c.unlocked=[];
+    const tk=trophyKey(c);
     if(pl<=3&&(!SAVE.trophies[tk]||pl<SAVE.trophies[tk]))SAVE.trophies[tk]=pl;
     if(!SAVE.unlock.cup){SAVE.unlock.cup=true;c.unlocked.push('KORNBLÅ LACK');}
     if(pl===1&&c.cls!=='easy'&&!SAVE.unlock.gold){SAVE.unlock.gold=true;c.unlocked.push('GULDKANNAN-LACK');}
-    if(pl===1){                            /* beat the rival: their paint, and their pennant on your kart */
+    if(pl<=3&&C.champ&&!SAVE.unlock['cup_'+C.id]){       /* a podium opens the next championship */
+      SAVE.unlock['cup_'+C.id]=true;const nx=CUPS.find(D=>D.need===C.id);if(nx)c.unlocked.push(nx.name+' ÖPPNAD');}
+    if(pl===1&&C.champ){                   /* beat the champion: their paint and a piece of their kart */
+      if(!SAVE.unlock['win_'+C.id]){
+        SAVE.unlock['win_'+C.id]=true;
+        const P=PAINTS.find(q=>q.unlock==='win_'+C.id),Q=PARTS.find(q=>q.unlock==='win_'+C.id);
+        c.unlocked.push(P.name+'-LACK',Q.name);
+        if(C.id!=='final'&&cupOpen(cupDef({cup:'final'})))c.unlocked.push('FINALEN MOT RAKET-RUNE');
+        if(C.id!=='final')c.unlocked.push(C.name+' SPEGELVÄND');
+      }
+    }else if(pl===1){                      /* beat the rival: their paint, and their pennant on your kart */
       const rk='rival'+c.rival,P=PAINTS.find(p=>p.unlock===rk);
       if(!SAVE.unlock[rk]){SAVE.unlock[rk]=true;c.unlocked.push(P.name+'-LACK');}
       SAVE.unlock.pennant=true;SAVE.pennant=ROSTER[c.rival].color;SAVE.pennantOn=true;
@@ -189,6 +199,18 @@ let stageSel=1;
     el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyStage(+el.dataset.i);});
   });
 })();
+/* the picker shows one championship's tracks at a time */
+const SGROUPS=[['skane','SKÅNE'],['osterlen','ÖSTERLEN'],['kust','KUSTEN'],['vild','VILDMARKEN'],['final','FINALEN']]
+  .filter(g=>STAGES.some(S=>S.group===g[0]));
+let stageGroup='skane';
+function renderGroups(){
+  const host=document.getElementById('sgroups');
+  host.innerHTML=SGROUPS.map(([g,n])=>'<button class="tab'+(g===stageGroup?' sel':'')+'" data-g="'+g+'">'+n+'</button>').join('');
+  host.querySelectorAll('.tab').forEach(el=>el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);
+    const g=el.dataset.g;if(g===stageGroup)return;
+    applyStage(STAGES.findIndex(S=>S.group===g));}));
+  document.querySelectorAll('#scards .card').forEach((el,k)=>el.hidden=STAGES[k].group!==stageGroup);
+}
 let mirrorSel=false;
 function renderStageInfo(){
   const S=STAGES[stageSel],host=document.getElementById('mirrorRow'),open=!TT&&!!SAVE.unlock['mirror_'+S.id];
@@ -201,6 +223,7 @@ function renderStageInfo(){
 }
 function applyStage(i){
   stageSel=i;
+  if(STAGES[i].group!==stageGroup){stageGroup=STAGES[i].group;renderGroups();}
   document.querySelectorAll('#scards .card').forEach((el,k)=>el.classList.toggle('sel',k===i));
   document.getElementById('sblurb').textContent=STAGES[i].blurb;
   renderStageInfo();
@@ -208,7 +231,7 @@ function applyStage(i){
   placeOnGrid();camInit=false;
 }
 function showStages(){
-  hideSheets();setMirror(false);
+  hideSheets();setMirror(false);renderGroups();
   previewOn=false;unpeek();setPause(false);
   state='select';camInit=false;
   document.body.classList.remove('racing');
@@ -219,7 +242,7 @@ function showStages(){
 function showSelect(){
   hideSheets();
   previewOn=true;
-  document.getElementById('vsMode').textContent=(cupSetup?'SKÅNECUPEN · '+CLASSES[classSel].name:TT?'TIDSLOPP':FREE?'SANDLÅDA':'ENKELLOPP')+
+  document.getElementById('vsMode').textContent=(cupSetup?CUPS[cupSel].name+' · '+CLASSES[classSel].name:TT?'TIDSLOPP':FREE?'SANDLÅDA':'ENKELLOPP')+
     ' · '+STAGES[stageSel].name;
   renderPaints();
   sheetStages.classList.add('hide');
@@ -247,8 +270,8 @@ function startRace(){previewOn=false;unpeek();sheetPick.classList.add('hide');re
 function goFromSelect(){
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
-  SAVE.cup={v:1,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
-    round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:!!SAVE.unlock.cup&&cupMirrorSel};
+  SAVE.cup={v:1,cup:CUPS[cupSel].id,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
+    round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel};
   writeSave();                             /* autosave after setup */
   showBrief();
 }
@@ -271,13 +294,16 @@ const MEDAL=['','GULD','SILVER','BRONS'],MEDALC=['','#ffd54a','#dfe7ee','#d08a4a
 function refreshMenu(){
   const c=SAVE.cup,b=document.getElementById('btnResumeCup');
   b.hidden=!(c&&!c.done);
-  if(c&&!c.done)b.textContent='FORTSÄTT CUPEN · RUNDA '+(c.round+1)+'/'+CUP_ROUNDS.length;
+  if(c&&!c.done)b.textContent='FORTSÄTT '+cupDef(c).name+' · '+(c.round+1)+'/'+cupRounds(c).length;
+  const h2=document.querySelector('#start h2');if(h2)h2.textContent='SKÅNE · '+STAGES.length+' BANOR · '+CHARS.length+' FÖRARE';
   document.getElementById('btnAlbum').textContent='PICKNICKPASSET · '+stampCount()+'/'+allStamps().length;
   const shelf=(C,m)=>{const t=SAVE.trophies[C.id+m];
     return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.sub+(m?' · SPEGEL':'')+
       '<b>'+(t?MEDAL[t]:'—')+'</b></div>';};
+  const champs=CUPS.filter(C=>C.champ&&(cupOpen(C)||bestMedal(C))).map(C=>{const t=bestMedal(C);
+    return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.short+'<b>'+(t?MEDAL[t]:'—')+'</b></div>';}).join('');
   document.getElementById('shelf').innerHTML=CLASSES.map(C=>shelf(C,'')).join('')+
-    (SAVE.unlock.cup?CLASSES.map(C=>shelf(C,'_m')).join(''):'');
+    (SAVE.unlock.cup?CLASSES.map(C=>shelf(C,'_m')).join(''):'')+champs;
   document.getElementById('saveNote').hidden=saveOK;
 }
 function showMenu(){
@@ -299,48 +325,74 @@ function pickClass(i){
   document.querySelectorAll('#classcards .card').forEach((el,n)=>el.classList.toggle('sel',n===i));
   document.getElementById('classblurb').textContent=CLASSES[i].blurb;
 }
-let cupMirrorSel=false;
+let cupMirrorSel=false,cupSel=0;
+function bestMedal(C){
+  let b=0;for(const k in SAVE.trophies)if(C.id==='skane'?!/_/.test(k.replace(/_m$/,'')):k.indexOf(C.id+'_')===0)
+    b=b?Math.min(b,SAVE.trophies[k]):SAVE.trophies[k];
+  return b;
+}
+function renderCups(){
+  document.getElementById('cupcards').innerHTML=CUPS.map((C,i)=>{const open=cupOpen(C),m=bestMedal(C),ch=C.champ&&CHAMPS[C.champ];
+    return '<button class="card'+(i===cupSel?' sel':'')+(open?'':' lock')+'" data-i="'+i+'"><div class="cn">'+C.name+'</div><div class="cr">'+
+      (open?C.rounds.length+(C.rounds.length>1?' BANOR':' LOPP')+(ch?' · '+ch.name:'')+(m?' · '+MEDAL[m]:''):'LÅST')+'</div></button>';}).join('');
+  document.querySelectorAll('#cupcards .card').forEach(el=>el.addEventListener('click',()=>{
+    bootAudio();ping(700,980,.05);pickCup(+el.dataset.i);}));
+}
+function pickCup(i){
+  cupSel=i;const C=CUPS[i],open=cupOpen(C);
+  if(!mirrorOpen(C))cupMirrorSel=false;
+  renderCups();renderCupMirror();
+  const ch=C.champ&&CHAMPS[C.champ];
+  document.getElementById('cupblurb').textContent=open?C.blurb+(ch?' Champion: '+ch.full+'.':''):cupLockText(C);
+  document.getElementById('btnCupNext').disabled=!open;
+}
 function renderCupMirror(){
-  const host=document.getElementById('cupMirror'),open=!!SAVE.unlock.cup;
-  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">SPEGELCUPEN: '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
+  const C=CUPS[cupSel],host=document.getElementById('cupMirror'),open=mirrorOpen(C);
+  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">'+(C.id==='skane'?'SPEGELCUPEN':'SPEGELVÄND OCH BAKLÄNGES')+': '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
   if(open)document.getElementById('btnCupMirror').addEventListener('click',()=>{cupMirrorSel=!cupMirrorSel;renderCupMirror();});
 }
 function showCupSetup(){
   hideSheets();state='menu';CUP=null;TT=false;
-  pickClass(classSel);renderCupMirror();
+  pickClass(classSel);pickCup(cupOpen(CUPS[cupSel])?cupSel:0);
   document.getElementById('cupWarn').hidden=!(SAVE.cup&&!SAVE.cup.done);
   document.getElementById('cupsetup').classList.remove('hide');
 }
 function renderPaints(){
   const host=document.getElementById('paints'),open=PAINTS.filter(p=>!p.id||SAVE.unlock[p.unlock]);
-  host.hidden=open.length<2&&!SAVE.unlock.pennant;
+  const parts=PARTS.filter(q=>!q.id||SAVE.unlock[q.unlock]);
+  host.hidden=open.length<2&&!SAVE.unlock.pennant&&parts.length<2;
   host.innerHTML=open.map(p=>'<button class="tab'+(p.id===paintSel||(!p.id&&!open.some(q=>q.id&&q.id===paintSel))?' sel':'')+
     '" data-p="'+(p.id||'')+'">LACK: '+p.name+'</button>').join('')+
-    (SAVE.unlock.pennant?'<button class="tab'+(SAVE.pennantOn?' sel':'')+'" id="btnPennant">VIMPEL: '+(SAVE.pennantOn?'PÅ':'AV')+'</button>':'');
+    (SAVE.unlock.pennant?'<button class="tab'+(SAVE.pennantOn?' sel':'')+'" id="btnPennant">VIMPEL: '+(SAVE.pennantOn?'PÅ':'AV')+'</button>':'')+
+    (parts.length>1?'<button class="tab'+(partOn()?' sel':'')+'" id="btnPart">DEL: '+(PARTS.find(q=>q.id===partOn())||PARTS[0]).name+'</button>':'');
   host.querySelectorAll('.tab[data-p]').forEach(el=>el.addEventListener('click',()=>{
     paintSel=el.dataset.p||null;SAVE.paint=paintSel;writeSave();showRig();renderPaints();}));
   const pb=document.getElementById('btnPennant');
   if(pb)pb.addEventListener('click',()=>{SAVE.pennantOn=!SAVE.pennantOn;writeSave();showRig();renderPaints();});
+  const qb=document.getElementById('btnPart');           /* cycles through the parts won so far */
+  if(qb)qb.addEventListener('click',()=>{const n=parts.findIndex(q=>q.id===partOn());
+    SAVE.part=parts[(n+1)%parts.length].id;writeSave();showRig();renderPaints();});
 }
 function showBrief(){
   const c=SAVE.cup;CUP=c;
   hideSheets();previewOn=false;state='menu';camInit=false;
   document.body.classList.remove('racing');
   applyCharacter(c.char);applyCar(c.car);
-  const si=STAGES.findIndex(S=>S.id===CUP_ROUNDS[c.round]),S=STAGES[si];
+  const RR=cupRounds(c),si=STAGES.findIndex(S=>S.id===RR[c.round]),S=STAGES[si],CD=cupDef(c);
   applyStage(si);
-  document.getElementById('briefTitle').innerHTML=S.name+'<i>RUNDA '+(c.round+1)+' AV '+CUP_ROUNDS.length+'</i>';
-  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name+(c.mirror?' · SPEGELCUPEN':'');
+  document.getElementById('briefTitle').innerHTML=S.name+'<i>'+CD.name+' · RUNDA '+(c.round+1)+' AV '+RR.length+'</i>';
+  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name+(c.mirror?(CD.champ?' · SPEGELVÄND':' · SPEGELCUPEN'):'');
   const surf=['ASFALT'].concat((S.routes||[]).map(R=>SURF[R.surface].name),(S.routes||[]).some(R=>R.mud)?['LERA']:[]);
   const [got,of]=stageStamps(S),st=standings(c),me=st.indexOf(0);
   const gap=i=>{const d=c.pts[0]-c.pts[i];return (d>0?'+':'')+d+' p';};
   const ahead=me>0?karts[st[me-1]]:null;
-  const rows=[['BANAN',CUP_ROLE[S.id]||S.blurb],
+  const rows=[['BANAN',CUP_ROLE[S.id]||S.role||S.blurb],
     ['UNDERLAG',[...new Set(surf)].join(', ')],
     ['GENVÄGAR',(S.routes||[]).map(R=>R.name).join(', ')||'Inga kända'],
     ['PICKNICK',of?got+'/'+of+' stämplar':'Kommer i nästa version'],
     ['DU',(c.res.length?c.pts[0]+' p · '+ordSv(me+1)+' plats':'Du startar sist i första rundan')+' · '+CHARS[c.char].short+' i '+CARS[c.car].name],
-    ['RIVALEN',karts[c.rival].name+HORN+' · '+c.pts[c.rival]+' p ('+gap(c.rival)+')']];
+    [CD.champ?'MÄSTAREN':'RIVALEN',(CD.champ?CHAMPS[CD.champ].full:karts[c.rival].name)+HORN+' · '+c.pts[c.rival]+' p ('+gap(c.rival)+')']];
+  if(CD.champ&&!c.res.length)rows.push(['',CHAMPS[CD.champ].name+': ”'+CHAMPS[CD.champ].say+'”']);
   if(ahead&&ahead.idx!==c.rival)rows.push(['NÄRMAST FÖRE',ahead.name+' · '+c.pts[ahead.idx]+' p ('+gap(ahead.idx)+')']);
   document.getElementById('briefBody').innerHTML=rows.map(r=>'<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>').join('');
   document.getElementById('brief').classList.remove('hide');
@@ -350,7 +402,7 @@ function showTable(){
   const c=SAVE.cup;
   hideSheets();state='menu';document.body.classList.remove('racing');
   const st=standings(c),L=c.last||{before:st,earned:[0,0,0,0,0,0]};
-  document.getElementById('tableSub').textContent='EFTER RUNDA '+c.round+' AV '+CUP_ROUNDS.length+' · '+cupClass().name;
+  document.getElementById('tableSub').textContent=cupDef(c).name+' · EFTER RUNDA '+c.round+' AV '+cupRounds(c).length+' · '+cupClass().name;
   document.getElementById('tgrid').innerHTML=st.map((i,n)=>{
     const k=karts[i],mv=L.before.indexOf(i)-n;
     return '<li'+(i===0?' class="me"':'')+'><span class="p">'+(n+1)+'</span><span class="chip" style="background:#'+
@@ -367,9 +419,11 @@ function showPodium(){
     '</div><div class="bl" style="height:'+h+'px">'+(n+1)+'</div></div>';};
   document.getElementById('pod').innerHTML=step(1,86)+step(0,124)+step(2,62);
   const pl=c.final||st.indexOf(0)+1;
-  document.getElementById('podSub').textContent='DU BLEV '+ordSv(pl)+' · '+cupClass().name+' · '+c.pts[0]+' POÄNG';
+  document.getElementById('podSub').textContent='DU BLEV '+ordSv(pl)+' · '+cupDef(c).name+' · '+cupClass().name+' · '+c.pts[0]+' POÄNG';
   let note=pl<=3?CUPSVG(MEDALC[pl],MEDAL[pl])+' '+MEDAL[pl]+'POKAL TILL HYLLAN.':
     OSTKAKA+'Ingen pall i år, men Majros bjuder på en tröstande ostkaka.';
+  const CH=cupDef(c).champ&&CHAMPS[cupDef(c).champ];
+  if(CH&&pl===1)note+=' Du slog '+CH.full+'!';
   if(c.unlocked&&c.unlocked.length)note+=' Upplåst: '+c.unlocked.join(', ')+'.';
   const pn=document.getElementById('podNote');pn.innerHTML=note;
   pn.querySelector('svg').style.cssText='width:30px;height:30px;vertical-align:middle;margin-right:6px';
@@ -381,7 +435,7 @@ let albumTab=1,albumBack=showMenu;
 const KIND={intro:'VID VÄGEN',route:'PÅ GENVÄGEN',master:'MÄSTARPROVET',line:'INNERLINJEN',air:'I LUFTEN'};
 const REWARDS=[[1,'Varje stämpel: sin sida i passet och sin historia'],[3,'Alla 3 på en bana: banans vykort'],
   [6,'6 stämplar: muu-tutan för alla förare (H)'],[9,'9 stämplar: picknickkorg på taket'],
-  [21,'Alla 21: Gyllene Picknickpasset och titeln Picknickmästare']];
+  [allStamps().length,'Alla '+allStamps().length+': Gyllene Picknickpasset och titeln Picknickmästare']];
 function showAlbum(back){
   albumBack=back||showMenu;
   hideSheets();state='menu';document.body.classList.remove('racing');
@@ -409,8 +463,9 @@ function renderAlbum(){
 document.getElementById('btnCup').addEventListener('click',()=>{bootAudio();showCupSetup();});
 document.getElementById('btnCupBack').addEventListener('click',showMenu);
 document.getElementById('btnCupNext').addEventListener('click',()=>{
+  if(!cupOpen(CUPS[cupSel]))return;
   bootAudio();cupSetup=true;CUP=null;
-  applyStage(STAGES.findIndex(S=>S.id===CUP_ROUNDS[0]));showSelect();});
+  applyStage(STAGES.findIndex(S=>S.id===cupRounds({cup:CUPS[cupSel].id,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel})[0]));showSelect();});
 document.getElementById('btnResumeCup').addEventListener('click',()=>{bootAudio();showBrief();});
 document.getElementById('btnAlbum').addEventListener('click',()=>{bootAudio();showAlbum(showMenu);});
 document.getElementById('btnAlbumBack').addEventListener('click',()=>albumBack());

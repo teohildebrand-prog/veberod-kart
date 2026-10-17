@@ -40,11 +40,15 @@ function farmSign(text,picnic){
 let BLOCKERS=[];
 function addBlocker(R){
   const j=COMMIT+3,x=R.X[j],z=R.Z[j],mi=R.MI[j];
-  const g=new THREE.Group();
-  const rock=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(2.6,0)),psMat({color:0x8a8780}));
-  rock.scale.set(1.1,1.25,1);rock.position.y=2.2;g.add(rock);
-  const moss=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(1.4,0)),psMat({color:0x6e7a52}));
-  moss.position.set(.8,3.8,.3);g.add(moss);
+  let g;
+  if(R.blockMesh)g=R.blockMesh(R,j);                /* a track's own: barrels, a door, a gate */
+  else{
+    g=new THREE.Group();
+    const rock=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(2.6,0)),psMat({color:0x8a8780}));
+    rock.scale.set(1.1,1.25,1);rock.position.y=2.2;g.add(rock);
+    const moss=new THREE.Mesh(flat(new THREE.DodecahedronGeometry(1.4,0)),psMat({color:0x6e7a52}));
+    moss.position.set(.8,3.8,.3);g.add(moss);
+  }
   const y=meshY(x,z);g.position.set(x,y,z);world.add(g);
   BLOCKERS.push({R,x,z,y,mi,lat:(x-sx[mi])*rx[mi]+(z-sz[mi])*rz[mi],mesh:g,drop:0});
 }
@@ -60,6 +64,7 @@ function openPassage(B,k){
 function updateBlockers(dt){
   for(const B of BLOCKERS){
     const want=B.R.open?1:0;B.drop=lerp(B.drop,want,Math.min(1,dt*3));
+    if(B.R.blockAnim){B.R.blockAnim(B,B.drop);continue;}
     B.mesh.position.y=B.y-B.drop*5.2;B.mesh.rotation.z=B.drop*0.9;
   }
 }
