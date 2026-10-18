@@ -94,32 +94,42 @@ function blockerAhead(si,reach){
   }
   return [bb,bd];
 }
+/* A shot fired toward a closed passage with no rival before it goes for the passage, and is
+   steered so it arrives in the mouth however far off the road that sits. It is checked
+   before the shot moves, so a long frame can't carry it past. */
+const SHOT_REACH=90;
+function mouthAhead(si,reach,owner){
+  let bb=null,bd=1e9;
+  for(const B of BLOCKERS){
+    if(B.R.open||B.R.noRocket)continue;              /* a switch-only passage ignores shots */
+    let d=B.mi-si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
+    if(d>=0&&d<reach&&d<bd){bd=d;bb=B;}
+  }
+  if(bb&&owner&&nextAhead(si,owner,bd)[0])return [null,1e9];   /* a rival in between comes first */
+  return [bb,bd];
+}
+/** line a shot up on the mouth for this frame's step; true when it is within two samples of it after the step */
+function steerToMouth(p,B,d,step){
+  p.lat+=(B.lat-p.lat)/Math.max(1,(d-1)/Math.max(step,1e-3));
+  return d<=step+2;
+}
 function updateRockets(dt){
   for(let n=rockets.length-1;n>=0;n--){
     const r=rockets[n];
     r.t+=dt;
-    r.si+=r.speed*dt/SEG;
+    const step=r.speed*dt/SEG,[mb,md]=mouthAhead(r.si,SHOT_REACH,r.owner);
+    if(mb&&steerToMouth(r,mb,md,step)){openPassage(mb,r.owner);scene.remove(r.holder);rockets.splice(n,1);continue;}
+    r.si+=step;
     while(r.si>=N)r.si-=N;
     const i=Math.floor(r.si)%N;
-    /* mild homing onto whoever is next up the road */
-    let [best,bd]=nextAhead(r.si,r.owner,60), bb=null;
-    for(const B of BLOCKERS){
-      if(B.R.open||B.R.noRocket)continue;          /* a switch-only passage ignores rockets */
-      let d=B.mi-r.si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
-      if(d>=0&&d<60&&d<bd){bd=d;bb=B;}
-    }
-    if(bb){
-      r.lat+=clamp(bb.lat-r.lat,-12*dt,12*dt);
-      let d=bb.mi-r.si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
-      if(Math.abs(d)<3&&Math.abs(bb.lat-r.lat)<3.6){openPassage(bb,r.owner);scene.remove(r.holder);rockets.splice(n,1);continue;}
-    }
-    else if(best)r.lat+=clamp(best.lat-r.lat,-9*dt,9*dt);
+    /* otherwise mild homing onto whoever is next up the road */
+    if(!mb){const [best]=nextAhead(r.si,r.owner,60);if(best)r.lat+=clamp(best.lat-r.lat,-9*dt,9*dt);}
     const x=sx[i]+rx[i]*r.lat, z=sz[i]+rz[i]*r.lat;
     const y=sy[i]+r.lat*bank[i]+1.0;
     r.holder.position.set(x,y,z);
     r.holder.rotation.y=Math.atan2(fx[i],fz[i]);
     if(Math.random()<.7)puff(x+rand(-.3,.3),y+.2,z+rand(-.3,.3),.9,.62,.3,.34);
-    let done=r.t>4.5;
+    let done=r.t>4.5&&!mb;
     if(!done)for(const k of karts){
       if(k===r.owner||k.rib)continue;
       let d=k.mi-r.si;
@@ -174,11 +184,15 @@ function updateHooks(dt){
     const h=hooks[n],k=h.owner;
     h.t+=dt;
     if(!h.target){
-      h.si+=h.speed*dt/SEG;while(h.si>=N)h.si-=N;
+      /* a closed passage up the road and no rival before it: the rope pays out as far as it takes, and the hook
+         bites into it and yanks it open */
+      const step=h.speed*dt/SEG,[mb,md]=mouthAhead(h.si,SHOT_REACH,k);
+      if(mb&&steerToMouth(h,mb,md,step)){openPassage(mb,k);dropHook(n);continue;}
+      h.si+=step;while(h.si>=N)h.si-=N;
       const i=Math.floor(h.si)%N,[best]=nextAhead(h.si,k,40),[bb,bd]=blockerAhead(h.si,3);
-      if(best)h.lat+=clamp(best.lat-h.lat,-7*dt,7*dt);
+      if(best&&!mb)h.lat+=clamp(best.lat-h.lat,-7*dt,7*dt);
       if(bb&&bd<2){dropHook(n,'KROKEN FASTNADE');continue;}
-      if(h.t>HOOK_REACH||k.rib){dropHook(n,'MISS!');continue;}
+      if((h.t>HOOK_REACH&&!mb)||k.rib){dropHook(n,'MISS!');continue;}
       h.holder.position.set(sx[i]+rx[i]*h.lat,sy[i]+h.lat*bank[i]+1.0,sz[i]+rz[i]*h.lat);
       h.holder.rotation.y=Math.atan2(fx[i],fz[i]);
       for(const o of karts){
@@ -211,7 +225,7 @@ function updateHooks(dt){
 }
 
 /* Semmelväggen: semlor stack up in front of the kart, then surge down the road as one
-   wide wave. It hits each rival once, stops at a closed passage and runs out of steam
+   wide wave. It hits each rival once, bursts open a closed passage it reaches and runs out of steam
    after a stretch, so it clears a contested piece of road, not the whole lap. */
 const semlaParts=(function(){
   const bun=psMat({color:0xd9a050}),cream=psMat({color:0xfffaf0}),sugar=psMat({color:0xffffff,unlit:true});
@@ -256,8 +270,9 @@ function updateWalls(dt){
     }else{
       for(const s of w.bits)s.visible=true;
       const step=w.speed*dt;w.dist+=step;w.si+=step/SEG;while(w.si>=N)w.si-=N;
-      const [bb,bd]=blockerAhead(w.si,3);
-      if(w.dist>WALL_RANGE||(bb&&bd<2)){dropWall(n);continue;}
+      const [bb,bd]=blockerAhead(w.si,3),[mb]=mouthAhead(w.si,SHOT_REACH);
+      if(bb&&bd<2&&!bb.R.noRocket)openPassage(bb,k);   /* the wave bursts a closed passage open */
+      if((w.dist>WALL_RANGE&&!mb)||(bb&&bd<2)){dropWall(n);continue;}   /* and keeps going until it gets there */
       for(const o of karts){
         if(w.hit.has(o)||o.rib||o.parked||o.ghost>0)continue;
         let d=o.mi-w.si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;

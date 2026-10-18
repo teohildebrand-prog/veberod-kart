@@ -52,7 +52,8 @@ function addBlocker(R){
     moss.position.set(.8,3.8,.3);g.add(moss);
   }
   const y=meshY(x,z);g.position.set(x,y,z);world.add(g);
-  BLOCKERS.push({R,x,z,y,mi,lat:(x-sx[mi])*rx[mi]+(z-sz[mi])*rz[mi],mesh:g,drop:0});
+  const top=new THREE.Box3().setFromObject(g).max.y;
+  BLOCKERS.push({R,x,z,y,mi,top,lat:(x-sx[mi])*rx[mi]+(z-sz[mi])*rz[mi],mesh:g,drop:0});
 }
 function shutPassages(k){
   for(const R of ALTS)if(R.open&&(!k||R.opener===k)){R.open=false;R.opener=null;}
@@ -69,6 +70,23 @@ function updateBlockers(dt){
     if(B.R.blockAnim){B.R.blockAnim(B,B.drop);continue;}
     B.mesh.position.y=B.y-B.drop*5.2;B.mesh.rotation.z=B.drop*0.9;
   }
+  aimAtMouth();
+}
+/* While you hold something that can open it, a target spins over the next closed mouth,
+   so a secret passage stays secret until you have the means to blow it open. */
+const aimMark=(function(){
+  const g=new THREE.Group(),m=psMat({color:0xffd23a,unlit:true,side:THREE.DoubleSide});
+  g.add(new THREE.Mesh(new THREE.RingGeometry(1.0,1.45,16),m));
+  const tip=new THREE.Mesh(new THREE.ConeGeometry(.7,1.3,4),m);tip.rotation.x=Math.PI;tip.position.y=-2.0;g.add(tip);
+  g.visible=false;scene.add(g);return g;
+})();
+function aimAtMouth(){
+  const armed=state==='race'&&player.held==='rocket'&&!(player.roll>0)&&!player.rib;
+  const [B]=armed?mouthAhead(player.mi,120):[null];
+  aimMark.visible=!!B;
+  if(!B)return;
+  aimMark.position.set(B.x,B.top+2.6+Math.sin(clock*5)*.35,B.z);
+  aimMark.rotation.y=clock*2.5;
 }
 /** karts on the main road bump off a closed boulder */
 function bumpBlockers(k){
