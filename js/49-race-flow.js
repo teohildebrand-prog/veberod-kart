@@ -232,8 +232,8 @@ function startRace(){previewOn=false;unpeek();sheetPick.classList.add('hide');re
 function goFromSelect(){
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
-  SAVE.cup={v:1,cup:CUPS[cupSel].id,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
-    round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel};
+  SAVE.cup={v:CUP_SAVE_V,cup:CUPS[cupSel].id,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
+    rounds:CUPS[cupSel].rounds.slice(),round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel};
   writeSave();                             /* autosave after setup */
   showBrief();
 }

@@ -185,3 +185,11 @@ Teo's change request "Hook Rework and Removal of Sugar-Cube Upgrades".
 - An item box now awards a whole variant: a family with equal weight, then level 1/2/3 at 50/30/20 % (ITEMODDS in js/35-pickups.js). All fifteen can come from the first box in any position. The level sits on the kart (heldLvl) until the item is used; damage never lowers it. AI uses the same boxes and rules.
 - HUD: the slot shows the exact variant's icon and name, with an I / II / III badge where the sugar row was (gold ring at II, pink at III, the numeral is enough on its own).
 - Spettigare kaka: the hook bites the first rival it reaches (KLONK!), the rope goes taut and the thrower surges forward along their own nose, steering intact, with HÅLL I DIG! on screen. It lets go 7 m short of the rival (SLÄPP! KÖR OM), when the surge runs out, or early if the next quarter second would hit the fence or a closed passage. Shields and closed passages stop it; a reset, finish, different route or a rope over the verge breaks it. The rival keeps its speed and steering. The surge is normal physics with extra push and a capped top speed (HOOK in js/37-power-ups.js: reach 0.7 s, surge 0.9 s, +60 m/s², top 1.45×), so fences, blockers and gates still apply. Numbers are a first guess for playtesting.
+
+## 2026-10-18 — Longer Skånecupen, Rosengård in Finalen
+
+Roadmap step 1 ("Now — finish the agreed championship changes").
+- Skånecupen grows from six to eight rounds: Veberöd, Lund, Tollarp, Hörby, Åhus, Glimmingehus, Ales stenar, Öresundsbron. Hörby stays round 4.
+- Finalen is two rounds: Rosengård, then Raket-Runes runda. Raket-Rune takes the rival's slot in both; the champion unlocks (win_final, Raket-Rune as a driver) still come only when the cup is won.
+- Saved cups carry their schedule: SAVE.cup is now v2 with a rounds list, written when the cup starts. A v1 cup (no rounds) is migrated on load to the schedule v1 raced (Skånecupen's six, Finalen's single race), so a cup in progress finishes the way it started. Trophy keys are unchanged. Points still commit once per round (applied).
+- Check: `python3 tools/cup_schedule_test.py` seeds old and new saves in headless Chromium and checks the briefing, table, resume button, stage select, points once per round and champion unlocks; Jenkins runs it.

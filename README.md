@@ -3,10 +3,11 @@
 A silly PS1-style kart racer through the Skåne countryside. Three.js r128,
 plain JavaScript, no build step.
 
-20 tracks in five groups: Skånecupen's six (with Hörby) plus Rosengård, and four
-championships built on LEGO Racers' cup shape (ideas only): Österlencupen,
-Kustcupen and Vildmarkscupen (four tracks and a champion each, then mirrored
-and in reverse once won) and Finalen against Raket-Rune.
+20 tracks in five groups: Skånecupen's eight (with Hörby, Glimmingehus and
+Ales stenar), and four championships built on LEGO Racers' cup shape (ideas
+only): Österlencupen, Kustcupen and Vildmarkscupen (four tracks and a champion
+each, then mirrored and in reverse once won) and Finalen against Raket-Rune
+(Rosengård, then Raket-Runes runda).
 
 ## Play
 
@@ -52,11 +53,12 @@ js/NN-<section>.js    game code, one file per section, loaded in order
 vendor/three.min.js   three.js r128 (MIT, see vendor/three.LICENSE)
 tools/serve.sh        local web server
 tools/smoke_test.py   headless test: start a race, fail on JS errors
+tools/cup_schedule_test.py  headless test: cup schedules, old saves, points once
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
 docs/                 design notes and build history
-Jenkinsfile           CI: runs the smoke test
+Jenkinsfile           CI: runs the audio, cup schedule and smoke tests
 ```
 
 The `js/` files are classic scripts, not ES modules. They share one global
@@ -85,4 +87,5 @@ when the highlight rests on it.
 ```bash
 pip install -r requirements-dev.txt && playwright install chromium
 python3 tools/smoke_test.py
+python3 tools/cup_schedule_test.py
 ```
