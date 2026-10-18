@@ -26,9 +26,8 @@ function resetRace(){
   shutPassages(null);
   if(TT)for(const it of items){it.cool=1e9;it.mesh.visible=false;}   /* no items in a time trial */
   for(const o of stampObjs)o.mesh.visible=!TT;
-  for(const r of rockets)scene.remove(r.holder);
-  rockets.length=0;
-  for(const k of karts)k.dome.visible=false;
+  clearPowerups();
+  for(const k of karts){k.dome.visible=false;if(k.panG)k.panG.visible=false;}
   dbgOnReset();
   if(FREE)toast('SANDLÅDA · F1 FÖR DEBUG');
 }

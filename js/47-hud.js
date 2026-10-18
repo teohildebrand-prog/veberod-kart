@@ -6,7 +6,7 @@ const el={lap:document.getElementById('lap'),pos:document.getElementById('pos'),
   spd:document.getElementById('spd'),fill:document.getElementById('fill'),
   fmeter:document.getElementById('fmeter'),ffill:document.getElementById('ffill'),
   slot:document.getElementById('slot'),slotv:document.getElementById('slotv'),
-  slotn:document.getElementById('slotn'),
+  slotn:document.getElementById('slotn'),slotname:document.getElementById('slotname'),
   meter:document.getElementById('meter'),flash:document.getElementById('flashtxt'),
   toast:document.getElementById('toast')};
 let toastT=0, lastSlot='', lastSugar=-1;
@@ -22,18 +22,22 @@ function drawHUD(dt){
   el.spd.innerHTML=Math.round(player.speed*4.35)+'<b>KM/H</b>';
   el.spd.className=player.slow>0?'sour':'';
   el.fill.style.width=((player.boost>0?1:clamp(player.charge/1.45,0,1))*100)+'%';
-  const held=player.held||(player.shield>0?'shield':null);
-  const key=player.held?player.held:(player.shield>0?'shield!':'');
-  el.slot.classList.toggle('off',!key);
+  /* the held item at its current level, or the shield that is running */
+  const fam=player.held||(player.shield>0?'shield':null);
+  const lvl=player.held?itemLvl(player):(player.shieldLvl||1);
+  const key=fam?fam+lvl+(player.held?'':'!'):'';
   if(key!==lastSlot){
-    if(held){
-      el.slotv.innerHTML=ITEMICON[held];
-      el.slot.title=ITEMNAME[held];
+    if(fam){
+      el.slotv.innerHTML=ITEMICON[fam+lvl];
+      el.slot.title=el.slotname.textContent=itemName(fam,lvl);
+      el.slot.className=el.slotname.className='plate lvl'+lvl+(player.held?'':' run');
       el.slot.classList.remove('pop');void el.slot.offsetWidth;el.slot.classList.add('pop');
     }
     lastSlot=key;
   }
-  el.slotn.textContent=(!player.held&&player.shield>0)?Math.ceil(player.shield):'';
+  el.slot.classList.toggle('off',!key);
+  el.slotname.classList.toggle('off',!player.held);
+  el.slotn.textContent=(!player.held&&player.shield>0)?(player.pans?'×'+player.pans:Math.ceil(player.shield)):'';
   if(player.sugar!==lastSugar){
     lastSugar=player.sugar;sugarEl.classList.toggle('off',!lastSugar);
     sugarEl.querySelectorAll('i').forEach((e,n)=>e.classList.toggle('on',n<lastSugar));

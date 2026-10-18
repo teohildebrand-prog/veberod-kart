@@ -47,20 +47,19 @@ function dbgTeleport(s){
   k.gate=s;k.cp=s;                         /* the gate counts as passed, so the lap still adds up */
   camInit=false;toast('KONTROLLPUNKT '+(s+1));
 }
-function dbgGive(t){
+function dbgGive(t,l){
   if(!racingNow())return;
-  if(t==='sugar'){player.sugar=3;toast('SOCKERBIT 3/3');return;}
+  if(t==='sugar'){player.sugar=SUGARMAX;toast('SOCKERBIT '+SUGARMAX+'/'+SUGARMAX);return;}
   if(t==='turbo'){player.boost=Math.max(player.boost,3);toast('TURBO!');return;}
-  player.held=t;DBG.lastItem=t;toast(ITEMNAME[t]+'!');
+  l=+l||1;player.held=t;player.sugar=l-1;DBG.lastItem=t;DBG.lastLvl=l;toast(itemName(t,l)+'!');
 }
 function dbgRow(title,items){
-  return '<div class="dh">'+title+'</div><div class="dr">'+items.map(([label,act,sel,off])=>
+  return (title?'<div class="dh">'+title+'</div>':'')+'<div class="dr">'+items.map(([label,act,sel,off])=>
     '<button class="tab'+(sel?' sel':'')+'" data-a="'+act+'"'+(off?' disabled':'')+'>'+label+'</button>').join('')+'</div>';
 }
 function renderDbg(){
   if(!DBG.open)return;
   const lock=!!CUP,R=racingNow(),on=v=>v?'PÅ':'AV';
-  const iT=[...new Set(ITEMPOOL)];
   let h='<div class="dtop"><b>DEBUG</b><span>F1 · § · `</span><button class="tab" data-a="close">STÄNG</button></div>';
   h+=dbgRow('BANA',STAGES.map((S,i)=>[S.name,'stage:'+i,S===stage,lock]));
   h+=dbgRow('FÖRARE',CHARS.map((c,i)=>[c.short||c.name,'char:'+i,i===charSel,lock]));
@@ -71,7 +70,8 @@ function renderDbg(){
   h+=dbgRow('TELEPORT',[...Array(CPN).keys()].map(s=>['KP '+(s+1),'tp:'+s,false,!R]));
   h+=dbgRow('FUSK',[['GUDALÄGE: '+on(DBG.god),'god',DBG.god],['OÄNDLIG BENSIN: '+on(DBG.fuel),'fuel',DBG.fuel],
     ['OÄNDLIGA FÖREMÅL: '+on(DBG.items),'items',DBG.items],['SISTA VARVET','last',false,!R||FREE||TT||player.done]]);
-  h+=dbgRow('FÖREMÅL',iT.map(t=>[ITEMNAME[t],'give:'+t,false,!R]).concat([['3 SOCKERBITAR','give:sugar',false,!R],['TURBO','give:turbo',false,!R]]));
+  for(const f of FAMILIES)h+=dbgRow(f===FAMILIES[0]?'FÖREMÅL':'',[1,2,3].map(l=>[itemName(f,l),'give:'+f+':'+l,false,!R]));
+  h+=dbgRow('',[[SUGARMAX+' SOCKERBITAR','give:sugar',false,!R],['TURBO','give:turbo',false,!R]]);
   h+=dbgRow('DATORFÖRARE',AIMODES.map(([m,n])=>[n,'ai:'+m,DBG.ai===m]));
   h+=dbgRow('VISA',[['FPS: '+on(DBG.fps),'fps',DBG.fps],['FYSIK: '+on(DBG.phys),'phys',DBG.phys]]);
   h+=dbgRow('TIDSSKALA',TIMES.map(t=>[t+'×','ts:'+t,DBG.ts===t]));
@@ -79,7 +79,7 @@ function renderDbg(){
   dbgEl.innerHTML=h;
 }
 function dbgAct(a){
-  const [cmd,arg]=a.split(':');
+  const [cmd,arg,arg2]=a.split(':');
   if(cmd==='close')return setDbg(false);
   if(cmd==='stage'&&!CUP){applyStage(+arg);if(racingNow())resetRace();else dbgOnReset();}
   if(cmd==='char'&&!CUP){applyCharacter(+arg);dbgRestart();}
@@ -90,7 +90,7 @@ function dbgAct(a){
   if(cmd==='fuel')DBG.fuel=!DBG.fuel;
   if(cmd==='items'){DBG.items=!DBG.items;if(DBG.items&&!DBG.lastItem)DBG.lastItem=player.held||'rocket';}
   if(cmd==='last'&&racingNow()&&!player.done){player.lap=LAPS-1;toast('SISTA VARVET');}
-  if(cmd==='give')dbgGive(arg);
+  if(cmd==='give')dbgGive(arg,arg2);
   if(cmd==='ai'){DBG.ai=arg;if(racingNow())dbgApplyAI();}
   if(cmd==='fps'){DBG.fps=!DBG.fps;}
   if(cmd==='phys'){DBG.phys=!DBG.phys;}
@@ -114,7 +114,7 @@ document.getElementById('btnDbg').addEventListener('click',()=>{setPause(false);
 function dbgFrame(rawDt){
   if(rawDt>0)DBG.fpsS+=(1/rawDt-DBG.fpsS)*0.05;
   if(DBG.fuel)player.fuel=TANK;
-  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow())player.held=DBG.lastItem;
+  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow()){player.held=DBG.lastItem;player.sugar=(DBG.lastLvl||1)-1;}
   if(dbgHud.hidden)return;
   const k=player,f=v=>v.toFixed(1);
   let t=DBG.fps?Math.round(DBG.fpsS)+' FPS'+(DBG.ts!==1?' · TID '+DBG.ts+'×':'')+'\n':'';
