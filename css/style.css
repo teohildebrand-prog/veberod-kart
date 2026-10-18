@@ -910,3 +910,50 @@ body.touch .ss-mir{min-height:44px}
   background:linear-gradient(180deg,rgba(7,26,77,0),rgba(7,26,77,.96) 30%)}
 .vs-go,.vs-back{white-space:nowrap}
 .card{min-height:44px}
+
+/* ── stage select on phones: compact scrolling roster + one preview, bottom bar fixed ──
+   #stages.sslist is set by 55-stage-select.js on the same media query that makes the roster one list */
+#stages.sslist .ss{overflow:hidden;gap:8px 12px;
+  padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
+  grid-template-columns:minmax(220px,42fr) minmax(0,58fr);grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-areas:"top top" "roster prev" "foot foot"}
+#stages.sslist .ss-roster{min-height:0;padding:4px;gap:0}
+#stages.sslist .ss-grid{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;gap:4px;
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y pinch-zoom;padding:2px}
+#stages.sslist .ss-pager{display:none}
+#stages.sslist .scard{flex:none;flex-direction:row;align-items:center;min-height:52px;border-width:2px;transform:none}
+#stages.sslist .scard.sel{border-width:3px}
+#stages.sslist .sc-img{flex:none;width:76px;height:auto;align-self:stretch;aspect-ratio:auto}
+#stages.sslist .sc-name{flex:1;min-width:0;justify-content:flex-start;text-align:left;min-height:0;
+  padding:4px 8px;font-size:14px;background:none;overflow-wrap:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stages.sslist .scard.sel .sc-name{background:none}
+#stages.sslist .sc-badges{position:static;flex:none;margin-right:6px}
+#stages.sslist .sc-cup{left:auto;right:0;top:auto;bottom:0;font-size:10px;padding:1px 5px}
+#stages.sslist .sc-why{left:76px;right:auto;top:auto;bottom:2px;padding:0 8px;background:none;font-size:10px;color:#ffb0a0}
+#stages.sslist .ss-prev{display:grid;grid-template-columns:42% 1fr;align-items:start;gap:8px;min-height:0;
+  overflow-y:auto;overscroll-behavior:contain}
+#stages.sslist .ss-shot{max-height:none;width:100%}
+#stages.sslist .ss-card{flex:none;overflow:visible;padding:8px 10px}
+#stages.sslist .ss-name b{font-size:24px}
+#stages.sslist .ss-name small{font-size:12px}
+#stages.sslist p.ss-tag{display:none}
+#stages.sslist .ss-info{grid-template-columns:1fr;gap:6px;padding-top:6px}
+#stages.sslist .ss-info dl{grid-template-columns:auto 1fr;gap:0 8px}
+#stages.sslist .ss-info dt{font-size:9px;line-height:1.6}
+#stages.sslist .ss-info dd{font-size:13px}
+#stages.sslist .ss-side{flex-direction:row;align-items:center;gap:6px}
+#stages.sslist .ss-map{display:none}
+#stages.sslist .ss-hints{display:none}
+#stages.sslist .vs-foot{position:static;margin:0 calc(-1*max(12px,env(safe-area-inset-right,0px))) 0 calc(-1*max(12px,env(safe-area-inset-left,0px)));
+  padding:8px max(12px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+  background:#06143f;border-top:2px solid #3f74d8}
+#stages.sslist .vs-back,#stages.sslist .vs-go{padding:6px 16px;font-size:16px}
+#stages.sslist .vs-go{flex:1;justify-content:center;max-width:60%}
+/* portrait: the preview on top (picture beside its facts), the list fills the rest */
+@media (max-width:760px) and (orientation:portrait){
+  #stages.sslist .ss{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:"top" "prev" "roster" "foot"}
+  #stages.sslist .ss-prev{grid-template-columns:44% 1fr;overflow:visible}
+  #stages.sslist .ss-name b{font-size:20px}
+  #stages.sslist .ss-info dd{font-size:12px}
+}

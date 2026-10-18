@@ -6,7 +6,8 @@
 Opens the name entry, main menu, cup setup, picnic pass, stage select, driver
 select and pause menu on four phone screens (landscape, landscape with the
 browser toolbar showing, a small landscape phone and portrait). Fails if a
-menu's main action is off screen, the page scrolls sideways, or a button is
+menu's main action is off screen, the stage roster isn't one
+scrolling list with its last track reachable, the page scrolls sideways, or a button is
 under 44 CSS px tall (filter chips excepted), or if pinch-zoom is
 turned off on a menu (headless Chromium can't pinch, so this reads touch-action). Set CHROMIUM to use an existing
 Chromium binary.
@@ -73,6 +74,15 @@ def main():
             click('btnCup'); check('cupsetup'); click('btnCupBack')
             click('btnAlbum'); check('album'); click('btnAlbumBack')
             click('btnStart'); check('stages')
+            # phones get one scrolling roster: the last track must scroll fully into view above the bottom bar
+            reach = page.evaluate('''()=>{const g=document.getElementById('ssGrid'),c=[...g.querySelectorAll('.scard')];
+              if(!document.getElementById('stages').classList.contains('sslist'))return {list:false,ok:c.length>0};
+              g.scrollTop=1e6;const last=c[c.length-1].getBoundingClientRect(),gr=g.getBoundingClientRect(),
+              foot=document.querySelector('#stages .vs-foot').getBoundingClientRect();
+              return {list:true,ok:c.every(e=>!e.hidden)&&last.bottom<=gr.bottom+1&&last.bottom<=foot.top+1&&last.top>=gr.top-1}}''')
+            print(('ok   ' if reach['ok'] and reach['list'] else 'FAIL ') + f'{tag:9} stages    roster is one list, last track reachable')
+            if not (reach['ok'] and reach['list']):
+                fails.append(f'{tag}/stages-roster')
             click('btnStageGo'); check('pick')
             click('btnGo')
             page.wait_for_timeout(1500)
