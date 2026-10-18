@@ -10,7 +10,9 @@ addEventListener('keydown',e=>{
   if(stageKeys(e,k))return;               /* the stage picker has its own keys, V and Esc included */
   keys[k]=true;
   if(state==='select'){
-    const g=GRID.indexOf(charSel),mv=d=>{unpeek();applyCharacter(GRID[(g+d+GRID.length)%GRID.length]);ping(700,980,.04);};
+    const g=GRID.indexOf(charSel),mv=d=>{unpeek();     /* step over locked champions */
+      let n=g;do n=(n+d+GRID.length)%GRID.length;while(n!==g&&!charOpen(GRID[n]));
+      applyCharacter(GRID[n]);ping(700,980,.04);};
     if(k==='arrowleft'||k==='a')mv(-1);
     if(k==='arrowright'||k==='d')mv(1);
     if(k==='arrowup'||k==='w')mv(-GRID_COLS);

@@ -138,6 +138,7 @@ function commitRound(){
         c.unlocked.push(P.name+'-LACK',Q.name);
         if(C.id!=='final'&&cupOpen(cupDef({cup:'final'})))c.unlocked.push('FINALEN MOT RAKET-RUNE');
         if(C.id!=='final')c.unlocked.push(C.name+' SPEGELVÄND');
+        const B=CHARS.find(d=>d.boss===C.id);if(B)c.newDriver=B.id;        /* the champion joins the drivers */
       }
     }else if(pl===1){                      /* beat the rival: their paint, and their pennant on your kart */
       const rk='rival'+c.rival,P=PAINTS.find(p=>p.unlock===rk);
@@ -163,9 +164,11 @@ function drawRivalTag(){
 const sheetPick=document.getElementById('pick');
 let cupSetup=false;
 /** a pixel portrait per driver, drawn once by the game renderer into a data URL */
-function portrait(ci){
+const SILHOUETTE=new THREE.MeshBasicMaterial({color:0x0a1a4a});
+/** sil: an unbeaten champion's card, the shape in solid navy */
+function portrait(ci,sil){
   const c=CHARS[ci],v=buildKart(c.color,kindOf(c),'kart'),ps=new THREE.Scene();
-  ps.add(v.root);
+  ps.add(v.root);if(sil)ps.overrideMaterial=SILHOUETTE;
   const cam=new THREE.PerspectiveCamera(30,1,.1,50);
   const hy=kindOf(c)==='cow'?1.92:1.86;
   cam.position.set(.7,hy+.32,1.55);cam.lookAt(0,hy-.12,-.6);
@@ -179,7 +182,8 @@ function portrait(ci){
 (function buildCards(){
   document.getElementById('cards').style.setProperty('--cols',GRID_COLS);
   document.getElementById('cards').innerHTML=GRID.map(i=>
-    '<button class="vcard" role="option" data-i="'+i+'" aria-label="'+CHARS[i].name+'"><img alt="" src="'+portrait(i)+'"><span>'+
+    '<button class="vcard" role="option" data-i="'+i+'" aria-label="'+CHARS[i].name+'"><img alt="" src="'+portrait(i)+'"'+
+    (CHARS[i].boss?' data-sil="'+portrait(i,true)+'"':'')+'><span>'+
     CHARS[i].short+'</span></button>').join('');
   resize();
   document.querySelectorAll('#cards .vcard').forEach(el=>{
@@ -337,7 +341,7 @@ function showBrief(){
   const c=SAVE.cup;CUP=c;
   hideSheets();previewOn=false;state='menu';camInit=false;
   document.body.classList.remove('racing');
-  applyCharacter(c.char);applyCar(c.car);
+  applyCharacter(c.char,true);applyCar(c.car);
   const RR=cupRounds(c),si=STAGES.findIndex(S=>S.id===RR[c.round]),S=STAGES[si],CD=cupDef(c);
   applyStage(si);
   document.getElementById('briefTitle').innerHTML=S.name+'<i>'+CD.name+' · RUNDA '+(c.round+1)+' AV '+RR.length+'</i>';
@@ -385,6 +389,8 @@ function showPodium(){
   const CH=cupDef(c).champ&&CHAMPS[cupDef(c).champ];
   if(CH&&pl===1)note+=' Du slog '+CH.full+'!';
   if(c.unlocked&&c.unlocked.length)note+=' Upplåst: '+c.unlocked.join(', ')+'.';
+  const ND=c.newDriver&&CHARS.find(d=>d.id===c.newDriver);
+  if(ND)note+='<div class="newdrv">NY FÖRARE: '+ND.name+'! Välj '+ND.short+' på förarskärmen.</div>';
   const pn=document.getElementById('podNote');pn.innerHTML=note;
   pn.querySelector('svg').style.cssText='width:30px;height:30px;vertical-align:middle;margin-right:6px';
   if(pl>3)pn.querySelector('svg').style.cssText='width:54px;height:30px;vertical-align:middle;margin-right:6px';
