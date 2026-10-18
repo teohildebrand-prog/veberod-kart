@@ -22,12 +22,39 @@ const CARS=[
    mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1.15,burn:0.70,spinResist:1.4}},
   {id:'lant', name:'VEBERÖD LANTMÄSTARE', sub:'TRAKTOR', sig:'anders', bars:[.40,.80,1.0],
    blurb:'Orange-red, huge rear wheels, a front loader and a bale on the back.',
-   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1.15,spinResist:0.5}}
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1.15,spinResist:0.5}},
+  /* the rest of the roster's own vehicles (js/30-vehicles.js). Neutral numbers for now:
+     the driver's own handling decides, exactly as it did in the plain kart */
+  {id:'aker', name:'ÖSTERLEN ÅKERLOPPA', sub:'HEMBYGGD GÅRDSBUGGY', sig:'arne', bars:[.60,.92,.96],
+   blurb:'Built from old farm machinery: a crate of vegetables, one crooked headlamp and a spade along the side. Anders bought horsepower; Arne built something that knows the field.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'patrull',name:'LANDSVÄGSPATRULLEN', sub:'KORTAD PIKET', sig:'billy', bars:[.96,.66,.32],
+   blurb:'A pursuit estate with the back half missing, enormous blue lights and a bumper an inch off the tarmac. It hates fields, and it looks like it.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'mjolk', name:'VEBERÖD MJÖLKEXPRESS', sub:'MJÖLKBIL', sig:'cow', bars:[.50,1.0,.98],
+   blurb:'A cow-sized cab, a polished milk tank that rocks through every corner and two churns for exhausts that foam when the milk goes in.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'flyinge',name:'FLYINGE FULLGAS', sub:'PROTOTYP, OFÄRDIG', sig:'teo', bars:[1.0,.44,.40],
+   blurb:'A prototype someone kept making faster instead of finishing. Primer-grey door, bolts everywhere and a rear wing that shudders at full speed.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'lerum', name:'LERUM LINJE', sub:'TOURINGKOMBI', sig:'amanda', bars:[.86,.86,.56],
+   blurb:'A compact touring estate prepared with almost suspicious competence: roof box, strapped picnic, thermos in its holder and a wiper for everything Teo throws.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'hembak',name:'ÅHUS HEMBAKAT', sub:'BAGERIBIL', sig:'britta', bars:[.80,.80,.60],
+   blurb:'A butter-yellow bakery van with a bread oven in the back. Surprisingly quick: Britta has deliveries to make.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  /* the AI's own vehicles: looks only, AI handling comes from the roster */
+  {id:'tralla', name:'NISSES TRÄNGSELTRALLA', sub:'SKROTKART', npc:true, bars:[.7,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'nattvagn',name:'GLIMMINGEHUS NATTVAGN', sub:'SPÖKVAGN', npc:true, bars:[.8,.8,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'langskepp',name:'KUSTENS LÅNGSKEPP', sub:'LÅNGSKEPP PÅ HJUL', npc:true, bars:[.8,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'tallrik', name:'ÄNGELHOLM TALLRIK 46', sub:'FLYGANDE TEFAT', npc:true, bars:[.8,.8,.8],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}}
 ];
-const FREECARS=CARS.map((c,i)=>c.sig?-1:i).filter(i=>i>=0);
+const FREECARS=CARS.map((c,i)=>c.sig||c.npc?-1:i).filter(i=>i>=0);
 
 /** chassis; returns the wheel layout so each car sits on its own footprint */
-function buildBody(car,add,paint,dark,steel){
+function buildBody(car,add,paint,dark,steel,A){
+  if(VEHICLES[car])return VEHICLES[car](add,paint,dark,steel,A);
   const glass=psMat({color:0x2b3a4a}), chrome=psMat({color:0xc6ced6});
   if(car==='t96'){                                     /* rally fastback */
     add(new THREE.BoxGeometry(2.25,.92,4.5),paint,0,.92,0);
@@ -93,12 +120,23 @@ function buildBody(car,add,paint,dark,steel){
     add(new THREE.BoxGeometry(.08,.9,.08),rack, .5,1.55,-2.3);
     add(new THREE.BoxGeometry(1.1,.08,.08),rack,0,1.95,-2.3);
     const bike=psMat({color:0x2f6e9e}),rub=psMat({color:0x1b1d22});
-    for(const x of [-.62,.62]){const w=add(new THREE.TorusGeometry(.42,.05,4,10),rub,x,1.9,-2.48);void w;}
+    const bw=[];for(const x of [-.62,.62])bw.push(add(new THREE.TorusGeometry(.42,.05,4,10),rub,x,1.9,-2.48));
+    for(const x of [-.62,.62])bw.push(add(new THREE.BoxGeometry(.8,.04,.04),rub,x,1.9,-2.48));   /* spokes, so the spin shows */
     add(new THREE.BoxGeometry(1.2,.06,.06),bike,0,2.05,-2.48);
     add(new THREE.BoxGeometry(.06,.5,.06),bike,-.2,2.0,-2.48).rotation.z=.4;
     add(new THREE.BoxGeometry(.06,.5,.06),bike,.35,2.0,-2.48).rotation.z=-.3;
     add(new THREE.BoxGeometry(.06,.06,.5),bike,.45,2.3,-2.48);
     add(new THREE.BoxGeometry(.3,.06,.2),psMat({color:0x6b4a2e}),-.25,2.27,-2.48);
+    /* the academic clutter: paper stacks on the back seat, a parking permit over half the screen */
+    const paper=psMat({color:0xf4f1e6}),paperD=psMat({color:0xd8d2bf});
+    for(const [x,h] of [[-.55,.5],[-.1,.34],[.5,.62]]){add(new THREE.BoxGeometry(.42,h,.32),paper,x,1.2+h/2,-1.05);
+      add(new THREE.BoxGeometry(.43,.03,.33),paperD,x,1.2+h*.6,-1.05);}
+    add(new THREE.BoxGeometry(.38,.3,.04),psMat({map:plateTex(12,10,'P','#1d4ea8','#f0d040',7)}),.7,1.6,.48).rotation.x=-.35;
+    const wp=new THREE.Vector3();
+    A.anim.push((k,dt)=>{
+      const b=k.boost>0;for(const w of bw)w.rotation.z+=dt*(b?26:Math.abs(k.speed)*.05);
+      if(b&&Math.random()<.5){bw[0].getWorldPosition(wp);puff(wp.x,wp.y+.4,wp.z,.97,.96,.9,1.1);}   /* loose thesis pages */
+    });
     return {fx:1.06,fz:1.42,rx:1.08,rz:-1.42,r:.46,white:true,cy:.12,cz:-.35};
   }
   if(car==='raket'){                                   /* Mehmet's moped */
@@ -109,8 +147,23 @@ function buildBody(car,add,paint,dark,steel){
     add(new THREE.BoxGeometry(.24,1.0,.24),dark,0,1.25,1.12).rotation.x=-.3;
     add(new THREE.BoxGeometry(1.2,.09,.09),steel,0,1.72,1.02);            /* handlebar */
     add(new THREE.BoxGeometry(.34,.24,.16),psMat({color:0xf6f2d8}),0,1.55,1.22);
-    add(new THREE.BoxGeometry(.18,.5,.06),psMat({color:0x5fb0e6}),.5,1.48,1.02);  /* club scarf */
-    add(new THREE.BoxGeometry(.18,.12,.07),psMat({color:0xf2f4f6}),.5,1.3,1.02);
+    const scarf=A.grp(.5,1.72,1.02);                                   /* club scarf */
+    A.put(scarf,new THREE.BoxGeometry(.18,.5,.06),psMat({color:0x5fb0e6}),0,-.24,0);
+    A.put(scarf,new THREE.BoxGeometry(.18,.12,.07),psMat({color:0xf2f4f6}),0,-.42,0);
+    add(new THREE.BoxGeometry(.04,.5,.46),psMat({color:0xe8e2d0}),-.35,.96,.9);    /* a replacement panel */
+    for(const [x,y,z] of [[.35,1.0,.75],[-.35,.74,-.3],[.35,.7,-.85]]){             /* football stickers */
+      add(new THREE.BoxGeometry(.03,.14,.14),psMat({color:0xf2f4f6}),x,y,z);
+      add(new THREE.BoxGeometry(.035,.06,.06),psMat({color:0x15171b}),x,y,z);}
+    add(new THREE.CylinderGeometry(.14,.1,1.0,6),steel,.36,.62,-1.3).rotation.x=Math.PI/2+.2;  /* an unnecessary exhaust */
+    add(new THREE.CylinderGeometry(.16,.16,.08,6),dark,.36,.72,-1.8).rotation.x=Math.PI/2+.2;
+    /* the 45 plate flips up in a boost wheelie and shows TYP underneath */
+    add(new THREE.BoxGeometry(.44,.26,.04),psMat({map:plateTex(16,10,'TYP','#15171b','#f0d040',6)}),0,.82,-1.72);
+    const flip=A.grp(0,.96,-1.75);
+    A.put(flip,new THREE.BoxGeometry(.46,.28,.04),psMat({map:plateTex(16,10,'45','#15171b','#f2f4f6',7)}),0,-.14,0);
+    A.anim.push(k=>{
+      flip.rotation.x=lerp(flip.rotation.x,k.wheelie&&k.boost>0?-1.9:0,.25);
+      scarf.rotation.x=lerp(scarf.rotation.x,-clamp(Math.abs(k.speed)*.035,0,1.3)+Math.sin(clock*13)*.12,.2);
+    });
     add(new THREE.BoxGeometry(.6,.26,1.1),seat,0,.98,-.55);
     add(new THREE.BoxGeometry(.66,.36,.9),paint,0,.74,-.6);
     const box=add(new THREE.BoxGeometry(.86,.66,.74),psMat({color:0xf0a818}),0,1.42,-1.35);  /* snack box */
@@ -135,10 +188,24 @@ function buildBody(car,add,paint,dark,steel){
     }
     add(new THREE.BoxGeometry(1.86,.12,1.8),paint,0,3.52,-.98);           /* roof */
     add(new THREE.BoxGeometry(.24,.22,.24),amber,0,3.7,-.98);             /* beacon */
-    add(new THREE.BoxGeometry(2.2,.12,.9),rust,0,.42,3.25);               /* the bucket */
-    add(new THREE.BoxGeometry(2.2,.7,.12),rust,0,.75,2.84);
-    add(new THREE.BoxGeometry(.12,.6,.9),rust,-1.04,.7,3.25);
-    add(new THREE.BoxGeometry(.12,.6,.9),rust, 1.04,.7,3.25);
+    add(new THREE.SphereGeometry(.2,6,3,0,6.283,0,Math.PI/2),psMat({color:0xf2f4f6}),.6,3.58,-1.5);  /* GPS */
+    for(const x of [-.75,-.4,.4,.75])add(new THREE.BoxGeometry(.24,.18,.12),psMat({color:0xfff6d0,unlit:true}),x,3.5,-.06);  /* work lights */
+    const rows=pixTex(16,12,g=>{g.fillStyle='#0c2a14';g.fillRect(0,0,16,12);g.fillStyle='#5cff7a';
+      for(let x=2;x<16;x+=3)g.fillRect(x,1,1,10);g.fillStyle='#f0c030';g.fillRect(7,8,2,2);});
+    add(new THREE.BoxGeometry(.42,.32,.05),psMat({map:rows,unlit:true}),-.55,2.05,.2).rotation.x=-.3;  /* perfectly straight lines */
+    const bk=A.grp(0,.42,2.84);                                            /* the bucket */
+    A.put(bk,new THREE.BoxGeometry(2.2,.12,.9),rust,0,0,.41);
+    A.put(bk,new THREE.BoxGeometry(2.2,.7,.12),rust,0,.33,0);
+    A.put(bk,new THREE.BoxGeometry(.12,.6,.9),rust,-1.04,.28,.41);
+    A.put(bk,new THREE.BoxGeometry(.12,.6,.9),rust, 1.04,.28,.41);
+    const cake=A.put(bk,new THREE.CylinderGeometry(.55,.6,.14,8),psMat({color:0xc89a52}),0,.14,.42);
+    A.put(cake,new THREE.CylinderGeometry(.4,.45,.06,8),psMat({color:0xf4ece0}),0,.08,0);
+    cake.scale.set(1.25,.6,1);cake.visible=false;
+    A.anim.push(k=>{
+      const t=k.bucketAt==null?99:clock-k.bucketAt;
+      cake.visible=t<1.3;
+      bk.rotation.x=t<1.6?(t<.9?-.12:Math.sin(Math.min(1,(t-.9)/.7)*Math.PI)*.9):0;   /* carries it, then tips it away */
+    });
     addHay(add,0,1.65,-2.4);
     return {fx:.95,fz:1.65,rx:1.32,rz:-1.0,r:.5,rr:1.0,rw:.6,cy:.5,cz:-.55};
   }
@@ -188,7 +255,7 @@ function blockGlasses(addc,y,col){
   addc(new THREE.BoxGeometry(.08,.03,.04),m,0,y+.03,-.345);
 }
 /** Björn, Mehmet, Anders and Britta: torso, arms on the wheel, head, hair and props */
-function buildDriver(kind,addc,add,skin,dark){
+function buildDriver(kind,addc,add,skin,dark,car){
   const torso=(m,front)=>{addc(new THREE.BoxGeometry(.94,.86,.56),m,0,1.24,-.60);
     if(front)addc(new THREE.BoxGeometry(.96,.62,.1),front,0,1.28,-.31);};
   const arms=(m,cuff)=>{
@@ -307,13 +374,15 @@ function buildDriver(kind,addc,add,skin,dark){
     addc(new THREE.BoxGeometry(.12,.3,.4),hair,-.3,1.92,-.66);
     addc(new THREE.BoxGeometry(.12,.3,.4),hair, .3,1.92,-.66);
     addc(new THREE.SphereGeometry(.17,6,5),hair,0,2.3,-.72);                        /* bun */
-    add(new THREE.BoxGeometry(.9,.42,.6),psMat({color:0xb07a3a}),0,1.2,-1.75);       /* knitting basket */
-    add(new THREE.SphereGeometry(.2,6,5),psMat({color:0xd84a6a}),-.18,1.5,-1.75);
-    add(new THREE.SphereGeometry(.18,6,5),psMat({color:0x3f63c8}),.2,1.48,-1.7);
+    if(car!=='hembak'){                                /* the bakery van has a cooling rack there */
+      add(new THREE.BoxGeometry(.9,.42,.6),psMat({color:0xb07a3a}),0,1.2,-1.75);     /* knitting basket */
+      add(new THREE.SphereGeometry(.2,6,5),psMat({color:0xd84a6a}),-.18,1.5,-1.75);
+      add(new THREE.SphereGeometry(.18,6,5),psMat({color:0x3f63c8}),.2,1.48,-1.7);
+    }
   }
 }
 /** the four cup champions: the ghost, the chieftain, the green man and Raket-Rune */
-function buildChampion(kind,addc,add,skin,dark){
+function buildChampion(kind,addc,add,skin,dark,car){
   const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
   if(kind==='ghost'){                       /* Spöket på Glimmingehus: a sheet, a chain, a lantern */
     const sheet=psMat({color:0xe6eef4}),hole=psMat({color:0x161a24}),iron=psMat({color:0x4a4e56});
@@ -328,9 +397,11 @@ function buildChampion(kind,addc,add,skin,dark){
     for(let n=0;n<6;n++){const a=n/6*6.283;
       addc(B(.18,.22,.1),sheet,Math.sin(a)*.5,.74,-.6+Math.cos(a)*.5).rotation.y=a;}
     for(let n=0;n<4;n++)addc(B(.08,.08,.14),iron,.26+n*.07,.95-n*.06,.32-n*.12);
-    const pole=add(new THREE.CylinderGeometry(.03,.03,1.6,4),iron,.55,1.7,-1.25);pole.rotation.z=.12;
-    add(B(.3,.36,.3),psMat({color:0xffcc55,unlit:true}),.65,2.5,-1.25);
-    add(B(.36,.06,.36),iron,.65,2.71,-1.25);
+    if(car!=='nattvagn'){                              /* the carriage hangs Spöklyktan up front */
+      const pole=add(new THREE.CylinderGeometry(.03,.03,1.6,4),iron,.55,1.7,-1.25);pole.rotation.z=.12;
+      add(B(.3,.36,.3),psMat({color:0xffcc55,unlit:true}),.65,2.5,-1.25);
+      add(B(.36,.06,.36),iron,.65,2.71,-1.25);
+    }
   }else if(kind==='viking'){                /* Vikingahövdingen: fur, beard, horns, a round shield */
     const fur=psMat({color:0x6b4a2e}),hide=psMat({color:0x8a6a44}),beard=psMat({color:0xd0642a}),
           iron=psMat({color:0x8a9098}),horn=psMat({color:0xeee4c8});
@@ -384,14 +455,17 @@ function buildChampion(kind,addc,add,skin,dark){
 function addHay(add,x,y,z){
   add(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),x,y,z).rotation.z=Math.PI/2;
 }
-function buildKart(color,kind,car){
+/** opt.twin: the AI twin's variant of a vehicle (Teodor's unfinished side, say) */
+function buildKart(color,kind,car,opt){
   const root=new THREE.Group();
   const lean=new THREE.Group();root.add(lean);
   const paint=psMat({color}), dark=psMat({color:0x23272e}),
         steel=psMat({color:0xa8b0ba}), skin=psMat({color:0xd8a07c});
   const add=(g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);lean.add(e);return e;};
-  const lamps=[];
-  const SPEC=buildBody(car||'kart',add,paint,dark,steel);
+  const lamps=[],anim=[];
+  const grp=(x,y,z,p)=>{const g=new THREE.Group();g.position.set(x,y,z);(p||lean).add(g);return g;};
+  const put=(p,g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);p.add(e);return e;};
+  const SPEC=buildBody(car||'kart',add,paint,dark,steel,{anim,lamps,grp,put,color,twin:!!(opt&&opt.twin)});
   const cab=new THREE.Group();lean.add(cab);
   const addc=(g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);cab.add(e);return e;};
   cab.position.set(0,SPEC.cy!=null?SPEC.cy:(car==='acc'?-.06:(car&&car!=='kart'?.32:0)),
@@ -439,8 +513,8 @@ function buildKart(color,kind,car){
     addc(new THREE.CylinderGeometry(.06,.07,1.9,6),psMat({color:0x9a7b4f}),-.66,1.80,-1.50).rotation.x=.22;
     for(const t of [-.16,0,.16])
       addc(new THREE.BoxGeometry(.05,.40,.05),psMat({color:0xb9c2cc}),-.66+t,2.72,-1.72);
-    addc(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),0,1.3,-2.2).rotation.z=Math.PI/2;
-  }else if(kind==='billy'){     /* uniform, rutig mössa, varselväst, blåljus */
+    if(car!=='aker')addc(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),0,1.3,-2.2).rotation.z=Math.PI/2;
+  }else if(kind==='billy'){     /* uniform, rutig mössa, varselväst, blåljus (on the bar unless the car has its own) */
     const navy=psMat({color:0x17325e}), navyD=psMat({color:0x101f3c}),
           hiviz=psMat({color:0xe8d93a}), silver=psMat({color:0xc6ced6}),
           belt=psMat({color:0x15171b});
@@ -481,9 +555,9 @@ function buildKart(color,kind,car){
     addc(new THREE.CylinderGeometry(.33,.31,.16,10),navy,0,2.17,-.60);
     addc(new THREE.BoxGeometry(.62,.05,.30),navyD,0,2.03,-.36);     /* peak */
     addc(new THREE.BoxGeometry(.17,.17,.05),hiviz,0,2.17,-.38);     /* badge */
-    addc(new THREE.BoxGeometry(1.15,.1,.3),dark,0,1.73,-1.86);
+    if(!lamps.length){addc(new THREE.BoxGeometry(1.15,.1,.3),dark,0,1.73,-1.86);
     lamps.push(add(new THREE.BoxGeometry(.44,.26,.3),psMat({color:0x2f78e8,unlit:true}),-.31,1.9,-1.86));
-    lamps.push(add(new THREE.BoxGeometry(.44,.26,.3),psMat({color:0xeaf1f8,unlit:true}), .31,1.9,-1.86));
+    lamps.push(add(new THREE.BoxGeometry(.44,.26,.3),psMat({color:0xeaf1f8,unlit:true}), .31,1.9,-1.86));}
   }else if(kind==='cow'){                              /* en ko bakom ratten */
     const hide=psMat({color:0xf0ece2}), spot=psMat({color:0x8a4a2c}),
           pink=psMat({color:0xe0a0a4});
@@ -505,12 +579,14 @@ function buildKart(color,kind,car){
     addc(new THREE.BoxGeometry(.3,.12,.18),hide, .42,1.94,-.62);
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}),-.26,2.3,-.62).rotation.z=.7;
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}), .26,2.3,-.62).rotation.z=-.7;
-    addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
-    addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
+    if(car!=='mjolk'){                                 /* the Mjölkexpress carries its own tank */
+      addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
+      addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
+    }
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
-    buildDriver(kind,addc,add,skin,dark);
+    buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
-    buildChampion(kind,addc,add,skin,dark);
+    buildChampion(kind,addc,add,skin,dark,car);
   }else{
     addc(new THREE.BoxGeometry(.78,.78,.5),dark,0,1.22,-.62);
     addc(new THREE.BoxGeometry(.22,.2,.88),skin,-.34,1.12,.02);
@@ -523,20 +599,23 @@ function buildKart(color,kind,car){
 
   const wheelG=(r,w)=>{const t=new THREE.CylinderGeometry(r,r,w,8);t.rotateZ(Math.PI/2);return flat(t);};
   const hubOf=(r,w,k)=>{const c=new THREE.CylinderGeometry(r*k,r*k,w+.04,6);c.rotateZ(Math.PI/2);return flat(c);};
-  const hubM=SPEC.white?psMat({color:0xf2efe6}):steel;
+  const hubM=SPEC.white?psMat({color:0xf2efe6}):SPEC.hub!=null?psMat({color:SPEC.hub}):steel;
   const wheels=[],pivots=[];
   const mk=(x,z,front)=>{
-    const r=front?SPEC.r:(SPEC.rr||SPEC.r),wd=front?.4:(SPEC.rw||.4);
+    const n=wheels.length;
+    const r=SPEC.radii?SPEC.radii[n]:front?SPEC.r:(SPEC.rr||SPEC.r),
+          wd=front?(SPEC.fw||.4):(SPEC.rw||.4);
     const piv=new THREE.Group();piv.position.set(x,r,z);lean.add(piv);
     const w=new THREE.Mesh(wheelG(r,wd),dark);piv.add(w);
-    w.add(new THREE.Mesh(hubOf(r,wd,SPEC.white?.7:.45),hubM));
+    if(SPEC.wheel)SPEC.wheel(w,r,wd,n);
+    else w.add(new THREE.Mesh(hubOf(r,wd,SPEC.white?.7:(SPEC.hubK||.45)),hubM));
     if(SPEC.white)w.add(new THREE.Mesh(hubOf(r,wd,.4),steel));
     wheels.push(w);if(front)pivots.push(piv);
   };
   if(SPEC.two){mk(0,SPEC.fz,true);mk(0,SPEC.rz,false);}
   else{mk(-SPEC.fx,SPEC.fz,true);mk(SPEC.fx,SPEC.fz,true);
        mk(-SPEC.rx,SPEC.rz,false);mk(SPEC.rx,SPEC.rz,false);}
-  return {root,lean,wheels,pivots,lamps,spec:SPEC};
+  return {root,lean,wheels,pivots,lamps,anim,spec:SPEC};
 }
 
 const blobTex=pixTex(32,32,(g)=>{
@@ -553,15 +632,15 @@ const blobTex=pixTex(32,32,(g)=>{
 /* drivers. The order is the save format (cup.char is an index), so new ones go on the end;
    GRID is the order on the select screen. sig = the vehicle that belongs to this driver. */
 const CHARS=[
-  {id:'arne',short:'ARNE',name:'BONDEN ARNE',role:'LANTBRUKARE, ÖSTERLEN',
-   color:0x8b2b1c,maxSpeed:39.6,power:28,offRoad:0.80,boostMul:1.32,gripOn:10.2,
+  {id:'arne',short:'ARNE',name:'BONDEN ARNE',role:'LANTBRUKARE, ÖSTERLEN',sig:'aker',
+   color:0xa8483a,maxSpeed:39.6,power:28,offRoad:0.80,boostMul:1.32,gripOn:10.2,
    stats:[0.60,0.92,0.96],quirk:['ÅKERVANA','Gräs och grus bromsar honom knappt.'],
    blurb:'Slowest flat out, but he crosses fields for a living. Grass and gravel barely slow him down, and he plants the kart in a corner like a fence post.'},
-  {id:'billy',short:'BILLY',name:'POLISEN BILLY BOOL',role:'ORDNINGSMAKTEN',
+  {id:'billy',short:'BILLY',name:'POLISEN BILLY BOOL',role:'ORDNINGSMAKTEN',sig:'patrull',
    color:0x1d4ea8,maxSpeed:43.2,power:25,offRoad:0.48,boostMul:1.50,gripOn:8.3,
    stats:[0.96,0.66,0.32],quirk:['BLÅLJUS','Mjölken ger längre och hårdare fart.'],
    blurb:'The quickest thing on tarmac, and his milk boosts run longer and harder. Put one wheel on the verge and the whole lap is gone.'},
-  {id:'cow',short:'MAJROS',name:'KOSSAN MAJROS',role:'MJÖLKKO, VEBERÖD',
+  {id:'cow',short:'MAJROS',name:'KOSSAN MAJROS',role:'MJÖLKKO, VEBERÖD',sig:'mjolk',
    color:0xf0ece2,maxSpeed:38.6,power:30.5,offRoad:0.90,boostMul:1.28,gripOn:11.6,milk:1.45,
    stats:[0.50,1.00,0.98],quirk:['EGEN MJÖLK','Mjölken räcker 45 % längre. H för att råma.'],
    blurb:'Slowest of the lot and she knows it. Four hooves of grip, a field is just a shortcut, and every bottle of milk lasts her half as long again. H to moo.'},
@@ -581,62 +660,63 @@ const CHARS=[
    say:{start:'Det är bara en åker med asfalt på.',hit:'PAPPA SKULLE HA BROMSAT HÄR.'},
    blurb:'Arne\'s son, who went big. Slowest in a straight line, best in the mud, and heavy enough to shove anyone off his line.'},
   /* an easter egg: the people who made the game */
-  {id:'teo',short:'TEO',name:'TEO',role:'TOLLARP',
-   color:0x8f2f24,maxSpeed:43.8,power:25,offRoad:0.52,boostMul:1.55,gripOn:8.0,
+  {id:'teo',short:'TEO',name:'TEO',role:'TOLLARP',sig:'flyinge',
+   color:0x2f62d8,maxSpeed:43.8,power:25,offRoad:0.52,boostMul:1.55,gripOn:8.0,
    stats:[1.00,0.44,0.40],quirk:['FULL GAS','Snabbast rakt fram, hopplös i kurvorna.'],
    say:{start:'Jag byggde den här banan!',hit:'DET DÄR ÄR EN BUGG!'},
    blurb:'He made this game, and it shows: flat out on every straight and still working out the corners.'},
-  {id:'amanda',short:'AMANDA',name:'AMANDA',role:'LUND',
-   color:0x1d1f24,maxSpeed:42.0,power:27,offRoad:0.62,boostMul:1.34,gripOn:10.6,burn:0.88,
+  {id:'amanda',short:'AMANDA',name:'AMANDA',role:'LUND',sig:'lerum',
+   color:0x6e1f2c,maxSpeed:42.0,power:27,offRoad:0.62,boostMul:1.34,gripOn:10.6,burn:0.88,
    stats:[0.86,0.86,0.56],quirk:['NOGGRANN','Perfekt linje: greppet håller och bensinen räcker längre.'],
    say:{start:'Nu kör vi!',hit:'TEO! VAD HAR DU BYGGT?!'},
    blurb:'Smiles the whole way round, never puts a wheel wrong, and somehow always has fuel left at the end.'},
-  {id:'britta',kind:'granny',short:'BRITTA',name:'FARMOR BRITTA',role:'ÅHUS',
-   color:0x5faf4a,maxSpeed:41.0,power:27,offRoad:0.64,boostMul:1.38,gripOn:10.4,shieldMul:2,
+  {id:'britta',kind:'granny',short:'BRITTA',name:'FARMOR BRITTA',role:'ÅHUS',sig:'hembak',
+   color:0xf2d36b,maxSpeed:41.0,power:27,offRoad:0.64,boostMul:1.38,gripOn:10.4,shieldMul:2,
    stats:[0.80,0.80,0.60],quirk:['HEMBAKAT','Hennes äggkaka skyddar dubbelt så länge.'],
    blurb:'Bakes for the whole village and drives like she is late for the bus. Her own äggkaka holds twice as long.'}
 ];
 const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','amanda','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
 const kindOf=c=>c.kind||c.id;
-/* an AI who is also the player's driver races as a twin */
-const TWIN={cow:[1,'STJÄRNA'],teo:[2,'TEODOR'],amanda:[3,'MANDY'],britta:[5,'BIRGITTA']};
+/* an AI who is also the player's driver races as a twin: [roster slot, name, paint] in the
+   same vehicle (Teodor's prototype is unfinished on the other side) */
+const TWIN={cow:[1,'STJÄRNA',0xf08aa8],teo:[2,'TEODOR',0x2f62d8],amanda:[3,'MANDY',0x2f5a3a],britta:[5,'BIRGITTA',0xb89ad8]};
 let LAPS=3;
 const ROSTER=[
   {name:'DU',     color:0xd8362a,ai:false,kind:'generic'},
   /* en ko: tung, seg, men oslagbar i åkern */
-  {name:'MAJROS', color:0xf0ece2,ai:true,kind:'cow',car:'t240',
+  {name:'MAJROS', color:0xf0ece2,ai:true,kind:'cow',car:'mjolk',
    maxSpeed:39.8,power:31,offRoad:.90,boostMul:1.26,gripOn:12.2,
    lineSpread:1.3,caution:3.0,lookAdd:3,driftLove:0.55,lean:{rough:-0.6}},
   /* Teo: snabbast rakt fram, hopplös i kurvorna */
-  {name:'TEO',    color:0x8f2f24,ai:true,kind:'teo',car:'acc',
+  {name:'TEO',    color:0x2f62d8,ai:true,kind:'teo',car:'flyinge',
    maxSpeed:44.8,power:25,offRoad:.52,boostMul:1.58,gripOn:7.9,
    lineSpread:4.8,caution:2.0,lookAdd:-3,driftLove:1.40,lean:{risk:0.5}},
   /* Amanda: perfekt linje, bromsar i tid, aldrig utanför */
-  {name:'AMANDA', color:0x1d1f24,ai:true,kind:'amanda',car:'t96',
+  {name:'AMANDA', color:0x6e1f2c,ai:true,kind:'amanda',car:'lerum',
    maxSpeed:42.8,power:28,offRoad:.66,boostMul:1.36,gripOn:10.8,
    lineSpread:0.6,caution:2.8,lookAdd:7,driftLove:1.05,lean:{risk:1.5,traffic:1.5}},
-  {name:'NISSE',  color:0x1fa8a0,ai:true,kind:'generic',car:'t96',
+  {name:'NISSE',  color:0x1fa8a0,ai:true,kind:'generic',car:'tralla',
    maxSpeed:42.4,power:27,offRoad:.62,boostMul:1.38,gripOn:9.9,
    lineSpread:3.0,caution:2.6,lookAdd:1,driftLove:1.15,lean:{traffic:2}},
-  {name:'BRITTA', color:0x5faf4a,ai:true,kind:'granny',car:'t240',
+  {name:'BRITTA', color:0xf2d36b,ai:true,kind:'granny',car:'hembak',
    maxSpeed:41.6,power:26,offRoad:.60,boostMul:1.38,gripOn:10.0,
    lineSpread:3.4,caution:2.7,lookAdd:2,driftLove:0.85,lean:{fuel:2,defend:true}}
 ];
 /* the champions: each one takes the rival's grid slot in their own cup */
 const CHAMPS={
-  spoket:{name:'SPÖKET',full:'SPÖKET PÅ GLIMMINGEHUS',color:0xcfe0ea,ai:true,kind:'ghost',car:'kart',
+  spoket:{name:'SPÖKET',full:'SPÖKET PÅ GLIMMINGEHUS',color:0xcfe0ea,ai:true,kind:'ghost',car:'nattvagn',
    maxSpeed:43.2,power:28,offRoad:.70,boostMul:1.42,gripOn:10.6,
    lineSpread:0.8,caution:2.6,lookAdd:5,driftLove:1.10,lean:{risk:1.2},
    say:'Hoooo... ingen kör förbi Glimmingehus.'},
-  viking:{name:'HÖVDINGEN',full:'VIKINGAHÖVDINGEN',color:0x7a4a2a,ai:true,kind:'viking',car:'acc',
+  viking:{name:'HÖVDINGEN',full:'VIKINGAHÖVDINGEN',color:0x7a4a2a,ai:true,kind:'viking',car:'langskepp',
    maxSpeed:43.6,power:27,offRoad:.72,boostMul:1.46,gripOn:10.2,
    lineSpread:2.0,caution:2.2,lookAdd:2,driftLove:1.30,lean:{traffic:1.5},
    say:'Till Valhall! Eller åtminstone till mål.'},
-  gubbe:{name:'GRÖNA GUBBEN',full:'GRÖNA GUBBEN FRÅN SKOGEN',color:0x4fd04a,ai:true,kind:'gubbe',car:'t96',
+  gubbe:{name:'GRÖNA GUBBEN',full:'GRÖNA GUBBEN FRÅN SKOGEN',color:0x4fd04a,ai:true,kind:'gubbe',car:'tallrik',
    maxSpeed:43.8,power:29,offRoad:.82,boostMul:1.44,gripOn:10.8,
    lineSpread:1.0,caution:2.5,lookAdd:4,driftLove:1.0,lean:{rough:-0.5},
    say:'Bliip. Jordbor kör så långsamt.'},
-  rune:{name:'RAKET-RUNE',full:'RAKET-RUNE',color:0xd82a2a,ai:true,kind:'rune',car:'kart',
+  rune:{name:'RAKET-RUNE',full:'RAKET-RUNE',color:0xd82a2a,ai:true,kind:'rune',car:'overljud',
    maxSpeed:44.2,power:31,offRoad:.70,boostMul:1.55,gripOn:11.0,
    lineSpread:0.8,caution:2.4,lookAdd:5,driftLove:1.2,lean:{risk:1.3},
    say:'Ingen slår Raket-Rune på hans egen runda!'}};
