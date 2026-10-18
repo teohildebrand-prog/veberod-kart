@@ -173,25 +173,32 @@ function buildItems(){
     while(!clearOfForks(at,6))at=(at+8)%N;
     addItem('fuel',at,(k%2?1:-1)*HW*0.62);
   }
-  /* sockerbitar: two in every lane, then the risky lines of the main road: just past
-     each jump's landing and on the inside verge of the two tightest corners */
+  /* sockerbitar: two in every lane, and on the main road short rows of three on the
+     line you drive anyway (a touch to the inside of the bend), spread round the lap */
   for(const R of ALTS)for(const f of [0.35,0.7]){
     const j=Math.round(f*(R.n-1));addItemAt('sugar',R.X[j],R.Z[j],R.Y[j],R.MI[j],0,R.idx);}
-  for(const J of JUMPS)addItem('sugar',(J.at+J.dn+5)%N,(hash2(J.at*.37,3.1)*2-1)*HW*0.45);
-  const tight=[];
-  for(let i=0;i<N;i++){
-    if(Math.abs(scurv[i])<0.22||!clearOfForks(i,8))continue;
-    if(Math.abs(scurv[i])<Math.abs(scurv[(i+1)%N])||Math.abs(scurv[i])<Math.abs(scurv[(i-1+N)%N]))continue;
-    tight.push(i);
+  const GAP=7, spots=[];                                    /* rows sit between the box rows */
+  for(let m=76;m<N;m+=72)for(const o of [0,-12,12,-24,24]){
+    const at=(m+o-GAP+N)%N;
+    if(sugarRowOk(at,GAP)){spots.push(at);break;}
   }
-  tight.sort((a,b)=>Math.abs(scurv[b])-Math.abs(scurv[a]));
-  const used=[];
-  for(const i of tight){
-    if(used.length>=2)break;
-    if(used.some(j=>Math.min(Math.abs(i-j),N-Math.abs(i-j))<90)||Math.min(i,N-i)<40)continue;
-    if((stage.stamps||[]).some(d=>d.i==='tight')&&Math.min(Math.abs(i-tightestCorner()),N-Math.abs(i-tightestCorner()))<40)continue;
-    used.push(i);addItem('sugar',(i+7)%N,-Math.sign(scurv[i])*(HW-0.6));
+  const rows=Math.min(5,spots.length);
+  for(let k=0;k<rows;k++){
+    const at=spots[Math.floor(k*spots.length/rows)];
+    for(let c=0;c<3;c++){
+      const i=(at+c*GAP)%N, lat=-Math.sign(scurv[i])*Math.min(HW*0.2,Math.abs(scurv[i])*8);
+      addItem('sugar',i,lat);
+    }
   }
+}
+
+/** a sugar row needs flat road: no jump, fork, start line or item boxes underneath */
+function sugarRowOk(at,gap){
+  const d=(a,b)=>Math.min(Math.abs(a-b),N-Math.abs(a-b)), end=(at+2*gap)%N, mid=(at+gap)%N;
+  if(d(mid,0)<32+gap||!clearOfForks(at,6)||!clearOfForks(end,6))return false;
+  for(const J of JUMPS)if(d(mid,J.at)<J.up+J.dn+gap+6)return false;
+  for(let i=40;i<N;i+=72)if(d(mid,i)<gap+10)return false;
+  return true;
 }
 
 function resetItems(){
@@ -223,7 +230,7 @@ function updateItems(dt){
 function checkPickups(){
   for(const it of items){
     if(it.cool>0)continue;
-    const milk=it.type==='milk', r2=it.type==='pie'?4.4:6.25;
+    const milk=it.type==='milk', r2=it.type==='pie'?4.4:it.type==='sugar'?11.6:6.25;
     for(const k of karts){
       const dx=k.x-it.x,dz=k.z-it.z;
       if(dx*dx+dz*dz>r2)continue;
