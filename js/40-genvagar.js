@@ -41,7 +41,7 @@ function farmSign(text,picnic){
    fired it crosses the line again. Karts on the main road bounce off a boulder. */
 let BLOCKERS=[];
 function addBlocker(R){
-  const j=COMMIT+3,x=R.X[j],z=R.Z[j],mi=R.MI[j];
+  const j=R.mouth||COMMIT+3,x=R.X[j],z=R.Z[j],mi=R.MI[j];   /* a track may set the door deeper in */
   let g;
   if(R.blockMesh)g=R.blockMesh(R,j);                /* a track's own: barrels, a door, a gate */
   else{
@@ -112,7 +112,7 @@ function buildAltWorld(){
   const mainGap=(x,z,pad)=>{const i=nearestGlobal(x,z);return Math.abs((x-sx[i])*rx[i]+(z-sz[i])*rz[i])>HW+pad;};
   for(const R of ALTS){
     /* the lane itself, laid over the main road's edge where they share it */
-    const lm=psMat({map:vergeTex(R.surface==='dirt'?'dirt':(R.surface==='sand'?'sand':'gravel'))});
+    const lm=psMat({map:R.tex?roadTex(R.tex):vergeTex(R.surface==='dirt'?'dirt':(R.surface==='sand'?'sand':'gravel'))});
     lm.polygonOffset=true;lm.polygonOffsetFactor=-2;lm.polygonOffsetUnits=-2;
     world.add(new THREE.Mesh(altRibbon(R,-R.hw,R.hw,.03,6,0,R.n-1),lm));
     let j=0;
