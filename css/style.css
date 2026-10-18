@@ -185,26 +185,6 @@
         color:rgba(205,238,255,.72);text-shadow:0 1px 3px rgba(0,24,48,.9)}
   #keys b{color:var(--amber);font-weight:700}
 
-  /* touch pads */
-  #pads{position:fixed;inset:auto 0 0 0;height:208px;display:none;z-index:6;
-        padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
-  body.touch #pads{display:block}
-  body.touch #keys{display:none}
-  body.touch #speedo{bottom:172px;width:184px}
-  body.touch #spd{font-size:34px}
-  body.touch #toast{bottom:238px}
-  .pad{position:absolute;bottom:16px;width:74px;height:74px;pointer-events:auto;
-       border-radius:50%;color:#fff;font:inherit;font-size:15px;font-weight:700;
-       letter-spacing:.06em;text-shadow:0 1px 3px rgba(0,30,60,.8)}
-  .pad:active,.pad.down{filter:brightness(1.35) saturate(1.3);transform:scale(.94)}
-  #pL{left:14px}#pR{left:96px}
-  #pD{right:96px;font-size:11px}
-  #pF{right:96px;bottom:98px;width:74px;height:54px;border-radius:999px;font-size:11px}
-  #pA{right:14px;height:112px;border-radius:999px}
-  #pB{right:14px;bottom:136px;width:74px;height:54px;border-radius:999px;font-size:11px;
-      background:linear-gradient(180deg,rgba(255,190,170,.5),rgba(255,255,255,.1) 47%,
-                 rgba(190,52,30,.5))}
-
   /* ── sheets: glass floating over the live 3D ── */
   .sheet{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:22px;
     background:
@@ -734,7 +714,6 @@
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   body.touch #camBtn{display:block}
   body.touch:not(.racing) #pads{display:none}
-  #pH{left:14px;bottom:98px;width:74px;height:40px;border-radius:999px;font-size:11px}
   #rotate{position:fixed;inset:0;z-index:30;display:none;place-items:center;align-content:center;
     gap:10px;text-align:center;color:#fff;font-weight:700;letter-spacing:.14em;
     background:linear-gradient(180deg,#1a6fb3,#063a66)}
@@ -744,16 +723,6 @@
   @media (orientation:portrait){body.touch.racing #rotate{display:grid}}
   @media (prefers-reduced-motion:reduce){#rotate .rot-ico{animation:none}}
   @media (max-height:540px){
-    body.touch #speedo{bottom:calc(10px + env(safe-area-inset-bottom,0px));width:170px}
-    body.touch #spd{font-size:28px}
-    body.touch #toast{bottom:120px}
-    .pad{width:66px;height:66px;bottom:10px}
-    #pL{left:max(12px,env(safe-area-inset-left))}#pR{left:calc(max(12px,env(safe-area-inset-left)) + 76px)}
-    #pH{left:max(12px,env(safe-area-inset-left));bottom:84px;height:36px}
-    #pA{right:max(12px,env(safe-area-inset-right));height:100px}
-    #pD{right:calc(max(12px,env(safe-area-inset-right)) + 76px)}
-    #pF{right:calc(max(12px,env(safe-area-inset-right)) + 76px);bottom:84px;height:46px}
-    #pB{right:max(12px,env(safe-area-inset-right));bottom:118px;height:46px}
     .sheet{padding:10px 14px}
     .sheet-in{padding:16px 20px}
     .sheet h1{font-size:30px}
@@ -809,3 +778,87 @@
 .audio-settings .alt{margin:6px 0 0;padding:6px 12px;font-size:11px}
 #paused{overflow-y:auto}
 #paused>.sheet-in{margin:auto}
+
+/* ── phone race layout: left-thumb stick, auto-gas, three right-thumb buttons, a slim HUD.
+   --u is one mockup pixel, scaled to the screen's short side (390 px phone = 1px) ── */
+#pads{position:fixed;inset:0;display:none;z-index:6;pointer-events:none;
+  --u:clamp(.8px,.2564vmin,1.3px);
+  --sl:max(10px,env(safe-area-inset-left,0px));--sr:max(10px,env(safe-area-inset-right,0px));
+  --sb:max(8px,env(safe-area-inset-bottom,0px))}
+body.touch #pads{display:block}
+body.touch:not(.racing) #pads{display:none}
+body.touch #keys{display:none}
+#pads,#pads *{touch-action:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none}
+#stickzone{position:absolute;left:0;bottom:0;width:44%;height:72%;pointer-events:auto}
+#stick{position:absolute;left:calc(var(--sl) + 14*var(--u));bottom:calc(var(--sb) + 14*var(--u));
+  width:calc(164*var(--u));height:calc(164*var(--u));border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,rgba(40,90,150,.42),rgba(6,30,66,.62));
+  border:calc(4*var(--u)) solid #ffd54a;
+  box-shadow:0 8px 22px rgba(2,22,44,.45),inset 0 2px 0 rgba(255,255,255,.35),inset 0 0 18px rgba(0,10,30,.5)}
+#stick.down{box-shadow:0 0 0 3px rgba(255,213,74,.35),0 8px 22px rgba(2,22,44,.45),inset 0 0 18px rgba(0,10,30,.5)}
+#stick i{position:absolute;top:50%;transform:translateY(-55%);font-style:normal;font-weight:700;
+  font-size:calc(40*var(--u));line-height:1;color:rgba(234,247,255,.75)}
+#stick .st-l{left:12%}#stick .st-r{right:12%}
+#stick span{position:absolute;left:0;right:0;bottom:11%;text-align:center;font-size:calc(11*var(--u));
+  font-weight:700;letter-spacing:.18em;color:rgba(234,247,255,.85)}
+#knob{position:absolute;left:50%;top:50%;width:calc(68*var(--u));height:calc(68*var(--u));
+  margin:calc(-34*var(--u)) 0 0 calc(-34*var(--u));border-radius:50%;
+  background:radial-gradient(circle at 42% 32%,#8fc4ff,#2a63c4 55%,#0f3577);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 6px 14px rgba(0,16,40,.6),inset 0 2px 0 rgba(255,255,255,.6);transition:transform .08s}
+#stick.down #knob{transition:none}
+.pad{position:absolute;pointer-events:auto;border-radius:50%;padding:0;color:#fff;font:inherit;font-weight:700;
+  letter-spacing:.06em;text-shadow:0 1px 3px rgba(0,30,60,.8);display:grid;place-items:center;align-content:center}
+.pad.down{filter:brightness(1.3) saturate(1.2);transform:scale(.93)}
+#pD{right:calc(var(--sr) + 16*var(--u));bottom:calc(var(--sb) + 14*var(--u));
+  width:calc(108*var(--u));height:calc(108*var(--u));font-size:calc(15*var(--u));
+  background:radial-gradient(circle at 50% 35%,rgba(120,100,60,.75),rgba(40,30,12,.82));
+  border:calc(4*var(--u)) solid #ffd54a}
+#pD svg{width:calc(38*var(--u));height:calc(28*var(--u));color:#ffe9a8;margin-bottom:2px}
+#pB{right:calc(var(--sr) + 114*var(--u));bottom:calc(var(--sb) + 92*var(--u));
+  width:calc(66*var(--u));height:calc(66*var(--u));font-size:calc(11*var(--u));
+  background:radial-gradient(circle at 50% 35%,#f08a4a,#b13a12 70%);
+  border:calc(3*var(--u)) solid rgba(255,190,140,.85)}
+#pF{right:calc(var(--sr) + 20*var(--u));bottom:calc(var(--sb) + 132*var(--u));
+  width:calc(86*var(--u));height:calc(86*var(--u));font-size:calc(10*var(--u));
+  background:radial-gradient(circle at 50% 30%,#4f9ef0,#1a5cc0 55%,#0b2f74);
+  border:calc(3*var(--u)) solid rgba(170,215,255,.9)}
+#pF .pf-l{position:absolute;left:0;right:0;bottom:16%;text-align:center}
+/* the item slot rides inside ANVÄND; the level numeral becomes its corner badge */
+#pF #slot{position:static;width:calc(52*var(--u));height:calc(52*var(--u));margin-top:calc(-12*var(--u));
+  background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#pF #slot.off{display:grid;visibility:hidden}
+#pF #slotv{width:calc(40*var(--u));height:calc(40*var(--u))}
+#pF #lvlbadge{top:calc(-6*var(--u));left:auto;right:calc(-6*var(--u));width:calc(30*var(--u));
+  height:calc(30*var(--u));padding:0;border-radius:50%;display:grid;place-items:center;
+  font-size:calc(11*var(--u));letter-spacing:0;text-indent:0}
+#pF #lvlbadge.off{display:none}
+#autogas{position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(var(--sb) + 64*var(--u));display:none;align-items:center;gap:6px;
+  font-size:calc(10*var(--u));font-weight:700;letter-spacing:.14em;color:#fff;text-shadow:0 1px 3px rgba(0,24,48,.9)}
+#autogas i{width:9px;height:9px;border-radius:50%;background:#4cd137;box-shadow:0 0 8px #4cd137}
+body.autogas #autogas{display:flex}
+/* slim HUD so the road stays visible */
+body.touch #board{top:calc(8px + env(safe-area-inset-top,0px));left:var(--sl,10px);gap:12px;padding:6px 10px;border-radius:12px}
+body.touch #board .val{font-size:19px}
+body.touch #board .lbl{font-size:8px;margin-bottom:3px}
+body.touch #clock{top:calc(8px + env(safe-area-inset-top,0px));right:calc(max(10px,env(safe-area-inset-right,0px)) + 46px);
+  padding:6px 10px;border-radius:12px}
+body.touch #clock .lbl,body.touch #clock .sub{display:none}
+body.touch #clock .val{font-size:16px}
+body.touch #map{display:block;top:calc(8px + env(safe-area-inset-top,0px));right:auto;
+  left:calc(max(10px,env(safe-area-inset-left,0px)) + 122px);width:62px;height:62px;border-radius:50%}
+body.touch #pause{left:auto;transform:none;right:max(10px,env(safe-area-inset-right,0px));
+  top:calc(8px + env(safe-area-inset-top,0px));width:38px;height:38px;border-radius:50%}
+body.touch #rescue{left:auto;right:calc(max(10px,env(safe-area-inset-right,0px)) + 46px);top:calc(48px + env(safe-area-inset-top,0px));
+  width:36px;height:28px}
+body.touch #camBtn{left:auto;right:calc(max(10px,env(safe-area-inset-right,0px)) + 88px);top:calc(48px + env(safe-area-inset-top,0px));
+  width:40px;height:28px}
+body.touch #slotname{display:none}
+body.touch #speedo{bottom:max(6px,env(safe-area-inset-bottom,0px));width:min(200px,30vw)}
+body.touch #spd{font-size:26px}
+body.touch #speedo .meter{margin-top:4px;height:8px}
+body.touch #speedo .fl{display:none}
+body.touch #speedo .meter.fuelm{height:7px;margin-top:3px}
+body.touch #toast{bottom:auto;top:calc(56px + env(safe-area-inset-top,0px));font-size:12px;padding:5px 14px}

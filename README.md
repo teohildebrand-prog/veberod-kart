@@ -35,9 +35,12 @@ pause menu after that.
 ### On a phone
 
 Play at https://teohildebrand-prog.github.io/veberod-kart/ (GitHub Pages,
-served from `main`). Hold the phone sideways. Touch pads appear on touch
-screens: steer left/right, gas, brake, drift (SLADD), item (SKJUT), horn
-(TUT), plus camera (KAM), pause and back-on-track at the top. On Android the
+served from `main`). Hold the phone sideways. Left thumb steers on the STYR
+stick (analog: a small push is a gentle turn); gas is automatic. Right thumb
+has BROMS (hold to brake, then reverse), SLADD and ANVÄND (shows your item);
+a thumb can slide between BROMS and SLADD. Camera (KAM), pause and
+back-on-track sit at the top. Pinch, double-tap zoom and page scrolling are
+blocked during a race (menus still scroll); `tools/touch_test.py` checks it. On Android the
 first tap goes fullscreen; on iPhone use Share → Add to Home Screen for a
 fullscreen icon.
 

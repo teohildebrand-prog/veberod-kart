@@ -55,13 +55,13 @@
 <pre id="dbgHud" hidden></pre>
 
 <div id="pads">
-  <button class="pad" id="pL" aria-label="Steer left">&lt;</button>
-  <button class="pad" id="pR" aria-label="Steer right">&gt;</button>
-  <button class="pad" id="pD" aria-label="Drift">SLADD</button>
-  <button class="pad" id="pF" aria-label="Fire">SKJUT</button>
-  <button class="pad" id="pB" aria-label="Brake">BROMS</button>
-  <button class="pad" id="pA" aria-label="Accelerate">^</button>
-  <button class="pad" id="pH" aria-label="Tuta">TUT</button>
+  <div id="stickzone" aria-label="Styr">
+    <div id="stick"><i class="st-l">&#8249;</i><i class="st-r">&#8250;</i><b id="knob"></b><span>STYR</span></div>
+  </div>
+  <div id="autogas"><i></i>AUTO-GAS</div>
+  <button class="pad" id="pF" aria-label="Använd föremål"><span class="pf-l">ANVÄND</span></button>
+  <button class="pad" id="pB" aria-label="Broms">BROMS</button>
+  <button class="pad" id="pD" aria-label="Sladd"><svg viewBox="0 0 40 30" aria-hidden="true"><path d="M8 26c10-2 4-9 13-11s11-6 6-11" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><path d="M15 27c8-3 4-8 12-10s10-6 7-11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg><span>SLADD</span></button>
 </div>
 <div id="rotate" aria-hidden="true">
   <div class="rot-ico">&#8635;</div>
