@@ -36,6 +36,8 @@ function drawKart(k){
   drawShield(k);
   if(k.rattle>0||(k.boost>0&&k.boostLvl>=3))       /* beans or cream: the whole kart shakes */
     k.v.root.position.add(nV.set(rand(-.07,.07),rand(0,.08),rand(-.07,.07)));
+  const dt=clamp(clock-(k.v.at==null?clock:k.v.at),0,.1);k.v.at=clock;
+  for(const f of k.v.anim)f(k,dt);               /* each vehicle's own moving prop */
   k.blob.scale.setScalar(clamp(1-Math.max(0,k.y-gy)*0.045,0.4,1));
   k.v.lean.rotation.x=k.air?clamp(-k.vy*0.024,-0.42,0.42)
                            :lerp(k.v.lean.rotation.x,k.wheelie&&k.boost>0?-0.3:0,0.22);

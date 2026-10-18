@@ -101,7 +101,7 @@ function blockHit(k){
   if(k.shield>0&&k.pans>1){k.pans--;if(k===player){toast('STEKPANNAN TOG DEN! '+k.pans+' KVAR');ping(1200,500,.12);}return true;}
   if(k.shield>0){k.shield=0;k.pans=0;if(k===player){toast('BLOCKERAT!');ping(700,300,.12);}return true;}
   if(k.bucket&&k.bucketLap!==k.lap){
-    k.bucketLap=k.lap;
+    k.bucketLap=k.lap;k.bucketAt=clock;
     for(let p=0;p<10;p++)puff(k.x+Math.sin(k.yaw)*3+rand(-.8,.8),k.y+rand(.3,1),k.z+Math.cos(k.yaw)*3+rand(-.8,.8),.6,.45,.3,.5);
     if(k===player){toast('SKOPAN TOG DEN!');ping(420,200,.16);}
     return true;

@@ -16,7 +16,7 @@ function useItem(k){
     if(k===player)toast('FÖR TRÅNGT HÄR!');
     return;
   }
-  const fam=k.held,lvl=itemLvl(k);k.held=null;k.sugar=0;
+  const fam=k.held,lvl=itemLvl(k);k.held=null;k.sugar=0;k.usedAt=clock;
   USE[fam](k,lvl);
 }
 const USE={

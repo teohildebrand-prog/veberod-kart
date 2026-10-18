@@ -61,10 +61,10 @@ const PAINTS=[{id:null,name:'ORIGINAL'},
   {id:'blue',name:'KORNBLÅ',color:0x3f63c8,unlock:'cup'},
   {id:'gold',name:'GULDKANNAN',color:0xd4a62a,unlock:'gold'},
   {id:'r1',name:'MAJROS-VIT',color:0xf0ece2,unlock:'rival1'},
-  {id:'r2',name:'TEOS RÖD',color:0x8f2f24,unlock:'rival2'},
-  {id:'r3',name:'AMANDAS SVART',color:0x1d1f24,unlock:'rival3'},
+  {id:'r2',name:'TEOS KOBOLT',color:0x2f62d8,unlock:'rival2'},
+  {id:'r3',name:'AMANDAS VINRÖD',color:0x6e1f2c,unlock:'rival3'},
   {id:'r4',name:'NISSES TURKOS',color:0x1fa8a0,unlock:'rival4'},
-  {id:'r5',name:'BRITTAS GRÖN',color:0x5faf4a,unlock:'rival5'},
+  {id:'r5',name:'BRITTAS SMÖRGUL',color:0xf2d36b,unlock:'rival5'},
   {id:'c1',name:'SPÖKVIT',color:0xcfe0ea,unlock:'win_osterlen'},
   {id:'c2',name:'VIKINGABRUN',color:0x7a4a2a,unlock:'win_kust'},
   {id:'c3',name:'UFO-GRÖN',color:0x4fd04a,unlock:'win_vild'},
@@ -143,10 +143,22 @@ function nameKarts(){
   player.name=SAVE.name||CHARS[charSel].short;
   karts.forEach((k,i)=>{if(i)k.name=k.cfg.name;});         /* only one of each */
   const tw=TWIN[CHARS[charSel].id];if(tw&&karts[tw[0]].cfg===ROSTER[tw[0]])karts[tw[0]].name=tw[1];
+  dressTwins(tw);
   karts.forEach((k,i)=>{
     if(!i||k.name!==player.name)return;
     const t=Object.values(TWIN).find(w=>w[0]===i&&k.cfg===ROSTER[i]);
     k.name=t&&t[1]!==player.name?t[1]:k.name+' II';
+  });
+}
+/** the twin races the same vehicle in its own paint; everyone else in their usual rig */
+const twinRigs={};
+function dressTwins(tw){
+  karts.forEach((k,i)=>{
+    if(!i||k.cfg!==ROSTER[i])return;
+    if(!k.v0)k.v0=k.v;
+    const R=ROSTER[i],want=tw&&tw[0]===i?(twinRigs[i]||(twinRigs[i]=(()=>{
+      const v=buildKart(tw[2],R.kind,R.car,{twin:true});v.root.visible=false;scene.add(v.root);return v;})())):k.v0;
+    if(k.v!==want){want.root.visible=k.v.root.visible;k.v.root.visible=false;k.v=want;}
   });
 }
 function applyCharacter(i){
