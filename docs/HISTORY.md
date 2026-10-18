@@ -202,3 +202,10 @@ Roadmap step 2 (Teo: "add the missing shortcuts and stamps for the tracks"), Lun
 - Stamps: Mazarin (outside the konditori in the long south curve), Hallongrotta (middle of Domkyrkogränden), Smörrebröd (in the market hall).
 - Lund's street houses and lamps now keep clear of the lanes.
 - `tools/shortcut_test.py` (in Jenkins): each AI kart alone drives the main road and then the shortcut over the same stretch with the game's own AI and physics; fails if a kart can't get on, needs the tractor, misses a gate or doesn't merge, if the shortcut isn't at least 0.3 s quicker on average, if the mirrored run differs, or if a closed mouth ignores any forward-attack level. Lund: Domkyrkogränden +0.85 s (+0.25 to +1.62 by kart), Saluhallen +2.34 s (+2.10 to +2.52). It checks the original tracks' shortcuts as they land (Lund so far); run with stage ids to check others (the older shortcuts mostly measure slower for the AI: Rapsfältet -0.15 s, Bakom korvkiosken -2.65 s, Svinstigen -3.91 s, Skeppssättningen -0.79 s, Stenraden -1.03 s).
+
+## Phone controls (2026-10-18)
+- Teo's mockup: STYR analog stick (left thumb, recentres under the thumb if it lands outside the ring), auto-gas with an AUTO-GAS dot, BROMS / SLADD / ANVÄND on the right thumb (ANVÄND carries the item slot and level badge). TUT and the gas pad are gone on phones; the horn stays on H.
+- Every finger is a pointerId with its own role and pointer capture, so steering and drifting never cancel each other; a thumb slides between BROMS and SLADD.
+- Zoom fix: iPhone Safari ignores touch-action and user-scalable, so touchstart/move/end, gesture* and dblclick are cancelled on the race surface (not on sheets or real buttons). Menus keep normal scrolling and zoom.
+- Auto-gas turns on with any touch and off when keys or a controller drive. Björn's academic quarter: auto-gas waits for the first pad touch after the lights (or 2.2 s).
+- Slim HUD on touch: compact VARV/PLATS, round map, small clock, pause top right, speedo bottom centre.

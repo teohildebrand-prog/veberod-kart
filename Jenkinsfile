@@ -25,6 +25,11 @@ pipeline {
         sh 'python3 tools/smoke_test.py'
       }
     }
+    stage('Touch test') {
+      steps {
+        sh 'python3 tools/touch_test.py'
+      }
+    }
   }
   post {
     always { archiveArtifacts artifacts: 'smoke.png', allowEmptyArchive: true }
