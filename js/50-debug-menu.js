@@ -49,9 +49,8 @@ function dbgTeleport(s){
 }
 function dbgGive(t,l){
   if(!racingNow())return;
-  if(t==='sugar'){player.sugar=SUGARMAX;toast('SOCKERBIT '+SUGARMAX+'/'+SUGARMAX);return;}
   if(t==='turbo'){player.boost=Math.max(player.boost,3);toast('TURBO!');return;}
-  l=+l||1;player.held=t;player.sugar=l-1;DBG.lastItem=t;DBG.lastLvl=l;toast(itemName(t,l)+'!');
+  l=+l||1;giveItem(player,t,l);player.roll=0;DBG.lastItem=t;DBG.lastLvl=l;toast(itemName(t,l)+'!');
 }
 function dbgRow(title,items){
   return (title?'<div class="dh">'+title+'</div>':'')+'<div class="dr">'+items.map(([label,act,sel,off])=>
@@ -70,7 +69,7 @@ function renderDbg(){
   h+=dbgRow('FUSK',[['GUDALÄGE: '+on(DBG.god),'god',DBG.god],['OÄNDLIG BENSIN: '+on(DBG.fuel),'fuel',DBG.fuel],
     ['OÄNDLIGA FÖREMÅL: '+on(DBG.items),'items',DBG.items],['SISTA VARVET','last',false,!R||FREE||TT||player.done]]);
   for(const f of FAMILIES)h+=dbgRow(f===FAMILIES[0]?'FÖREMÅL':'',[1,2,3].map(l=>[itemName(f,l),'give:'+f+':'+l,false,!R]));
-  h+=dbgRow('',[[SUGARMAX+' SOCKERBITAR','give:sugar',false,!R],['TURBO','give:turbo',false,!R]]);
+  h+=dbgRow('',[['TURBO','give:turbo',false,!R]]);
   h+=dbgRow('DATORFÖRARE',AIMODES.map(([m,n])=>[n,'ai:'+m,DBG.ai===m]));
   h+=dbgRow('VISA',[['FPS: '+on(DBG.fps),'fps',DBG.fps],['FYSIK: '+on(DBG.phys),'phys',DBG.phys]]);
   h+=dbgRow('TIDSSKALA',TIMES.map(t=>[t+'×','ts:'+t,DBG.ts===t]));
@@ -87,7 +86,7 @@ function dbgAct(a){
   if(cmd==='tp')dbgTeleport(+arg);
   if(cmd==='god')DBG.god=!DBG.god;
   if(cmd==='fuel')DBG.fuel=!DBG.fuel;
-  if(cmd==='items'){DBG.items=!DBG.items;if(DBG.items&&!DBG.lastItem)DBG.lastItem=player.held||'rocket';}
+  if(cmd==='items'){DBG.items=!DBG.items;if(DBG.items&&!DBG.lastItem){DBG.lastItem=player.held||'rocket';DBG.lastLvl=player.held?itemLvl(player):1;}}
   if(cmd==='last'&&racingNow()&&!player.done){player.lap=LAPS-1;toast('SISTA VARVET');}
   if(cmd==='give')dbgGive(arg,arg2);
   if(cmd==='ai'){DBG.ai=arg;if(racingNow())dbgApplyAI();}
@@ -113,7 +112,7 @@ document.getElementById('btnDbg').addEventListener('click',()=>{setPause(false);
 function dbgFrame(rawDt){
   if(rawDt>0)DBG.fpsS+=(1/rawDt-DBG.fpsS)*0.05;
   if(DBG.fuel)player.fuel=TANK;
-  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow()){player.held=DBG.lastItem;player.sugar=(DBG.lastLvl||1)-1;}
+  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow())giveItem(player,DBG.lastItem,DBG.lastLvl||1);
   if(dbgHud.hidden)return;
   const k=player,f=v=>v.toFixed(1);
   let t=DBG.fps?Math.round(DBG.fpsS)+' FPS'+(DBG.ts!==1?' · TID '+DBG.ts+'×':'')+'\n':'';
@@ -123,7 +122,7 @@ function dbgFrame(rawDt){
     'SPÅR  si '+k.si+'  mi '+Math.round(k.mi)+'  rutt '+(k.rib?(ALTS[k.rib-1].name||'genväg '+k.rib):'huvudväg')+'  '+(k.surf||k.sfx||'')+'\n'+
     'VARV  '+k.lap+'/'+(FREE?'∞':LAPS)+'  grind '+k.gate+'  kp '+(k.cp+1)+'  plats '+k.place+'\n'+
     'LUFT  '+(k.air?'ja '+f(k.airT)+' s':'nej')+'  SLADD '+f(k.charge)+'  TURBO '+f(k.boost)+'\n'+
-    'BENSIN '+Math.round(k.fuel)+'  SOCKER '+k.sugar+'  ITEM '+(k.held||'-')+'\n'+
+    'BENSIN '+Math.round(k.fuel)+'  ITEM '+(k.held?itemName(k.held,itemLvl(k)):'-')+'\n'+
     'LÄGE  '+state+'  tid '+f(raceTime)+'  aktiva '+karts.filter(q=>!q.parked).length;
   dbgHud.textContent=t;
 }

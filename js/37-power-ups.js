@@ -1,22 +1,15 @@
 "use strict";
 /* ───────── power-ups ───────── */
-/* Five families, three levels each. An item box gives the family; the sugar cubes held
-   when it is used pick the level (0 → 1, 1 → 2, 2 → 3) and are spent with it. */
+/* Five families, three levels each. An item box gives the family and the level together;
+   the item keeps that level until it is used, whatever hits the kart meanwhile. */
 const rockets=[], hooks=[], walls=[], farts=[];
-/** an unprotected weapon or hazard hit knocks one sugar cube loose */
-function dropSugar(k){
-  if(!k.sugar)return;
-  for(let p=0;p<6;p++)puff(k.x+rand(-1.2,1.2),k.y+rand(.4,1.6),k.z+rand(-1.2,1.2),1,1,1,.45);
-  k.sugar--;
-  if(k===player)setTimeout(()=>toast(k.held?'SOCKERBIT TAPPAD: '+itemName(k.held,itemLvl(k)):'SOCKERBIT TAPPAD'),700);
-}
 function useItem(k){
   if(!k.held||k.roll>0||k.spun>0||k.fartT>0)return;         /* nothing while the slot still spins */
   if(k.rib&&(k.held==='pie'||k.held==='rocket')){            /* no room in a farm lane */
     if(k===player)toast('FÖR TRÅNGT HÄR!');
     return;
   }
-  const fam=k.held,lvl=itemLvl(k);k.held=null;k.sugar=0;k.usedAt=clock;
+  const fam=k.held,lvl=itemLvl(k);k.held=null;k.heldLvl=0;k.usedAt=clock;
   USE[fam](k,lvl);
 }
 const USE={
@@ -136,7 +129,6 @@ function updateRockets(dt){
       if(d<-N/2)d+=N;else if(d>N/2)d-=N;
       if(Math.abs(d)>3||Math.abs(k.lat-r.lat)>3.4)continue;
       if(!blockHit(k)){
-        dropSugar(k);
         k.spun=1.5*k.spinResist;k.boost=0;k.drift=0;k.charge=0;
         for(let p=0;p<18;p++)
           puff(k.x+rand(-1.3,1.3),k.y+rand(.2,1.4),k.z+rand(-1.3,1.3),1,.72,.34,.7);
@@ -150,23 +142,35 @@ function updateRockets(dt){
   updateHooks(dt);updateWalls(dt);updateFarts(dt);shieldContacts();
 }
 
-/* Spettigare kaka: a cake on a skewer, on a rope. It needs a clear shot within reach;
-   once it bites, the rope reels the thrower in toward the target's slipstream and lets
-   go just short of contact, so the overtake is still yours to steer. The target keeps
-   full control. A shield blocks it; a lane, a corner the rope cuts across, or time
-   breaks it. */
-const HOOK_REACH=1.0, HOOK_HOLD=2.4, ropeMat=new THREE.LineBasicMaterial({color:0xe8d8b0});
+/* Spettigare kaka: a cake on a skewer, on a rope. Fired forward, it bites the first rival
+   it reaches; the rope snaps tight and launches the thrower forward, steering still in
+   their hands, and lets go before the two karts touch so the overtake is theirs to make.
+   The rival is only an anchor: it keeps its speed and its steering. A shield or scenery
+   stops the hook; a reset, a finish, a different route, a rope across the verge or
+   something in the way breaks it. The launch is ordinary driving with more push, so the
+   fence, blockers and gates all still apply. Tune it in HOOK. */
+const HOOK={
+  reach:0.7,        /* seconds the hook flies before it counts as a miss */
+  tighten:0.1,      /* seconds from the clank to the rope going taut */
+  launch:0.9,       /* the longest the surge can last */
+  push:60,          /* extra forward acceleration while launching, m/s² */
+  top:1.45,         /* the surge's top speed, as a share of the kart's own */
+  release:7,        /* let go this far from the anchor, before contact */
+  maxRope:70        /* a rope stretched further than this snaps */
+};
+const ROPE_PTS=9, ropeMat=new THREE.LineBasicMaterial({color:0xe8d8b0});
 function fireHook(k){
   const mesh=makeSpettekaka();
   mesh.scale.setScalar(.6);mesh.rotation.x=-Math.PI/2;
   const holder=new THREE.Group();holder.add(mesh);scene.add(holder);
-  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(ROPE_PTS*3),3));
   const rope=new THREE.Line(geo,ropeMat);rope.frustumCulled=false;scene.add(rope);
-  hooks.push({owner:k,si:(k.si+2)%N,lat:k.lat,t:0,speed:Math.max(k.speed,26)+34,holder,rope,target:null});
+  hooks.push({owner:k,si:(k.si+2)%N,lat:k.lat,t:0,speed:Math.max(k.speed,26)+34,holder,rope,target:null,rib:k.rib});
   if(k===player){toast('SPETTIGARE KAKA!');ping(700,300,.14);}
 }
 function dropHook(n,why){
   const h=hooks[n];
+  if(h.target)h.owner.launch=0;                       /* the surge ends with the rope */
   scene.remove(h.holder);scene.remove(h.rope);h.rope.geometry.dispose();hooks.splice(n,1);
   if(why&&h.owner===player)toast(why);
 }
@@ -176,6 +180,19 @@ function ropeCut(a,b){
   for(const f of [.33,.66]){
     const mx=lerp(a.x,b.x,f),mz=lerp(a.z,b.z,f),i=nearestLocal(mx,mz,a.si);
     if(Math.abs((mx-sx[i])*rx[i]+(mz-sz[i])*rz[i])>HW+2.5)return true;
+  }
+  return false;
+}
+/** would another quarter second of surge put the kart into the fence or a closed passage? */
+function launchBlocked(k){
+  const ax=k.x+k.vx*.25,az=k.z+k.vz*.25;
+  if(!k.rib){
+    const i=nearestLocal(ax,az,k.si);
+    if(Math.abs((ax-sx[i])*rx[i]+(az-sz[i])*rz[i])>HW+3.2)return true;   /* the fence */
+    for(const B of BLOCKERS)if(!B.R.open&&Math.hypot(ax-B.x,az-B.z)<4.5)return true;
+  }else{
+    const R=ALTS[k.rib-1],j=nearestAlt(R,ax,az,k.si);
+    if(Math.abs((ax-R.X[j])*R.RX[j]+(az-R.Z[j])*R.RZ[j])>R.hw+.6)return true;
   }
   return false;
 }
@@ -192,34 +209,51 @@ function updateHooks(dt){
       const i=Math.floor(h.si)%N,[best]=nextAhead(h.si,k,40),[bb,bd]=blockerAhead(h.si,3);
       if(best&&!mb)h.lat+=clamp(best.lat-h.lat,-7*dt,7*dt);
       if(bb&&bd<2){dropHook(n,'KROKEN FASTNADE');continue;}
-      if((h.t>HOOK_REACH&&!mb)||k.rib){dropHook(n,'MISS!');continue;}
+      if((h.t>HOOK.reach&&!mb)||k.rib||k.rib!==h.rib||k.done){dropHook(n,'MISS!');continue;}
       h.holder.position.set(sx[i]+rx[i]*h.lat,sy[i]+h.lat*bank[i]+1.0,sz[i]+rz[i]*h.lat);
       h.holder.rotation.y=Math.atan2(fx[i],fz[i]);
+      let gone=false;
       for(const o of karts){
-        if(o===k||o.rib||o.parked||o.ghost>0)continue;
+        if(o===k||o.rib||o.parked||o.ghost>0||o.done)continue;
         let d=o.mi-h.si;if(d<-N/2)d+=N;else if(d>N/2)d-=N;
         if(Math.abs(d)>3||Math.abs(o.lat-h.lat)>3.2)continue;
-        if(blockHit(o)){h.t=99;if(k===player)toast('SKÖLDEN STOPPADE KROKEN');break;}
+        if(blockHit(o)){if(k===player)toast('SKÖLDEN STOPPADE KROKEN');dropHook(n);gone=true;break;}
         h.target=o;h.t=0;
-        if(k===player){toast('FAST! HÄNG MED');ping(500,900,.12);}
-        else if(o===player)toast(k.name+' HAR KROKAT DIG!');
+        for(let p=0;p<8;p++)puff(h.holder.position.x+rand(-.5,.5),h.holder.position.y+rand(-.3,.5),h.holder.position.z+rand(-.5,.5),.85,.85,.9,.35);
+        if(k===player){ping(1700,1150,.06);toast('KLONK!');}            /* the clank */
+        else if(o===player){toast(k.name+' HAR KROKAT DIG!');ping(1500,1000,.06);}
         break;
       }
+      if(gone)continue;
     }else{
       const o=h.target,dx=o.x-k.x,dz=o.z-k.z,d=Math.hypot(dx,dz);
-      if(h.t>HOOK_HOLD||o.parked||o.done||k.spun>0||k.recoverT>0||o.recoverT>0||d>70||ropeCut(k,o)){
-        dropHook(n,h.t>HOOK_HOLD?'REPET SLÄPPTE':'REPET GICK AV');continue;}
-      if(d<6.5){                                         /* in the slipstream: steer out and pass */
-        k.boost=Math.max(k.boost,.45);
-        dropHook(n,'SLÄPP! KÖR OM');continue;}
-      k.tow=0.12;
-      const pull=Math.min(30,8+d*0.9)*dt;
-      k.vx+=dx/d*pull;k.vz+=dz/d*pull;
+      if(o.parked||o.done||k.done){dropHook(n,'REPET SLÄPPTE');continue;}
+      if(k.ghost>0||o.ghost>0||k.recoverT>0||o.recoverT>0||k.rtp||k.spun>0){dropHook(n,'REPET GICK AV');continue;}
+      if(d>HOOK.maxRope||k.rib!==o.rib||ropeCut(k,o)){dropHook(n,'REPET GICK AV');continue;}
+      const taut=h.t>=HOOK.tighten;
+      if(taut&&!h.surge){                                 /* the rope snaps tight: go */
+        h.surge=true;k.launch=HOOK.launch;
+        if(k===player){flash('HÅLL I DIG!');ping(420,1300,.22);shake=Math.min(.5,shake+.3);}
+      }
+      if(h.surge){
+        if(d<HOOK.release){                               /* just short of their bumper: let go and pass */
+          k.boost=Math.max(k.boost,.45);
+          dropHook(n,'SLÄPP! KÖR OM');if(k===player)ping(900,1400,.08);continue;}
+        if(k.launch<=0){dropHook(n,'REPET SLÄPPTE');continue;}
+        if(launchBlocked(k)){dropHook(n,'SLÄPP!');continue;}
+        if(Math.random()<.8)puff(k.x-Math.sin(k.yaw)*2+rand(-.5,.5),k.y+rand(.4,1.2),k.z-Math.cos(k.yaw)*2+rand(-.5,.5),1,.9,.6,.45);
+      }
       h.holder.position.set(o.x-Math.sin(o.yaw)*1.9,o.y+1.0,o.z-Math.cos(o.yaw)*1.9);
       h.holder.rotation.y=o.yaw;
     }
-    const P=h.rope.geometry.attributes.position;
-    P.setXYZ(0,k.x,k.y+1.1,k.z);P.setXYZ(1,h.holder.position.x,h.holder.position.y,h.holder.position.z);
+    /* the rope: slack while it flies and as it bites, a straight line once it is taut */
+    const P=h.rope.geometry.attributes.position,hp=h.holder.position;
+    const sag=h.target?(h.surge?0:1-h.t/HOOK.tighten):.6;
+    const L=Math.hypot(hp.x-k.x,hp.z-k.z);
+    for(let q=0;q<ROPE_PTS;q++){
+      const f=q/(ROPE_PTS-1);
+      P.setXYZ(q,lerp(k.x,hp.x,f),lerp(k.y+1.1,hp.y,f)-Math.sin(f*Math.PI)*sag*Math.min(3,L*.08),lerp(k.z,hp.z,f));
+    }
     P.needsUpdate=true;
   }
 }
@@ -228,12 +262,12 @@ function updateHooks(dt){
    wide wave. It hits each rival once, bursts open a closed passage it reaches and runs out of steam
    after a stretch, so it clears a contested piece of road, not the whole lap. */
 const semlaParts=(function(){
-  const bun=psMat({color:0xd9a050}),cream=psMat({color:0xfffaf0}),sugar=psMat({color:0xffffff,unlit:true});
+  const bun=psMat({color:0xd9a050}),cream=psMat({color:0xfffaf0}),icing=psMat({color:0xffffff,unlit:true});
   return [
     [flat(new THREE.SphereGeometry(.7,8,3,0,6.283,Math.PI/2,Math.PI/2)),bun,.7,1],
     [flat(new THREE.CylinderGeometry(.66,.7,.34,8)),cream,.86,1],
     [flat(new THREE.SphereGeometry(.6,8,3,0,6.283,0,Math.PI/2)),bun,1.0,.6],
-    [flat(new THREE.CylinderGeometry(.3,.36,.05,6)),sugar,1.37,1]];
+    [flat(new THREE.CylinderGeometry(.3,.36,.05,6)),icing,1.37,1]];
 })();
 function makeSemla(){
   const g=new THREE.Group();
@@ -279,7 +313,6 @@ function updateWalls(dt){
         if(Math.abs(d)>2.6||Math.abs(o.lat-w.lat)>w.half+1.2)continue;
         w.hit.add(o);
         if(blockHit(o))continue;
-        dropSugar(o);
         o.spun=Math.max(o.spun,1.2*o.spinResist);o.slow=Math.max(o.slow,.6);o.boost=0;o.drift=0;o.charge=0;
         for(let p=0;p<20;p++)puff(o.x+rand(-1.4,1.4),o.y+rand(.3,1.8),o.z+rand(-1.4,1.4),1,.96,.88,.8);
         if(o===player){toast(hitLine(k,'SEMLOR I ANSIKTET!'));ping(260,70,.3);shake=Math.min(1,shake+.7);}
@@ -306,7 +339,6 @@ function bash(k,o,force,ux,uz){
   for(let p=0;p<10;p++)puff((k.x+o.x)/2+rand(-.6,.6),(k.y+o.y)/2+rand(.4,1.4),(k.z+o.z)/2+rand(-.6,.6),1,.85,.5,.35);
   if(k===player||o===player)ping(1100,700,.08);
   if(blockHit(o))return;
-  dropSugar(o);
   o.vx+=ux*force;o.vz+=uz*force;o.slow=Math.max(o.slow,.5);o.boost=0;o.drift=0;o.charge=0;
   if(o===player){toast('PANG!');shake=Math.min(1,shake+.45);}
   else if(k===player)toast(k.shieldLvl===3?'PANG! STEKPANNA':'STEKHET!');
@@ -379,7 +411,7 @@ function blast(k,lvl){
     if(lvl===1&&!(f<0&&s<-f*0.7+2))continue;           /* a short cone straight back */
     if(lvl===2&&f>1.5)continue;                        /* behind and beside, not ahead */
     if(blockHit(o))continue;
-    dropSugar(o);hits++;
+    hits++;
     const push=F.push*(1-0.5*d/F.r);
     o.vx+=dx/d*push;o.vz+=dz/d*push;o.drift=0;o.charge=0;o.suck=Math.min(o.suck,-1.5);   /* no slipstream either */
     o.rattle=0.5;
