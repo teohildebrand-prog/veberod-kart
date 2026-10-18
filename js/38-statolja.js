@@ -103,18 +103,24 @@ function aiItemLines(){
       }
     }
     if(k.held){                                            /* play what they picked up */
-      let ahead=false,behind=false;
+      let ahead=false,near=false,behind=false,tail=false,close=false;
       for(const o of karts){
-        if(o===k)continue;
+        if(o===k||o.parked)continue;
         let d=o.mi-k.mi;
         if(d>N/2)d-=N;else if(d<-N/2)d+=N;
         if(d>4&&d<48)ahead=true;
+        if(d>4&&d<30&&!o.rib)near=true;                    /* in reach of the hook */
         if(d<-2&&d>-30)behind=true;
+        const g=Math.hypot(o.x-k.x,o.z-k.z);
+        if(d<0&&g<11)tail=true;
+        if(g<12)close=true;
       }
-      if(k.held==='boost')useItem(k);
-      else if(k.held==='rocket'&&ahead)useItem(k);
-      else if(k.held==='pie'&&behind)useItem(k);
-      else if(k.held==='shield'&&(behind||Math.random()<0.004))useItem(k);
+      const lvl=itemLvl(k),h=k.held;
+      if(h==='boost')useItem(k);
+      else if(h==='rocket'&&(lvl===2?near:ahead))useItem(k);
+      else if(h==='pie'&&behind)useItem(k);
+      else if(h==='shield'&&(lvl===3?close||behind:behind||Math.random()<0.004))useItem(k);
+      else if(h==='fart'&&(lvl===1?tail:close))useItem(k);
     }
     if(!k.wantFuel&&!k.atPump&&wantsFuel(k))k.wantFuel=true;  /* decided before the pump */
     if(k.wantFuel&&k.atPump&&k.fuel>=Math.min(96,Math.max(82,legFuel(k)))||k.fuel>=96)k.wantFuel=false;

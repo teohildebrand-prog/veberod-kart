@@ -33,8 +33,9 @@ function drawKart(k){
   if(k.ghost>0){k.v.root.visible=Math.floor(clock*14)%2===0;k.blink=true;}
   else if(k.blink){k.v.root.visible=true;k.blink=false;}
   k.blob.rotation.y=k.yaw;
-  k.dome.visible=k.shield>0;
-  if(k.shield>0){k.dome.position.set(k.x,k.y+1.15,k.z);k.dome.rotation.y+=.05;}
+  drawShield(k);
+  if(k.rattle>0||(k.boost>0&&k.boostLvl>=3))       /* beans or cream: the whole kart shakes */
+    k.v.root.position.add(nV.set(rand(-.07,.07),rand(0,.08),rand(-.07,.07)));
   k.blob.scale.setScalar(clamp(1-Math.max(0,k.y-gy)*0.045,0.4,1));
   k.v.lean.rotation.x=k.air?clamp(-k.vy*0.024,-0.42,0.42)
                            :lerp(k.v.lean.rotation.x,k.wheelie&&k.boost>0?-0.3:0,0.22);

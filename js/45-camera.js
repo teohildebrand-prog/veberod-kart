@@ -59,7 +59,7 @@ function updateCamera(dt){
   }
   if(player.sfx==='cobble'&&player.speed>10)camera.position.y+=rand(-.05,.05);   /* cobble shake */
   camera.lookAt(camAim);
-  camera.fov=lerp(camera.fov,(camMode===1?66:60)+clamp(player.speed/player.maxSpeed,0,1.2)*13+(player.boost>0?7:0),
+  camera.fov=lerp(camera.fov,(camMode===1?66:60)+clamp(player.speed/player.maxSpeed,0,1.2)*13+(player.boost>0?(player.boostLvl>=3?10:7):0),
     1-Math.pow(0.01,dt));
   camera.updateProjectionMatrix();
 }

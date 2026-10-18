@@ -95,10 +95,11 @@ function checkStamps(){
    hit(k,u) says whether a kart is touching it; a shield takes the hit instead, and a
    hit knocks the sugar cubes loose. */
 let HAZARDS=[];
-/** the äggkaka shield, then Anders' bucket (once a lap), takes a hit; true if one did */
+/** the äggakaka shield (or one flying pan), then Anders' bucket (once a lap), takes a hit; true if one did */
 function blockHit(k){
   if(k===player&&DBG.god)return true;     /* debug: nothing lands */
-  if(k.shield>0){k.shield=0;if(k===player){toast('BLOCKERAT!');ping(700,300,.12);}return true;}
+  if(k.shield>0&&k.pans>1){k.pans--;if(k===player){toast('STEKPANNAN TOG DEN! '+k.pans+' KVAR');ping(1200,500,.12);}return true;}
+  if(k.shield>0){k.shield=0;k.pans=0;if(k===player){toast('BLOCKERAT!');ping(700,300,.12);}return true;}
   if(k.bucket&&k.bucketLap!==k.lap){
     k.bucketLap=k.lap;
     for(let p=0;p<10;p++)puff(k.x+Math.sin(k.yaw)*3+rand(-.8,.8),k.y+rand(.3,1),k.z+Math.cos(k.yaw)*3+rand(-.8,.8),.6,.45,.3,.5);

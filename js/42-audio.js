@@ -59,6 +59,21 @@ function klonk(){                          /* rubber stamp on paper */
   n.buffer=b;n.connect(ng);ng.connect(actx.destination);n.start(t);
   setTimeout(()=>ping(880,1320,.09),170);
 }
+/** a flapping low saw through a resonant lowpass; the big one is long and loud */
+function fartSound(lvl){
+  if(!actx)return;
+  const t=actx.currentTime,dur=[.35,.6,1.1][lvl-1],base=[150,110,72][lvl-1],vol=[.16,.22,.32][lvl-1];
+  const o=actx.createOscillator(),lfo=actx.createOscillator(),lg=actx.createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(base*1.25,t);o.frequency.exponentialRampToValueAtTime(base*.65,t+dur);
+  lfo.type='square';lfo.frequency.value=[30,24,17][lvl-1];lg.gain.value=base*.4;
+  lfo.connect(lg);lg.connect(o.frequency);
+  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=520+lvl*60;lp.Q.value=7;
+  const g=actx.createGain();
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);
+  g.gain.setValueAtTime(vol,t+dur*.75);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(lp);lp.connect(g);g.connect(actx.destination);
+  o.start(t);lfo.start(t);o.stop(t+dur+.05);lfo.stop(t+dur+.05);
+}
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
   else{ping(420,400,.18);setTimeout(()=>ping(420,400,.18),220);}
@@ -72,7 +87,7 @@ function toggleAudio(){
 function audioUpdate(){
   if(!engine)return;
   const r=clamp(player.speed/player.maxSpeed,0,1.2);
-  const f=64+r*330+(player.boost>0?70:0);
+  const f=64+r*330+(player.boost>0?(player.boostLvl>=3?150:70):0);   /* skånsk grädde screams */
   engine.o1.frequency.setTargetAtTime(f,actx.currentTime,.05);
   engine.o2.frequency.setTargetAtTime(f*.5,actx.currentTime,.05);
   engine.lp.frequency.setTargetAtTime(600+r*1700,actx.currentTime,.08);

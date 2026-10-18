@@ -82,7 +82,17 @@
     border:1px solid rgba(255,255,255,.85);
     box-shadow:0 3px 9px rgba(2,24,44,.55),inset 0 1px 0 rgba(255,255,255,.9)}
   #slotn:empty{display:none}
+  #slotname{top:127px;left:96px;padding:6px 11px;border-radius:11px;font-size:11px;font-weight:700;
+    letter-spacing:.08em;color:#fff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,30,60,.7)}
+  #slotname.off{display:none}
+  /* sugar levels: gold rim at two, a pulsing pink rim at three */
+  #slot.lvl2,#slotname.lvl2{border-color:#f7d24a;box-shadow:0 0 0 2px #f2c500,0 10px 28px rgba(2,22,44,.45)}
+  #slot.lvl3,#slotname.lvl3{border-color:#ffc0dc;animation:lvl3 .9s ease-in-out infinite alternate}
+  #slotname.lvl3{color:#fff2f8}
+  @keyframes lvl3{from{box-shadow:0 0 0 2px #ff5fa2,0 0 10px rgba(255,95,162,.5)}
+                  to{box-shadow:0 0 0 3px #ff9ac6,0 0 22px rgba(255,95,162,.9)}}
   #slot.pop{animation:slotpop .42s cubic-bezier(.16,1,.3,1)}
+  #slot.lvl3.pop{animation:slotpop .42s cubic-bezier(.16,1,.3,1),lvl3 .9s .42s ease-in-out infinite alternate}
   @keyframes slotpop{0%{transform:scale(.55);opacity:.25}
                      58%{transform:scale(1.14);opacity:1}100%{transform:scale(1)}}
 
@@ -579,7 +589,7 @@
   @media (prefers-reduced-motion:reduce){
     #flash span.pop{animation-duration:.01ms}
     #bub{display:none!important}
-    #slot.pop{animation:none}
+    #slot.pop,#slot.lvl3,#slotname.lvl3{animation:none}
     .meter.fuelm.warn{animation:none}
     .card:hover{transform:none}
   }
