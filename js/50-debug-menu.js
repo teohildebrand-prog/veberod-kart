@@ -63,8 +63,7 @@ function renderDbg(){
   let h='<div class="dtop"><b>DEBUG</b><span>F1 · § · `</span><button class="tab" data-a="close">STÄNG</button></div>';
   h+=dbgRow('BANA',STAGES.map((S,i)=>[S.name,'stage:'+i,S===stage,lock]));
   h+=dbgRow('FÖRARE',CHARS.map((c,i)=>[c.short||c.name,'char:'+i,i===charSel,lock]));
-  const sig=CHARS[charSel].sig;              /* own vehicles stay with their driver, here too */
-  h+=dbgRow('FORDON',CARS.map((c,i)=>[c.name,'car:'+i,i===carSel,lock||(sig?c.id!==sig:!!c.sig)]));
+  h+=dbgRow('FORDON',CARS.map((c,i)=>[c.name,'car:'+i,i===carSel,lock]));
   if(lock)h+='<p class="dn">Bana, förare och fordon är låsta under cupen.</p>';
   h+=dbgRow('VÄDER OCH LJUS',SKIES.map(([n],i)=>[n,'sky:'+i,i===Math.max(0,DBG.sky)]));
   h+=dbgRow('TELEPORT',[...Array(CPN).keys()].map(s=>['KP '+(s+1),'tp:'+s,false,!R]));

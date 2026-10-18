@@ -17,7 +17,7 @@ addEventListener('keydown',e=>{
     if(k==='arrowdown'||k==='s')mv(3);
     if(k==='q')stepCar(-1);
     if(k==='e')stepCar(1);
-    if(k>='1'&&k<=String(FREECARS.length))applyCar(FREECARS[+k-1]);
+    if(k.length===1&&k>='1'&&k<='9')applyCar(FREECARS[+k-1]);
     if(k==='backspace')document.getElementById('btnBack').click();
     if(k==='enter'||k===' '){bootAudio();goFromSelect();}
   }else if((state==='menu'||state==='over')&&k==='enter'&&

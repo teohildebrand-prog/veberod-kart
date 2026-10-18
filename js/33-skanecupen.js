@@ -125,10 +125,10 @@ function addBasket(v){
   const cl=new THREE.Mesh(flat(new THREE.BoxGeometry(.94,.08,.64)),c);cl.position.set(0,1.32,-1.35);v.lean.add(cl);
   const h=new THREE.Mesh(flat(new THREE.TorusGeometry(.3,.04,4,8,Math.PI)),w);h.position.set(0,1.36,-1.35);v.lean.add(h);
 }
-/** show whichever driver is being previewed, falling back to the chosen one */
-let lastFreeCar=0;
-/** the car a driver races: their own vehicle, or the free car last picked */
-function carFor(ci){const c=CHARS[ci];return c.sig?CARS.findIndex(r=>r.id===c.sig):(CARS[carSel].sig?lastFreeCar:carSel);}
+let carPicked=false;
+const ownCar=ci=>Math.max(0,CARS.findIndex(r=>r.id===CHARS[ci].sig));
+/** the car a driver races: the chosen driver's pick, or a previewed driver's own vehicle */
+function carFor(ci){return ci===charSel?carSel:ownCar(ci);}
 function showRig(){
   const ci=previewChar==null?charSel:previewChar;
   const v=rigFor(ci,carFor(ci));
@@ -162,9 +162,7 @@ function dressTwins(tw){
   });
 }
 function applyCharacter(i){
-  const c=CHARS[i];
-  if(c.sig){if(!CARS[carSel].sig)lastFreeCar=carSel;carSel=CARS.findIndex(r=>r.id===c.sig);}
-  else if(CARS[carSel].sig)carSel=lastFreeCar;
+  if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;}   /* a new driver starts in their own vehicle */
   charSel=i;previewChar=null;showRig();
 }
 function peekCharacter(i){                /* hover/focus: look, don't commit */
@@ -188,21 +186,18 @@ function renderCombo(){
   const peek=previewChar!=null&&previewChar!==charSel;
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
   set('vsName',c.name);set('vsHome',c.role);set('ptag',peek?'FÖRHANDSVISNING':'');
-  set('vsCar',R.name);set('vsCarSub',c.sig?'EGET FORDON · '+R.sub:R.sub);
+  set('vsCar',R.name);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',c.blurb);
   set('btnGoT',cupSetup?'STARTA CUPEN':'VÄLJ '+CHARS[charSel].short);
-  for(const id of ['carPrev','carNext']){const b=document.getElementById(id);if(b)b.disabled=!!c.sig;}
   document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i;
     el.classList.toggle('sel',n===charSel);el.classList.toggle('peek',peek&&n===ci);
     el.setAttribute('aria-selected',n===charSel);});
 }
 function applyCar(i){
-  const sig=CHARS[charSel].sig;
-  if(sig?CARS[i].id!==sig:!!CARS[i].sig)return;     /* own vehicles stay with their driver */
-  carSel=i;if(!sig)lastFreeCar=i;showRig();
+  if(!CARS[i])return;
+  carSel=i;showRig();
 }
 function stepCar(d){
-  if(CHARS[charSel].sig)return;
   const n=FREECARS.indexOf(carSel);applyCar(FREECARS[(n+d+FREECARS.length)%FREECARS.length]);
 }
 
