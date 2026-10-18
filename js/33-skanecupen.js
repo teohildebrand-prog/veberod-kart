@@ -1,30 +1,44 @@
 "use strict";
 /* ───────── Skånecupen ───────── */
-const CUP_ROUNDS=['veberod','lund','tollarp','horby','ahus','bron'];
+const CUP_ROUNDS=['veberod','lund','tollarp','horby'];
 const CUP_ROLE={veberod:'Blandat underlag och de första genvägarna.',lund:'Precision och kurvtagning.',
   tollarp:'Långa raksträckor och fart.',horby:'Torgkurvor, grus och gyttja, och grisar på vägen.',ahus:'Hopp och jämn kontroll.',bron:'Två varv fullt ut, under press.',
   glimminge:'Ren racing i månsken, utan genvägar.',ales:'Fart på sanden och två hemliga passager.'};
-/* LEGO Racers' shape: three cups of four with a champion each, the same three mirrored and
-   in reverse order once won, then one final race. Skånecupen stays as it was. */
+/* No cup runs longer than four rounds. Skånecupen and Sommarcupen are the home cups, no champion.
+   LEGO Racers' shape: three cups of four with a champion each, the same three mirrored and
+   in reverse order once won, then Finalen: Rosengård, then Raket-Rune's own circuit. */
 const CUPS=[
   {id:'skane',name:'SKÅNECUPEN',short:'SKÅNE',rounds:CUP_ROUNDS,
-   blurb:'The home six: Veberöd, Lund, Tollarp, Hörby, Åhus and the bridge. No champion, just the village rivals.'},
+   blurb:'The home four: Veberöd, Lund, Tollarp and Hörby. No champion, just the village rivals.'},
+  {id:'sommar',name:'SOMMARCUPEN',short:'SOMMAR',rounds:['ahus','glimminge','ales','bron'],
+   blurb:'A summer trip: Åhus, Glimmingehus by moonlight, Ales stenar and the bridge. No champion, just the village rivals.'},
   {id:'osterlen',name:'ÖSTERLENCUPEN',short:'ÖSTERLEN',rounds:['glimminge','kivik','ales','soderasen'],champ:'spoket',
    blurb:'Castle, cairn, sand and gorge. The ghost of Glimmingehus has never lost on home ground.'},
   {id:'kust',name:'KUSTCUPEN',short:'KUSTEN',rounds:['foteviken','karlskrona','ven','limhamn'],champ:'viking',need:'osterlen',
    blurb:'Vikings, warships, an island and a quarry by night. The Viking chieftain takes the coast personally.'},
   {id:'vild',name:'VILDMARKSCUPEN',short:'VILDMARKEN',rounds:['angelholm','hoor','romele','kalmar'],champ:'gubbe',need:'kust',
    blurb:'A UFO forest, the elk woods, a snowstorm and a joust. The Green Man from the forest is waiting.'},
-  {id:'final',name:'FINALEN',short:'FINALEN',rounds:['rune'],champ:'rune',
-   blurb:'One race on Raket-Rune\'s own circuit in Malmö harbour. Win all three championships to be invited.'}];
+  {id:'final',name:'FINALEN',short:'FINALEN',rounds:['rosengard','rune'],champ:'rune',
+   blurb:'Rosengård, then Raket-Rune\'s own circuit in Malmö harbour. Win all three championships to be invited.'}];
 const cupDef=c=>CUPS.find(C=>C.id===((c&&c.cup)||'skane'))||CUPS[0];
-/** a won championship can be raced again mirrored, rounds in reverse */
-function cupRounds(c){const C=cupDef(c),r=C.rounds.slice();if(c&&c.mirror&&C.champ)r.reverse();return r;}
+/* a saved championship carries its own schedule (cup save v2), so a cup started before a schedule
+   changed finishes on the rounds it started with. v1 saves stored none: they get the schedule v1 raced. */
+const CUP_SAVE_V=2;
+const CUP_ROUNDS_V1={skane:['veberod','lund','tollarp','horby','ahus','bron'],final:['rune']};
+function migrateCup(c){
+  if(!c||c.v>=CUP_SAVE_V)return false;
+  const id=cupDef(c).id;c.rounds=(CUP_ROUNDS_V1[id]||cupDef(c).rounds).slice();c.v=CUP_SAVE_V;
+  return true;
+}
+if(migrateCup(SAVE.cup))writeSave();
+/** the schedule: the saved cup's own, or today's for a cup not started yet;
+    a won championship can be raced again mirrored, rounds in reverse */
+function cupRounds(c){const C=cupDef(c),r=((c&&c.rounds)||C.rounds).slice();if(c&&c.mirror&&C.champ)r.reverse();return r;}
 function cupOpen(C){
   if(C.id==='final')return CUPS.every(D=>!D.champ||D.id==='final'||SAVE.unlock['win_'+D.id]);
   return !C.need||!!SAVE.unlock['cup_'+C.need];
 }
-function mirrorOpen(C){return C.id==='skane'?!!SAVE.unlock.cup:(!!C.champ&&C.id!=='final'&&!!SAVE.unlock['win_'+C.id]);}
+function mirrorOpen(C){return !C.champ?!!SAVE.unlock.cup:(C.id!=='final'&&!!SAVE.unlock['win_'+C.id]);}
 function cupLockText(C){
   if(C.id==='final')return 'Locked: win Österlencupen, Kustcupen and Vildmarkscupen to be invited.';
   return 'Locked: finish on the podium in '+cupDef({cup:C.need}).name+' to open it.';

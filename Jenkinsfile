@@ -10,6 +10,11 @@ pipeline {
         sh 'node tools/audio_test.cjs'
       }
     }
+    stage('Cup schedule test') {
+      steps {
+        sh 'python3 tools/cup_schedule_test.py'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
