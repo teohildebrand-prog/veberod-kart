@@ -230,3 +230,10 @@ Roadmap step 4, second track.
 - Spökhuset (606-704, closed): a ghost house with skeletons and green lamps; double doors at `mouth:22` that swing open when shot. AI gain +1.3 s. All three forward-attack levels open it.
 - The first inside pump sat on the coaster fork, so Åhus pumps are now both on the outside (`stations:[[0.27,-1],[0.71,-1]]`). Tents, pines, kiosks and flag poles keep off the lanes.
 - Stamps: Våffla med sylt (outer edge before the coaster), Brända mandlar (inside Spökhuset), Sockervadd (top of the middle hump).
+
+## Phone menus, step 2: stage select (2026-10-18)
+- Teo: compact scrollable roster on the left, one preview on the right (name, laps, surface, stamps), TILLBAKA and VÄLJ BANA in a dedicated bottom bar; portrait stacks them.
+- On phones (max-width 760 or max-height 540, the `SS_LIST` media query) the roster is one list of compact rows (thumbnail, name, stamps, cup tag) with no pages; `#stages.sslist` switches the layout. The page size becomes unbounded (`ssPer()`), one column, left/right step the list like up/down, and the highlighted row is kept scrolled into view. Desktop keeps the 4x2 pages.
+- Preview: picture beside its facts (VARV, UNDERLAG, GENVÄGAR, PICKNICKPASS, REKORD) plus the mirror toggle; tag line and route map hidden on phones. Portrait (orientation) puts the preview above the list.
+- `tools/menu_fit_test.py` also checks the roster is one list on phones and its last track scrolls fully into view above the bottom bar.
+

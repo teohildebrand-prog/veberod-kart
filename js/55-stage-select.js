@@ -5,7 +5,9 @@
    section brings its own order, tag line and portrait camera (view), and the roster, surfaces,
    shortcuts, stamps and route outline follow from its data. Moving the highlight never builds a
    world; only confirming does. Portraits are baked from the real scenery by tools/stage_art.py
-   into STAGE_ART; a track without one gets a live render once the highlight rests on it. */
+   into STAGE_ART; a track without one gets a live render once the highlight rests on it.
+   On phones (Teo, 2026-10-18) the roster is one scrolling list of compact rows beside, or in
+   portrait under, a single preview; TILLBAKA and VÄLJ BANA stay in the bottom bar. */
 const SS_COLS_WIDE=4, SS_PAGE=8;
 const ROADNAME={asphalt:'ASFALT',cobble:'KULLERSTEN',concrete:'BETONG',sand:'SAND',kivik:'ASFALT',
   soderasen:'ASFALT',fotJord:'JORD',kkrSten:'GATSTEN',ven:'ASFALT',kalk:'KALKGRUS',angelholm:'GRUS',
@@ -22,7 +24,10 @@ const stageModes=S=>S.modes||['race','tt','free','cup'];
 function rosterOrder(){
   return STAGES.map((S,i)=>i).sort((a,b)=>(STAGES[a].order||100+a)-(STAGES[b].order||100+b));
 }
-const ssCols=()=>matchMedia('(max-width:760px)').matches?2:SS_COLS_WIDE;
+/* phones (portrait, or a short landscape screen): one scrolling list of compact rows instead of pages */
+const SS_LIST=matchMedia('(max-width:760px),(max-height:540px)');
+const ssPer=()=>SS_LIST.matches?1e9:SS_PAGE;
+const ssCols=()=>SS_LIST.matches?1:SS_COLS_WIDE;
 const knownRoutes=S=>(S.routes||[]).filter(R=>!R.hidden||SAVE.routes[S.id+'.'+R.id]);
 const stageArt=S=>(typeof STAGE_ART!=='undefined'&&STAGE_ART[S.id])||SS.art[S.id]||'';
 
@@ -139,13 +144,18 @@ function buildStageCards(){
 }
 const MIRSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 1h2v14H7zM5 4 1 8l4 4zm6 0 4 4-4 4z" fill="currentColor"/></svg>';
 const LOCKSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor"/></svg>';
-const ssPages=()=>Math.max(1,Math.ceil(SS.list.length/SS_PAGE));
-const ssPage=()=>Math.floor(SS.hi/SS_PAGE);
+const ssPages=()=>Math.max(1,Math.ceil(SS.list.length/ssPer()));
+const ssPage=()=>Math.floor(SS.hi/ssPer());
 function renderPage(){
-  const p=ssPage(),n=ssPages();
+  const p=ssPage(),n=ssPages(),per=ssPer();
+  sheetStages.classList.toggle('sslist',SS_LIST.matches);
   ssGrid.querySelectorAll('.scard').forEach((el,k)=>{
-    el.hidden=Math.floor(k/SS_PAGE)!==p;
-    const on=k===SS.hi;el.classList.toggle('sel',on);el.setAttribute('aria-selected',on);});
+    el.hidden=Math.floor(k/per)!==p;
+    const on=k===SS.hi;el.classList.toggle('sel',on);el.setAttribute('aria-selected',on);
+    if(on&&SS_LIST.matches){            /* keep the highlighted row inside the scrolling list */
+      const t=el.offsetTop,b=t+el.offsetHeight,g=ssGrid;
+      if(t<g.scrollTop)g.scrollTop=t-4;else if(b>g.scrollTop+g.clientHeight)g.scrollTop=b-g.clientHeight+4;
+    }});
   document.getElementById('ssPageN').textContent=(p+1)+' / '+n;
   document.getElementById('ssPrev').disabled=p===0;
   document.getElementById('ssNext').disabled=p>=n-1;
@@ -221,7 +231,7 @@ function queueArt(){
 }
 function ssHighlight(k,sound){
   k=clamp(k,0,SS.list.length-1);
-  const page=Math.floor(k/SS_PAGE)!==ssPage();
+  const page=Math.floor(k/ssPer())!==ssPage();
   if(k===SS.hi&&!page&&SS.shown)return;
   if(sound)page?ping(420,260,.08):ping(700,980,.04);
   SS.hi=k;SS.shown=true;
@@ -230,26 +240,29 @@ function ssHighlight(k,sound){
 }
 
 /* moving the highlight */
-function ssCell(k){const c=ssCols(),o=k%SS_PAGE;return {p:Math.floor(k/SS_PAGE),r:Math.floor(o/c),c:o%c};}
+function ssCell(k){const c=ssCols(),per=ssPer(),o=k%per;return {p:Math.floor(k/per),r:Math.floor(o/c),c:o%c};}
 /** the card on page p nearest to row r, column c, or -1 */
 function ssNearest(p,r,c){
   let best=-1,d=1e9;
-  for(let k=p*SS_PAGE;k<Math.min(SS.list.length,(p+1)*SS_PAGE);k++){
+  const per=ssPer();
+  for(let k=p*per;k<Math.min(SS.list.length,(p+1)*per);k++){
     const q=ssCell(k),e=(q.r-r)*(q.r-r)*4+(q.c-c)*(q.c-c);
     if(e<d){d=e;best=k;}
   }
   return best;
 }
 function ssMove(dir){
+  if(SS_LIST.matches&&(dir==='l'||dir==='r'))dir=dir==='l'?'u':'d';   /* one column: sideways steps the list */
   const q=ssCell(SS.hi),cols=ssCols(),n=SS.list.length;
   let k=-1;
   if(dir==='l'||dir==='r'){
     const s=dir==='l'?-1:1,t=SS.hi+s,tc=q.c+s;
-    if(tc>=0&&tc<cols&&t<n&&Math.floor(t/SS_PAGE)===q.p)k=t;
+    if(tc>=0&&tc<cols&&t<n&&Math.floor(t/ssPer())===q.p)k=t;
     else if(q.p+s>=0&&q.p+s<ssPages())k=ssNearest(q.p+s,q.r,s<0?cols-1:0);   /* off the edge: the next page */
   }else{                                  /* up and down stay on the page, nearest column in the next row */
     const r=q.r+(dir==='u'?-1:1);let d=1e9;
-    for(let t=q.p*SS_PAGE;t<Math.min(n,(q.p+1)*SS_PAGE);t++){const c=ssCell(t);
+    const per=ssPer();
+    for(let t=q.p*per;t<Math.min(n,(q.p+1)*per);t++){const c=ssCell(t);
       if(c.r===r&&Math.abs(c.c-q.c)<d){d=Math.abs(c.c-q.c);k=t;}}
   }
   if(k>=0&&k!==SS.hi)ssHighlight(k,true);
