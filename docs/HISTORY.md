@@ -167,3 +167,13 @@ Teo's spec: market day in Hörby and seven trailers of escaped pigs at the agric
 - Sound and text: oink() (buzzing saw through a lowpass); seven rising honks when you take the big jump; the loudspeaker (HÖGTALAREN panel at the top of the screen) once a lap, more desperate each time.
 - Stamps: Äggamacka (picnic tables outside the hairpin), Äppelmust (Svinstigen just past the mud), Kanelbulle (over the big jump).
 
+
+## 2026-10-18 — Softer audio mix
+
+Teo: "Need to improve the sound", with a patch proposing a softer mix.
+- The bright saw/square engine is now a low-harmonic motor with smoothed virtual gear changes, so the pitch no longer climbs into a whine.
+- Engine/tyres and effects run on separate gain buses into a master gain and a compressor. Short effects are capped at 8 voices, get rounded attacks, and their pitch is kept to 45–1100 Hz.
+- Engine and tyre loops fade out in menus, pause and hidden tabs. Muting keeps the AudioContext so quick M presses don't stack engines; mute and volumes are saved (localStorage `vk.audio.v1`).
+- PAUSAD has a LJUD box: total volym, motor och däck, ljudeffekter (− / + in 10 % steps, gamepad navigable) and LJUD PÅ/AV.
+- Ven, Limhamn and Hörby (oink) effects go through the effects bus via audioOutput(); the test fails if any file connects straight to actx.destination.
+- Checks: `node tools/audio_test.cjs` (simulated AudioContext); headless Chromium measurement of the real output vs main: driving RMS 0.035–0.051 → ~0.022, spectral centroid 160–260 Hz → ~75 Hz, a burst of 12 pings peaks at 0.06 instead of 0.82, silent in menus and pause.

@@ -103,7 +103,7 @@ function limHiss(vol){
   for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.min(1,i/(len*.15))*(1-i/len);
   const n=actx.createBufferSource(),hp=actx.createBiquadFilter(),g=actx.createGain();
   hp.type='highpass';hp.frequency.value=2600;g.gain.value=.22*vol;
-  n.buffer=b;n.connect(hp);hp.connect(g);g.connect(actx.destination);n.start(t);
+  n.buffer=b;n.connect(hp);hp.connect(g);g.connect(audioOutput());n.start(t);
 }
 /** the cracked boulder in the mouth of Sprickan, in two halves */
 function limBlock(R,j){

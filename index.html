@@ -237,6 +237,13 @@
   <div class="sheet-in" style="width:min(340px,100%);text-align:center">
     <h1 style="font-size:clamp(24px,6vw,34px)">PAUSAD</h1>
     <h2 style="margin-bottom:20px">VEBERÖD KART</h2>
+    <fieldset class="audio-settings">
+      <legend>LJUD</legend>
+      <div><span>Total volym</span><button type="button" data-volume="master" data-step="-.1" aria-label="Sänk total volym">−</button><output id="audio-master">70%</output><button type="button" data-volume="master" data-step=".1" aria-label="Höj total volym">+</button></div>
+      <div><span>Motor och däck</span><button type="button" data-volume="engine" data-step="-.1" aria-label="Sänk motor och däck">−</button><output id="audio-engine">35%</output><button type="button" data-volume="engine" data-step=".1" aria-label="Höj motor och däck">+</button></div>
+      <div><span>Ljudeffekter</span><button type="button" data-volume="effects" data-step="-.1" aria-label="Sänk ljudeffekter">−</button><output id="audio-effects">65%</output><button type="button" data-volume="effects" data-step=".1" aria-label="Höj ljudeffekter">+</button></div>
+      <button type="button" class="alt" id="btnSoundMute" aria-pressed="false">LJUD: PÅ</button>
+    </fieldset>
     <button class="go" id="btnResume" style="width:100%">FORTSÄTT</button>
     <div style="margin-top:10px">
       <button class="alt" id="btnRestart" style="margin-left:0">BÖRJA OM</button>

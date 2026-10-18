@@ -88,7 +88,7 @@ function venRumble(vol){
   for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/len);
   const n=actx.createBufferSource(),lp=actx.createBiquadFilter(),g=actx.createGain();
   lp.type='lowpass';lp.frequency.value=140;g.gain.value=.5*vol;
-  n.buffer=b;n.connect(lp);lp.connect(g);g.connect(actx.destination);n.start(t);
+  n.buffer=b;n.connect(lp);lp.connect(g);g.connect(audioOutput());n.start(t);
 }
 function sceneryVen(){
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),

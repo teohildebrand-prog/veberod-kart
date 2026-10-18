@@ -9,7 +9,7 @@ function frame(now){
   if(dt>0.1)dt=0.1;
   pollPad();
   dbgFrame(dt);dt*=DBG.ts;                 /* debug time scale */
-  if(paused){renderer.render(scene,camera);return;}   /* prevT already advanced: no jump on resume */
+  if(paused){audioUpdate();renderer.render(scene,camera);return;}   /* fade driving loops during pause */
   clock+=dt;
   if(camera.userData.mir)mirrorCam();
   for(const t of turbines){
