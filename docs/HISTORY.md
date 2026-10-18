@@ -157,3 +157,13 @@ Teo's spec: Victor from Veberöd, Teo's friend and rival. "Teo built the game; V
 - Lines (toasts): start, a home line on Veberöd (CHARS[].home), passing Teo, a hit from Teo's rocket or semla wall, a perfect drift, driving into mud, win and lose (also on the result screen), and a rare idle line after 8 s standing still. Helpers: bark(), hitLine(), raceLines() in js/36-picknickstamplar.js.
 - Veberöd: a KÖR VICTOR! cloth banner by the start straight with TEO OCKSÅ added underneath in blue marker.
 - The driver grid goes four across once there are more than nine drivers (GRID_COLS).
+
+## Hörby, sju lass svin (2026-10-18)
+Teo's spec: market day in Hörby and seven trailers of escaped pigs at the agricultural fair; add it to any cup. Claude put it in Skånecupen as round 4, between Tollarp and Åhus (now six rounds).
+- Lap (js/27-horby.js, about 1.45 km, ~48 s for the AI): HÖRBY LANTBRUKSRALLY cloth banner over the start, two tight corners round the market block (a U-turn), out through the brick arch (HÖRBY 1450), a wide gravel sweep up to the fair, a loop between the seven numbered trailers (tractors in front, pigs packed inside), the big loading-ramp jump over the pig pen with one enormous pig that looks up and does not move, then downhill past the FODER silo and the STATOLJA forecourt and a broad corner back into town. Two pumps (0.24 and 0.85) because the lap is long.
+- Engine: stages can set zones:[[from,to,surface]] on the main road (MAINS per sample). Physics, AI braking, route costs, the road mesh and the stage picker's UNDERLAG all read it. Hörby: cobbles in town, SURF.horbyGrus (gentler than the lanes' GRUS) to and through the fair, SURF.horbyGyttja mud patches after the ramps and under the pig pen. jumpSpec entries with at:N are placed by hand instead of on the straightest bits.
+- Shortcuts: BAKOM KORVKIOSKEN (inside the U, past the sausage kiosk, crates stacked tight at the entrance) and SVINSTIGEN (deep mud along the pig enclosure, INGEN GENOMFART sign with tyre tracks under it). Own checkpoint chains and AI routing as usual.
+- Hazard: at trailers #3 and #5 the gate rattles and folds down, a farmer waves a red flag and the pigs grunt, then three groups of three pigs trot across with gaps between them. A hit: short slowdown, straw shower, NÖFF!, and the pig bounces aside and turns away, offended. One pig carries a stolen chequered flag. The other five trailers are scenery only.
+- Sound and text: oink() (buzzing saw through a lowpass); seven rising honks when you take the big jump; the loudspeaker (HÖGTALAREN panel at the top of the screen) once a lap, more desperate each time.
+- Stamps: Äggamacka (picnic tables outside the hairpin), Äppelmust (Svinstigen just past the mud), Kanelbulle (over the big jump).
+
