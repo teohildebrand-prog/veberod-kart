@@ -793,3 +793,15 @@
   .ph-act text,text.ph-act{font-family:'Titillium Web',sans-serif!important;font-weight:700;font-size:21px;fill:#e8f1ff}
   .ph-abxy text{font-size:20px;text-anchor:middle}
   body.padnav .sheet button:focus,body.padnav #dbg button:focus{outline:3px solid var(--lime);outline-offset:3px}
+
+/* Compact sound controls also work with the existing gamepad button navigation. */
+.audio-settings{border:1px solid rgba(205,238,255,.4);border-radius:10px;margin:0 0 16px;padding:8px 10px;color:#fff;text-align:left}
+.audio-settings legend{font-size:11px;font-weight:700;letter-spacing:.15em;padding:0 5px}
+.audio-settings>div{display:flex;align-items:center;gap:7px;margin:5px 0}
+.audio-settings span{flex:1;font-size:13px}
+.audio-settings output{width:38px;text-align:center;font-variant-numeric:tabular-nums;font-size:12px}
+.audio-settings button[data-volume]{min-width:32px;min-height:32px;border:1px solid #a1c4f0;border-radius:6px;background:#174786;color:#fff;font-size:20px;cursor:pointer;touch-action:manipulation}
+.audio-settings button:focus-visible{outline:3px solid #ffe460;outline-offset:2px}
+.audio-settings .alt{margin:6px 0 0;padding:6px 12px;font-size:11px}
+#paused{overflow-y:auto}
+#paused>.sheet-in{margin:auto}

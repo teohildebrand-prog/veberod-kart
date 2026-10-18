@@ -404,7 +404,7 @@ function oink(vol){
     lfo.type='square';lfo.frequency.value=42;lg.gain.value=60;lfo.connect(lg);lg.connect(o.frequency);
     lp.type='lowpass';lp.frequency.value=900;lp.Q.value=6;
     g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.16*(vol||1),t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.15);
-    o.connect(lp);lp.connect(g);g.connect(actx.destination);o.start(t+d);lfo.start(t+d);o.stop(t+d+.17);lfo.stop(t+d+.17);
+    o.connect(lp);lp.connect(g);g.connect(audioOutput());o.start(t+d);lfo.start(t+d);o.stop(t+d+.17);lfo.stop(t+d+.17);
   }
 }
 /** the loudspeaker over the fair, more desperate every lap */

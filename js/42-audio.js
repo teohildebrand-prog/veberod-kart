@@ -1,101 +1,148 @@
 "use strict";
-/* ───────── audio ───────── */
-let actx=null,engine=null,skid=null,muted=false;
+/* A quiet, band-limited mix. Engine/road loops and effects have separate buses. */
+let actx=null,engine=null,skid=null,muted=false,audioMix=null;
+const AUDIO_DEFAULTS={master:.7,engine:.35,effects:.65};
+const audioVolumes={...AUDIO_DEFAULTS};
+try{
+  const saved=JSON.parse(localStorage.getItem('vk.audio.v1')||'{}');
+  for(const key of Object.keys(audioVolumes))
+    if(typeof saved[key]==='number'&&Number.isFinite(saved[key]))audioVolumes[key]=clamp(saved[key],0,1);
+  muted=saved.muted===true;
+}catch(_){}
+let audioVoices=0,lastPing=-10,lastMoo=-10,lastFart=-10;
+function audioOutput(){return audioMix.effects;}
+function applyAudioMix(){
+  if(!actx||!audioMix)return;
+  const t=actx.currentTime;
+  audioMix.master.gain.setTargetAtTime(muted||document.hidden?0:audioVolumes.master,t,.035);
+  audioMix.engine.gain.setTargetAtTime(audioVolumes.engine,t,.05);
+  audioMix.effects.gain.setTargetAtTime(audioVolumes.effects,t,.05);
+}
 function bootAudio(){
-  if(actx||muted)return;
+  if(muted)return;
+  if(actx){if(actx.state==='suspended')actx.resume().catch(()=>{});return;}
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-  actx=new AC();
-  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;
+  try{actx=new AC();}catch(_){return;}
+  audioVoices=0;lastPing=lastMoo=lastFart=-10;
+  const master=actx.createGain(),motor=actx.createGain(),effects=actx.createGain();
+  const limiter=actx.createDynamicsCompressor();
+  limiter.threshold.value=-12;limiter.knee.value=12;limiter.ratio.value=8;
+  limiter.attack.value=.004;limiter.release.value=.18;
+  const effectFilter=actx.createBiquadFilter();effectFilter.type='lowpass';effectFilter.frequency.value=2400;effectFilter.Q.value=.5;
+  motor.connect(master);effects.connect(effectFilter);effectFilter.connect(master);master.connect(limiter);limiter.connect(actx.destination);
+  master.gain.value=0;audioMix={master,engine:motor,effects};applyAudioMix();
+  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=480;lp.Q.value=.5;
   const g=actx.createGain();g.gain.value=0;
-  const o1=actx.createOscillator();o1.type='sawtooth';o1.frequency.value=70;
-  const o2=actx.createOscillator();o2.type='square';o2.frequency.value=35;
-  o1.connect(lp);o2.connect(lp);lp.connect(g);g.connect(actx.destination);
+  const o1=actx.createOscillator(),o2=actx.createOscillator();
+  // A handful of low harmonics replaces the old bright saw/square drone.
+  const real=new Float32Array(7),imag=new Float32Array([0,1,.32,.13,.06,.025,.01]);
+  o1.setPeriodicWave(actx.createPeriodicWave(real,imag));o1.frequency.value=42;
+  o2.type='sine';o2.frequency.value=21;
+  const sub=actx.createGain();sub.gain.value=.28;
+  o1.connect(lp);o2.connect(sub);sub.connect(lp);lp.connect(g);g.connect(motor);
   o1.start();o2.start();engine={o1,o2,g,lp};
   const len=actx.sampleRate*2,buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
-  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  let smooth=0;
+  for(let i=0;i<len;i++){smooth=.82*smooth+.18*(Math.random()*2-1);d[i]=smooth;}
   const src=actx.createBufferSource();src.buffer=buf;src.loop=true;
-  const bp=actx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2000;bp.Q.value=1.3;
+  const bp=actx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=850;bp.Q.value=.55;
   const sg=actx.createGain();sg.gain.value=0;
-  src.connect(bp);bp.connect(sg);sg.connect(actx.destination);src.start();
-  const rbp=actx.createBiquadFilter();rbp.type='bandpass';rbp.frequency.value=1000;rbp.Q.value=2.2;
+  src.connect(bp);bp.connect(sg);sg.connect(motor);src.start();
+  const rbp=actx.createBiquadFilter();rbp.type='lowpass';rbp.frequency.value=650;rbp.Q.value=.5;
   const rg=actx.createGain();rg.gain.value=0;
-  src.connect(rbp);rbp.connect(rg);rg.connect(actx.destination);
+  src.connect(rbp);rbp.connect(rg);rg.connect(motor);
   skid={g:sg,bp,road:{bp:rbp,g:rg}};
+  if(actx.state==='suspended')actx.resume().catch(()=>{});
+}
+/** Rounded attack/release avoids clicks; a voice cap bounds busy combat mixes. */
+function audioTone(f0,f1,dur,volume=.055,type='sine',delay=0){
+  if(!actx||muted||document.hidden||audioVoices>=8)return;
+  const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime+delay;
+  dur=Math.max(.04,Math.min(dur,.6));audioVoices++;
+  o.type=type;o.frequency.setValueAtTime(clamp(f0,45,1100),t);
+  o.frequency.exponentialRampToValueAtTime(clamp(f1,45,1100),t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(volume,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(audioOutput());
+  o.onended=()=>{o.disconnect();g.disconnect();audioVoices--;};
+  o.start(t);o.stop(t+dur+.02);
 }
 function ping(f0,f1,dur){
-  if(!actx)return;
-  const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;
-  o.type='square';
-  o.frequency.setValueAtTime(f0,t);
-  o.frequency.exponentialRampToValueAtTime(Math.max(40,f1),t+dur);
-  g.gain.setValueAtTime(.075,t);
-  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+dur+.02);
+  if(!actx||actx.currentTime-lastPing<.06)return;
+  lastPing=actx.currentTime;audioTone(f0,f1,dur);
 }
-function moo(){                            /* two detuned saws through a lowpass */
-  if(!actx)return;
+function moo(){
+  if(!actx||muted||document.hidden||actx.currentTime-lastMoo<1.8||audioVoices>=7)return;
+  lastMoo=actx.currentTime;
   const t=actx.currentTime,g=actx.createGain(),lp=actx.createBiquadFilter();
-  lp.type='lowpass';lp.frequency.setValueAtTime(380,t);lp.frequency.linearRampToValueAtTime(900,t+.25);
-  lp.frequency.linearRampToValueAtTime(300,t+1.0);lp.Q.value=4;
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.12);
-  g.gain.setValueAtTime(.16,t+.7);g.gain.exponentialRampToValueAtTime(.0001,t+1.05);
-  for(const d of [0,4]){
-    const o=actx.createOscillator();o.type='sawtooth';
-    o.frequency.setValueAtTime(118+d,t);o.frequency.linearRampToValueAtTime(142+d,t+.25);
-    o.frequency.linearRampToValueAtTime(96+d,t+1.0);
-    o.connect(lp);o.start(t);o.stop(t+1.1);
+  lp.type='lowpass';lp.frequency.setValueAtTime(260,t);lp.frequency.linearRampToValueAtTime(520,t+.2);
+  lp.frequency.linearRampToValueAtTime(220,t+.8);lp.Q.value=.7;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1,t+.08);
+  g.gain.exponentialRampToValueAtTime(.0001,t+.85);lp.connect(g);g.connect(audioOutput());
+  let remaining=2;
+  for(const detune of [0,3]){
+    const o=actx.createOscillator();audioVoices++;o.type='triangle';
+    o.frequency.setValueAtTime(105+detune,t);o.frequency.linearRampToValueAtTime(125+detune,t+.2);
+    o.frequency.linearRampToValueAtTime(84+detune,t+.8);o.connect(lp);
+    o.onended=()=>{o.disconnect();audioVoices--;if(!--remaining){lp.disconnect();g.disconnect();}};
+    o.start(t);o.stop(t+.9);
   }
-  lp.connect(g);g.connect(actx.destination);
 }
-function klonk(){                          /* rubber stamp on paper */
-  if(!actx)return;
-  const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();
-  o.type='triangle';o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(55,t+.14);
-  g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.0001,t+.2);
-  o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+.22);
-  const len=(actx.sampleRate*.05)|0,b=actx.createBuffer(1,len,actx.sampleRate),d=b.getChannelData(0);
-  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
-  const n=actx.createBufferSource(),ng=actx.createGain();ng.gain.value=.22;
-  n.buffer=b;n.connect(ng);ng.connect(actx.destination);n.start(t);
-  setTimeout(()=>ping(880,1320,.09),170);
+function klonk(){
+  audioTone(155,55,.16,.12,'triangle');audioTone(660,880,.09,.04,'sine',.14);
 }
-/** a flapping low saw through a resonant lowpass; the big one is long and loud */
 function fartSound(lvl){
-  if(!actx)return;
-  const t=actx.currentTime,dur=[.35,.6,1.1][lvl-1],base=[150,110,72][lvl-1],vol=[.16,.22,.32][lvl-1];
+  if(!actx||muted||document.hidden||actx.currentTime-lastFart<.65||audioVoices>=7)return;
+  lastFart=actx.currentTime;lvl=clamp(lvl,1,3);
+  const t=actx.currentTime,dur=[.28,.42,.65][lvl-1],base=[100,85,65][lvl-1];
   const o=actx.createOscillator(),lfo=actx.createOscillator(),lg=actx.createGain();
-  o.type='sawtooth';o.frequency.setValueAtTime(base*1.25,t);o.frequency.exponentialRampToValueAtTime(base*.65,t+dur);
-  lfo.type='square';lfo.frequency.value=[30,24,17][lvl-1];lg.gain.value=base*.4;
-  lfo.connect(lg);lg.connect(o.frequency);
-  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=520+lvl*60;lp.Q.value=7;
-  const g=actx.createGain();
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);
-  g.gain.setValueAtTime(vol,t+dur*.75);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-  o.connect(lp);lp.connect(g);g.connect(actx.destination);
-  o.start(t);lfo.start(t);o.stop(t+dur+.05);lfo.stop(t+dur+.05);
+  o.type='triangle';o.frequency.setValueAtTime(base*1.2,t);o.frequency.exponentialRampToValueAtTime(base*.7,t+dur);
+  lfo.type='sine';lfo.frequency.value=22;lg.gain.value=base*.25;lfo.connect(lg);lg.connect(o.frequency);
+  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=340;lp.Q.value=.65;
+  const g=actx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.1+lvl*.015,t+.025);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(lp);lp.connect(g);g.connect(audioOutput());audioVoices+=2;
+  o.onended=()=>{o.disconnect();lfo.disconnect();lg.disconnect();lp.disconnect();g.disconnect();audioVoices-=2;};
+  o.start(t);lfo.start(t);o.stop(t+dur+.03);lfo.stop(t+dur+.03);
 }
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
-  else{ping(420,400,.18);setTimeout(()=>ping(420,400,.18),220);}
+  else{audioTone(330,320,.15,.07,'triangle');audioTone(330,320,.15,.07,'triangle',.19);}
 }
-function toggleAudio(){
-  muted=!muted;
-  if(muted&&actx){actx.close();actx=null;engine=null;skid=null;}
-  else bootAudio();
-  toast(muted?'LJUD AV':'LJUD PÅ');
+function saveAudioSettings(){
+  try{localStorage.setItem('vk.audio.v1',JSON.stringify({...audioVolumes,muted}));}catch(_){}
+  applyAudioMix();refreshAudioControls();
 }
+function toggleAudio(){muted=!muted;if(!muted)bootAudio();saveAudioSettings();toast(muted?'LJUD AV':'LJUD PÅ');}
+function refreshAudioControls(){
+  for(const key of Object.keys(audioVolumes)){
+    const el=document.getElementById('audio-'+key);if(el)el.textContent=Math.round(audioVolumes[key]*100)+'%';
+  }
+  const el=document.getElementById('btnSoundMute');if(el){el.textContent=muted?'LJUD: AV':'LJUD: PÅ';el.setAttribute('aria-pressed',String(muted));}
+}
+for(const button of document.querySelectorAll('[data-volume]'))button.addEventListener('click',()=>{
+  const key=button.dataset.volume;
+  audioVolumes[key]=Math.round(clamp(audioVolumes[key]+Number(button.dataset.step),0,1)*100)/100;
+  bootAudio();saveAudioSettings();
+});
+const soundButton=document.getElementById('btnSoundMute');if(soundButton)soundButton.addEventListener('click',toggleAudio);
+refreshAudioControls();
 function audioUpdate(){
   if(!engine)return;
-  const r=clamp(player.speed/player.maxSpeed,0,1.2);
-  const f=64+r*330+(player.boost>0?(player.boostLvl>=3?150:70):0);   /* skånsk grädde screams */
-  engine.o1.frequency.setTargetAtTime(f,actx.currentTime,.05);
-  engine.o2.frequency.setTargetAtTime(f*.5,actx.currentTime,.05);
-  engine.lp.frequency.setTargetAtTime(600+r*1700,actx.currentTime,.08);
-  engine.g.gain.setTargetAtTime(state==='race'?(0.028+r*0.05):0.012,actx.currentTime,.1);
-  if(skid)skid.g.gain.setTargetAtTime(player.drift!==0?0.03:(player.onRoad?0:0.014),actx.currentTime,.06);
-  if(skid&&skid.road){                            /* the surface underneath, from the table */
-    const S=SFX[player.sfx],n=S&&S.noise,on=n&&state==='race'&&player.speed>6&&!player.air;
-    if(n)skid.road.bp.frequency.setTargetAtTime(n.f*(0.7+0.5*r),actx.currentTime,.05);
-    skid.road.g.gain.setTargetAtTime(on?n.g*(0.5+r)*(S.rattle?(Math.random()<.5?1:.35):1):0,actx.currentTime,.02);
-  }
+  const active=state==='race'&&!paused&&!document.hidden;
+  const r=clamp(player.speed/Math.max(1,player.maxSpeed),0,1.2),t=actx.currentTime;
+  const throttle=active?clamp(input.throttle,0,1):0;
+  // Virtual gear changes keep the pitch from rising into a continuous whine.
+  const gear=Math.min(3,Math.floor(r*4)),rpm=clamp(r*4-gear,0,1);
+  const f=42+rpm*30+gear*5+throttle*7+(player.boost>0?8:0);
+  engine.o1.frequency.setTargetAtTime(f,t,.14);engine.o2.frequency.setTargetAtTime(f*.5,t,.14);
+  engine.lp.frequency.setTargetAtTime(350+throttle*220+r*100,t,.15);
+  engine.g.gain.setTargetAtTime(active?(.045+throttle*.035+r*.018):0,t,.09);
+  const grounded=active&&!player.air&&player.speed>6;
+  skid.g.gain.setTargetAtTime(grounded&&player.drift!==0?.065:0,t,.1);
+  const S=SFX[player.sfx],n=S&&S.noise;
+  if(n)skid.road.bp.frequency.setTargetAtTime(Math.min(900,n.f*.6),t,.12);
+  const rattle=S&&S.rattle?.8+.2*Math.sin(t*35):1;
+  skid.road.g.gain.setTargetAtTime(grounded&&n?Math.min(.09,n.g*.6)*r*rattle:0,t,.12);
 }
+document.addEventListener('visibilitychange',()=>{applyAudioMix();audioUpdate();});

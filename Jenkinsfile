@@ -5,6 +5,11 @@ pipeline {
   }
   options { timeout(time: 10, unit: 'MINUTES') }
   stages {
+    stage('Audio test') {
+      steps {
+        sh 'node tools/audio_test.cjs'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
