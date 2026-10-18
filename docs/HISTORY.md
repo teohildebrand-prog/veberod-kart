@@ -143,3 +143,7 @@ Teo's vehicle concepts: every driver gets a vehicle you can recognise from its s
 - Main colours changed to match: Arne faded red, Teo cobalt, Amanda burgundy, Britta butter yellow; the rival paints follow (TEOS KOBOLT, AMANDAS VINRÖD, BRITTAS SMÖRGUL).
 - Twins race the same vehicle in their own paint: STJÄRNA strawberry-pink Mjölkexpress, TEODOR with the unfinished panels on the other side, MANDY forest green, BIRGITTA lilac.
 - Code: js/30-vehicles.js holds the new builders (VEHICLES); buildKart gained an anim list run by drawKart, per-wheel radii and hub decoration; dressTwins() in js/33-skanecupen.js.
+
+## Every vehicle for every driver (2026-10-18)
+- Teo: all vehicles are open to all drivers. Picking a driver selects their own vehicle (EGET FORDON on the panel); ◀ ▶, Q/E, keys 1–9 and the debug menu then reach any of the 20, the four original cars, the signature vehicles, Nisse's and the champions'. Re-picking the same driver keeps the chosen vehicle.
+- Handling is still the driver's numbers times the vehicle's: the original four and Björn's, Mehmet's and Anders' vehicles keep their multipliers (now for whoever drives them); the rest are neutral. Driver abilities (Skopan, akademisk kvart, Mehmet's wheelie and so on) stay with the driver.

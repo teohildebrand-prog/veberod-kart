@@ -13,7 +13,7 @@ const CARS=[
   {id:'acc', name:'ÄNGELHOLM CC', sub:'HYPERBIL', bars:[1.0,.35,.20],
    blurb:'Absurd power, a wing you could land a plane on and a fuel gauge that falls while you watch. Fastest thing here by a mile, and the least forgiving.',
    mul:{maxSpeed:1.14,power:1.12,offRoad:0.74,gripOn:0.86,boostMul:1.10,burn:1.42}},
-  /* signature vehicles: each belongs to one driver and never shows in the free car list */
+  /* signature vehicles: each driver's own, picked first for them, but anyone may take one */
   {id:'l61', name:'LANDSKRONA 61', sub:'VETERANBIL', sig:'bjorn', bars:[.80,.90,.40],
    blurb:'Mint green, whitewall tyres and a bicycle on the roof rack. Slow to wind up, lovely in a corner, sips fuel.',
    mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:0.80}},
@@ -50,7 +50,7 @@ const CARS=[
   {id:'tallrik', name:'ÄNGELHOLM TALLRIK 46', sub:'FLYGANDE TEFAT', npc:true, bars:[.8,.8,.8],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
   {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}}
 ];
-const FREECARS=CARS.map((c,i)=>c.sig||c.npc?-1:i).filter(i=>i>=0);
+const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 
 /** chassis; returns the wheel layout so each car sits on its own footprint */
 function buildBody(car,add,paint,dark,steel,A){
@@ -630,7 +630,7 @@ const blobTex=pixTex(32,32,(g)=>{
 });
 
 /* drivers. The order is the save format (cup.char is an index), so new ones go on the end;
-   GRID is the order on the select screen. sig = the vehicle that belongs to this driver. */
+   GRID is the order on the select screen. sig = the driver's own vehicle, picked first. */
 const CHARS=[
   {id:'arne',short:'ARNE',name:'BONDEN ARNE',role:'LANTBRUKARE, ÖSTERLEN',sig:'aker',
    color:0xa8483a,maxSpeed:39.6,power:28,offRoad:0.80,boostMul:1.32,gripOn:10.2,
