@@ -45,6 +45,8 @@ function applyChampion(){
     k.cfg=cfg;k.name=cfg.name;k.color=cfg.color;
   });
   nameKarts();
+  const ck=ch&&karts[CUP.rival];   /* the player drives this cup's own champion: the other one is II */
+  if(ck&&CHARS[charSel].id===cupDef(CUP).champ&&ck.name===ch.name)ck.name=ch.name+' II';
 }
 const POINTS=[10,7,5,3,2,1];
 const CLASSES=[
@@ -161,7 +163,10 @@ function dressTwins(tw){
     if(k.v!==want){want.root.visible=k.v.root.visible;k.v.root.visible=false;k.v=want;}
   });
 }
-function applyCharacter(i){
+/** what a locked champion's card says: which cup to win */
+const bossLockText=ci=>'Låst: vinn '+cupDef({cup:CHARS[ci].boss}).name+' för att köra som '+CHARS[ci].short+'.';
+function applyCharacter(i,force){
+  if(!force&&!charOpen(i)){peekCharacter(i);ping(220,160,.06);return;}   /* a look, and the lock text */
   if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;}   /* a new driver starts in their own vehicle */
   charSel=i;previewChar=null;showRig();
 }
@@ -187,9 +192,12 @@ function renderCombo(){
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
   set('vsName',c.name);set('vsHome',c.role);set('ptag',peek?'FÖRHANDSVISNING':'');
   set('vsCar',R.name);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
-  set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',c.blurb);
+  set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
   set('btnGoT',cupSetup?'STARTA CUPEN':'VÄLJ '+CHARS[charSel].short);
-  document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i;
+  document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i,open=charOpen(n);
+    if(el.classList.contains('locked')===open){const im=el.querySelector('img'),was=im.src;
+      if(im.dataset.sil){im.src=im.dataset.sil;im.dataset.sil=was;}}   /* silhouette and portrait trade places */
+    el.classList.toggle('locked',!open);el.querySelector('span').textContent=open?CHARS[n].short:'LÅST';
     el.classList.toggle('sel',n===charSel);el.classList.toggle('peek',peek&&n===ci);
     el.setAttribute('aria-selected',n===charSel);});
 }

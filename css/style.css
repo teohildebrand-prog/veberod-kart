@@ -350,6 +350,8 @@
   .vcard.sel::after{content:'1P';position:absolute;left:0;top:0;padding:2px 6px;background:#ffd54a;
     color:#10276b;font:italic 900 14px/1.1 "Titillium Web",sans-serif}
   .vcard.peek{border-color:#9fd0ff}
+  .vcard.locked span{background:#2a2f3a;color:#9aa3b2}
+  .newdrv{margin-top:8px;padding:6px 10px;border-radius:4px;background:#ffd54a;color:#0d2463;font-weight:700;letter-spacing:.04em}
   .vcard:focus-visible{outline:3px solid #9ad73f;outline-offset:2px}
   .vs-name{grid-area:name;justify-self:start}
   .vs-big{font:italic 900 clamp(26px,4.6vw,54px)/1 "Titillium Web",sans-serif;color:#ffd54a;

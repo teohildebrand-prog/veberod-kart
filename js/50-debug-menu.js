@@ -80,7 +80,7 @@ function dbgAct(a){
   const [cmd,arg,arg2]=a.split(':');
   if(cmd==='close')return setDbg(false);
   if(cmd==='stage'&&!CUP){applyStage(+arg);if(racingNow())resetRace();else dbgOnReset();}
-  if(cmd==='char'&&!CUP){applyCharacter(+arg);dbgRestart();}
+  if(cmd==='char'&&!CUP){applyCharacter(+arg,true);dbgRestart();}   /* debug may drive a locked champion */
   if(cmd==='car'&&!CUP){applyCar(+arg);dbgRestart();}
   if(cmd==='sky')dbgSky(+arg);
   if(cmd==='tp')dbgTeleport(+arg);

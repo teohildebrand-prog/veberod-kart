@@ -45,10 +45,10 @@ const CARS=[
    mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
   /* the AI's own vehicles: looks only, AI handling comes from the roster */
   {id:'tralla', name:'NISSES TRÄNGSELTRALLA', sub:'SKROTKART', npc:true, bars:[.7,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
-  {id:'nattvagn',name:'GLIMMINGEHUS NATTVAGN', sub:'SPÖKVAGN', npc:true, bars:[.8,.8,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
-  {id:'langskepp',name:'KUSTENS LÅNGSKEPP', sub:'LÅNGSKEPP PÅ HJUL', npc:true, bars:[.8,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
-  {id:'tallrik', name:'ÄNGELHOLM TALLRIK 46', sub:'FLYGANDE TEFAT', npc:true, bars:[.8,.8,.8],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
-  {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'nattvagn',name:'GLIMMINGEHUS NATTVAGN', sub:'SPÖKVAGN', sig:'spoket', npc:true, bars:[.8,.8,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'langskepp',name:'KUSTENS LÅNGSKEPP', sub:'LÅNGSKEPP PÅ HJUL', sig:'viking', npc:true, bars:[.8,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'tallrik', name:'ÄNGELHOLM TALLRIK 46', sub:'FLYGANDE TEFAT', sig:'gubbe', npc:true, bars:[.8,.8,.8],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', sig:'rune', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
   /* later arrivals go on the end: a cup save keeps the vehicle as an index */
   {id:'original',name:'VEBERÖD ORIGINAL', sub:'NUMMER 13', sig:'victor', bars:[.88,.72,.45],
    blurb:'Proper racing equipment until Victor added a few improvements. Carefully tuned, well used and far too serious for a race with a cow in it.',
@@ -770,11 +770,34 @@ const CHARS=[
         pass:'Du byggde banan. Jag är uppvuxen här.',hitTeo:'DET DÄR ÄR JU EN BUGG!',
         perfect:'Där! Originalkänslan!',mud:'Vem har designat det här?',
         win:'En gång till. Så du får en chans.',lose:'Vi kör bäst av tre.',idle:'Och låt Halo vara.'},
-   blurb:'Victor från Veberöd har åsikter om racinglinjer, kontrollkänsla och varför originalet alltid var bättre. Hans VEBERÖD ORIGINAL belönar rena sladdar och sena omkörningar. Förlorar han var det förmodligen något med kontrollen.'}
+   blurb:'Victor från Veberöd har åsikter om racinglinjer, kontrollkänsla och varför originalet alltid var bättre. Hans VEBERÖD ORIGINAL belönar rena sladdar och sena omkörningar. Förlorar han var det förmodligen något med kontrollen.'},
+  /* the cup champions, playable once beaten: boss = the cup whose win (SAVE.unlock.win_<cup>) unlocks them */
+  {id:'spoket',kind:'ghost',boss:'osterlen',short:'SPÖKET',name:'SPÖKET PÅ GLIMMINGEHUS',role:'GLIMMINGEHUS',sig:'nattvagn',home:'glimminge',
+   color:0xcfe0ea,maxSpeed:42.2,power:27,offRoad:0.62,boostMul:1.40,gripOn:10.8,
+   stats:[0.82,0.92,0.55],quirk:['SPÖKLINJEN','Svävar genom kurvorna nästan lika säkert som Majros.'],
+   say:{start:'Hoooo...',home:'Mitt slott. Mina kurvor.',hit:'MITT LAKAN!'},
+   blurb:'Har spökat på Glimmingehus i femhundra år och kan varje kurva i mörker. Inte snabbast rakt fram, men tappar aldrig linjen.'},
+  {id:'viking',kind:'viking',boss:'kust',short:'HÖVDINGEN',name:'VIKINGAHÖVDINGEN',role:'FOTEVIKEN',sig:'langskepp',home:'foteviken',
+   color:0x7a4a2a,maxSpeed:42.6,power:28,offRoad:0.70,boostMul:1.44,gripOn:9.6,mass:1.8,
+   stats:[0.86,0.72,0.70],quirk:['LÅNGSKEPPET','Tung som ett skepp: knuffar undan alla som kommer för nära.'],
+   say:{start:'Till Valhall!',home:'Hela kusten är min.',hit:'VID ODENS SKÄGG!'},
+   blurb:'Kör långskepp på hjul som om det vore en strandhugg. Tung, envis och svår att knuffa av linjen.'},
+  {id:'gubbe',kind:'gubbe',boss:'vild',short:'GUBBEN',name:'GRÖNA GUBBEN FRÅN SKOGEN',role:'ÄNGELHOLMS UFO-SKOG',sig:'tallrik',home:'angelholm',
+   color:0x4fd04a,maxSpeed:42.0,power:29,offRoad:0.88,boostMul:1.38,gripOn:10.2,
+   stats:[0.80,0.82,0.94],quirk:['SVÄVAR','Tefatet bryr sig knappt om lera, gräs och snö.'],
+   say:{start:'Bliip.',home:'Bliip bliip. Hemma.',hit:'BLIIP!'},
+   blurb:'Landade i Ängelholm 1946 och har inte hittat hem sedan dess. Hans tefat svävar över allt som inte är asfalt.'},
+  {id:'rune',kind:'rune',boss:'final',short:'RUNE',name:'RAKET-RUNE',role:'MALMÖ HAMN',sig:'overljud',home:'rune',
+   color:0xd82a2a,maxSpeed:44.0,power:30,offRoad:0.50,boostMul:1.56,gripOn:8.6,burn:1.15,
+   stats:[1.00,0.55,0.36],quirk:['RAKETBRÄNSLE','Hårdaste turbon i fältet, men tanken tar slut fortare.'],
+   say:{start:'Ingen slår Raket-Rune!',home:'Min runda. Mina regler.',hit:'MIN RAKET!'},
+   blurb:'Skånes snabbaste man, enligt honom själv. Ingen accelererar som Rune, och ingen bränner så mycket bensin på vägen.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','amanda','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
-const GRID_COLS=Math.ceil(Math.sqrt(GRID.length));   /* 3x3 for nine, four across past that */
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','amanda','britta','spoket','viking','gubbe','rune'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID_COLS=Math.max(Math.ceil(Math.sqrt(GRID.length)),Math.ceil(GRID.length/3));   /* 3x3 for nine, then wider: never past three rows */
 const kindOf=c=>c.kind||c.id;
+/** a champion is playable once their cup is won; everyone else always is */
+const charOpen=ci=>!CHARS[ci].boss||!!SAVE.unlock['win_'+CHARS[ci].boss];
 /* an AI who is also the player's driver races as a twin: [roster slot, name, paint] in the
    same vehicle (Teodor's prototype is unfinished on the other side) */
 const TWIN={cow:[1,'STJÄRNA',0xf08aa8],teo:[2,'TEODOR',0x2f62d8],amanda:[3,'MANDY',0x2f5a3a],britta:[5,'BIRGITTA',0xb89ad8]};
