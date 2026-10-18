@@ -957,3 +957,24 @@ body.touch .ss-mir{min-height:44px}
   #stages.sslist .ss-name b{font-size:20px}
   #stages.sslist .ss-info dd{font-size:12px}
 }
+
+/* ── main menu: compact logo, four clear choices, a smaller secondary row ── */
+.menu-in{width:min(520px,100%)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.mgrid .go{margin:0;width:100%;font-size:17px}
+.mresume{width:100%;margin:0 0 10px}
+.mresume[hidden]{display:none}
+.msec{gap:7px}
+.msec .alt{flex:1 1 120px;font-size:11px;padding-left:8px;padding-right:8px}
+#settings .audio-settings{margin-bottom:10px}
+@media (max-height:540px){
+  .menu-in h1{font-size:24px}
+  .menu-in h2{margin-bottom:10px}
+}
+/* wide, short screens (a phone on its side): the four choices in one row */
+@media (max-height:540px) and (min-aspect-ratio:3/2){
+  .menu-in{width:min(680px,100%)}
+  .mgrid{grid-template-columns:repeat(4,1fr)}
+  .mgrid .go{font-size:15px;padding-left:6px;padding-right:6px}
+}
+@media (max-width:480px){.mgrid .go{font-size:15px;letter-spacing:.04em;padding-left:6px;padding-right:6px}}

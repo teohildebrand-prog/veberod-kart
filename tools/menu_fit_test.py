@@ -3,11 +3,11 @@
 
     pip install playwright && python3 tools/menu_fit_test.py
 
-Opens the name entry, main menu, cup setup, picnic pass, stage select, driver
+Opens the name entry, main menu, how-to, settings, cup setup, picnic pass, stage select, driver
 select and pause menu on four phone screens (landscape, landscape with the
 browser toolbar showing, a small landscape phone and portrait). Fails if a
 menu's main action is off screen, the stage roster isn't one
-scrolling list with its last track reachable, the page scrolls sideways, or a button is
+scrolling list with its last track reachable, the page scrolls sideways, a button's label is cut off, or a button is
 under 44 CSS px tall (filter chips excepted), or if pinch-zoom is
 turned off on a menu (headless Chromium can't pinch, so this reads touch-action). Set CHROMIUM to use an existing
 Chromium binary.
@@ -24,11 +24,13 @@ MEASURE = '''(id)=>{const sh=document.getElementById(id),vw=innerWidth,vh=innerH
   const shown=[...sh.querySelectorAll('button')].filter(b=>b.offsetParent&&!b.hidden);
   const small=shown.filter(b=>!b.classList.contains('tab')&&b.getBoundingClientRect().height<43.5)
     .map(b=>(b.id||b.className)+' '+Math.round(b.getBoundingClientRect().height)+'px');
+  /* driver portraits (.vcard) are rebuilt for phones in the driver-select step; checked from then on */
+  const cut=shown.filter(b=>!b.classList.contains('vcard')&&b.scrollWidth>b.clientWidth+1).map(b=>b.id||b.className);
   const go=[...sh.querySelectorAll('.go,.vs-go')].find(b=>b.offsetParent&&!b.hidden);
   const r=go&&go.getBoundingClientRect();
   return {main:go?go.textContent.trim():null,
           onScreen:!!go&&r.top>=0&&r.bottom<=vh+0.5&&r.left>=0&&r.right<=vw+0.5,
-          sideways:sh.scrollWidth>sh.clientWidth+1,small,
+          sideways:sh.scrollWidth>sh.clientWidth+1,small,cut,
           zoom:['manipulation','auto'].includes(getComputedStyle(document.body).touchAction)||
                /pinch-zoom|auto|manipulation/.test(getComputedStyle(sh).touchAction)}}'''
 
@@ -60,6 +62,8 @@ def main():
                     bad.append('scrolls sideways')
                 if not m['zoom'] and sheet != 'paused':     # menus keep pinch-zoom; the race does not
                     bad.append('pinch-zoom blocked')
+                if m['cut']:
+                    bad.append('text cut off: ' + ', '.join(m['cut'][:5]))
                 if m['small']:
                     bad.append('small buttons: ' + ', '.join(m['small'][:5]))
                 print(('FAIL ' if bad else 'ok   ') + f'{tag:9} {sheet:9} ' + '; '.join(bad))
@@ -71,6 +75,8 @@ def main():
             page.fill('#nameBox', 'teo')
             page.keyboard.press('Enter')
             check('start')
+            click('btnHow'); check('howto'); click('btnHowBack')
+            click('btnSettings'); check('settings'); click('btnSetBack')
             click('btnCup'); check('cupsetup'); click('btnCupBack')
             click('btnAlbum'); check('album'); click('btnAlbumBack')
             click('btnStart'); check('stages')
