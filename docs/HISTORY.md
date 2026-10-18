@@ -177,3 +177,11 @@ Teo: "Need to improve the sound", with a patch proposing a softer mix.
 - PAUSAD has a LJUD box: total volym, motor och däck, ljudeffekter (− / + in 10 % steps, gamepad navigable) and LJUD PÅ/AV.
 - Ven, Limhamn and Hörby (oink) effects go through the effects bus via audioOutput(); the test fails if any file connects straight to actx.destination.
 - Checks: `node tools/audio_test.cjs` (simulated AudioContext); headless Chromium measurement of the real output vs main: driving RMS 0.035–0.051 → ~0.022, spectral centroid 160–260 Hz → ~75 Hz, a burst of 12 pings peaks at 0.06 instead of 0.82, silent in menus and pause.
+
+## 2026-10-18 — Hook rework, no more sugar cubes
+
+Teo's change request "Hook Rework and Removal of Sugar-Cube Upgrades".
+- Sugar cubes are gone: no pickups on the main road or in the lanes, no counter on the kart, no HUD row, no drop when hit, no AI line choice for them, no debug button. Saves never stored sugar, and the save loader merges unknown keys, so old saves load as before. Picnic stamps are untouched.
+- An item box now awards a whole variant: a family with equal weight, then level 1/2/3 at 50/30/20 % (ITEMODDS in js/35-pickups.js). All fifteen can come from the first box in any position. The level sits on the kart (heldLvl) until the item is used; damage never lowers it. AI uses the same boxes and rules.
+- HUD: the slot shows the exact variant's icon and name, with an I / II / III badge where the sugar row was (gold ring at II, pink at III, the numeral is enough on its own).
+- Spettigare kaka: the hook bites the first rival it reaches (KLONK!), the rope goes taut and the thrower surges forward along their own nose, steering intact, with HÅLL I DIG! on screen. It lets go 7 m short of the rival (SLÄPP! KÖR OM), when the surge runs out, or early if the next quarter second would hit the fence or a closed passage. Shields and closed passages stop it; a reset, finish, different route or a rope over the verge breaks it. The rival keeps its speed and steering. The surge is normal physics with extra push and a capped top speed (HOOK in js/37-power-ups.js: reach 0.7 s, surge 0.9 s, +60 m/s², top 1.45×), so fences, blockers and gates still apply. Numbers are a first guess for playtesting.

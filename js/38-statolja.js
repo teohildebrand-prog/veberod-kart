@@ -89,7 +89,7 @@ function aiItemLines(){
     if(!k.ai||k.parked)continue;
     let bias=0;
     for(const it of items){
-      if(it.cool>0||it.type==='sugar')continue;
+      if(it.cool>0)continue;
       let d=it.si-k.mi;
       if(d>N/2)d-=N; else if(d<-N/2)d+=N;
       if(d<2||d>26)continue;

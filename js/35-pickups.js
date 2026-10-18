@@ -31,17 +31,29 @@ function makePie(){
 }
 
 const items=[];
-/* an item box gives a family; the sugar cubes held when it is used pick the level */
-const SUGARMAX=2;
-const ITEMPOOL=['boost','boost','boost','rocket','rocket','shield','pie','pie','fart','fart'];
+/* an item box gives a whole variant, family and level, from the first box of the race:
+   a family by its weight, then a level by its odds. Tune both here. */
 const FAMILIES=['boost','rocket','shield','pie','fart'];
+const ITEMODDS={family:{boost:1,rocket:1,shield:1,pie:1,fart:1},level:[0.5,0.3,0.2]};
+function pickWeighted(keys,w){
+  let sum=0;for(const q of keys)sum+=w[q];
+  let r=Math.random()*sum;
+  for(const q of keys){r-=w[q];if(r<0)return q;}
+  return keys[keys.length-1];
+}
+/** what an item box hands out: [family, level 1..3] */
+function rollItem(){
+  return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
+}
+/** put an item in the slot; it keeps its level until it is used */
+function giveItem(k,fam,lvl){k.held=fam;k.heldLvl=lvl||1;}
 const ITEMNAMES={boost:['MJÖLK','GRÄDDFIL','SKÅNSK GRÄDDE'],
   rocket:['SPETTEKAKA','SPETTIGARE KAKA','SEMMELVÄGGEN'],
   shield:['ÄGGAKAKA','STEKHET ÄGGAKAKA','DEN FLYGANDE STEKPANNAN'],
   pie:['ÄPPELPAJ','KAFFEREP','TÅRTMINA'],
   fart:['SKÅNSKA BÖNOR','SKÅNSK ÄRTSOPPA','BRUNA BÖNOR MED FLÄSK']};
 const itemName=(f,l)=>ITEMNAMES[f][l-1];
-const itemLvl=k=>Math.min(k.sugar,SUGARMAX)+1;
+const itemLvl=k=>k.heldLvl||1;
 const ROLLT=1.5;                 /* seconds the item slot spins before the item can be used */
 const ITEMICON={
   boost1:`<svg viewBox="0 0 48 48"><defs>
@@ -209,7 +221,7 @@ function makeSpettekaka(){
   const g=new THREE.Group();
   const cone=new THREE.Mesh(flat(new THREE.ConeGeometry(.62,1.9,8)),psMat({color:0xc89a4e}));
   cone.position.y=.95;g.add(cone);
-  for(let k=0;k<4;k++){                                /* the sugar drizzle */
+  for(let k=0;k<4;k++){                                /* the icing drizzle */
     const r=.56-k*.12;
     const ring=new THREE.Mesh(flat(new THREE.TorusGeometry(r,.055,4,8)),
       psMat({color:0xf2ece0}));
@@ -251,28 +263,12 @@ function makeMine(){
   g.userData.flame.visible=false;
   return g;
 }
-const sugarMat=psMat({color:0xffffff});
-function makeSugar(){
-  const g=new THREE.Group();
-  const c=new THREE.Mesh(flat(new THREE.BoxGeometry(.62,.62,.62)),sugarMat);
-  c.rotation.set(.6,.3,.5);g.add(c);
-  const c2=new THREE.Mesh(flat(new THREE.BoxGeometry(.4,.4,.4)),sugarMat);
-  c2.position.set(.42,-.18,.2);c2.rotation.set(.2,.9,.1);g.add(c2);
-  return g;
-}
-/** an item somewhere other than the main road's centreline grid, e.g. in a lane */
-function addItemAt(type,x,z,y,si,lat,rib){
-  const mesh=type==='sugar'?makeSugar():type==='milk'?makeMilk():makeBox();
-  mesh.position.set(x,y+1.15,z);world.add(mesh);
-  const o={type,si,lat,x,z,y,mesh,cool:0,base:mesh.position.y,rib:rib||0};
-  items.push(o);return o;
-}
 /** traps that sit on the road instead of spinning above it */
 const GROUNDED={pie:1,coffee:1,mine:1};
 function addItem(type,si,lat){
   const x=sx[si]+rx[si]*lat, z=sz[si]+rz[si]*lat, y=groundAt(x,z,si);
   const mesh=type==='fuel'?makeDunk():type==='box'?makeBox():type==='milk'?makeMilk():type==='pie'?makePie():
-             type==='sugar'?makeSugar():type==='coffee'?makeCoffee():type==='mine'?makeMine():
+             type==='coffee'?makeCoffee():type==='mine'?makeMine():
              type==='rocket'?makeSpettekaka():makeAggkaka();
   const low=GROUNDED[type];
   mesh.position.set(x,y+(low?.04:1.15),z);
@@ -303,32 +299,6 @@ function buildItems(){
     while(!clearOfForks(at,6))at=(at+8)%N;
     addItem('fuel',at,(k%2?1:-1)*HW*0.62);
   }
-  /* sockerbitar: two in every lane, and on the main road short rows of three on the
-     line you drive anyway (a touch to the inside of the bend), spread round the lap */
-  for(const R of ALTS)for(const f of [0.35,0.7]){
-    const j=Math.round(f*(R.n-1));addItemAt('sugar',R.X[j],R.Z[j],R.Y[j],R.MI[j],0,R.idx);}
-  const GAP=7, spots=[];                                    /* rows sit between the box rows */
-  for(let m=76;m<N;m+=72)for(const o of [0,-12,12,-24,24]){
-    const at=(m+o-GAP+N)%N;
-    if(sugarRowOk(at,GAP)){spots.push(at);break;}
-  }
-  const rows=Math.min(5,spots.length);
-  for(let k=0;k<rows;k++){
-    const at=spots[Math.floor(k*spots.length/rows)];
-    for(let c=0;c<3;c++){
-      const i=(at+c*GAP)%N, lat=-Math.sign(scurv[i])*Math.min(HW*0.2,Math.abs(scurv[i])*8);
-      addItem('sugar',i,lat);
-    }
-  }
-}
-
-/** a sugar row needs flat road: no jump, fork, start line or item boxes underneath */
-function sugarRowOk(at,gap){
-  const d=(a,b)=>Math.min(Math.abs(a-b),N-Math.abs(a-b)), end=(at+2*gap)%N, mid=(at+gap)%N;
-  if(d(mid,0)<32+gap||!clearOfForks(at,6)||!clearOfForks(end,6))return false;
-  for(const J of JUMPS)if(d(mid,J.at)<J.up+J.dn+gap+6)return false;
-  for(let i=40;i<N;i+=72)if(d(mid,i)<gap+10)return false;
-  return true;
 }
 
 function resetItems(){
@@ -366,7 +336,7 @@ function checkPickups(){
     if(it.cool>0)continue;
     if(it.type==='mine'){checkMine(it);continue;}
     const milk=it.type==='milk', trap=it.type==='pie'||it.type==='coffee';
-    const r2=trap?4.4:it.type==='sugar'?11.6:6.25;
+    const r2=trap?4.4:6.25;
     for(const k of karts){
       const dx=k.x-it.x,dz=k.z-it.z;
       if(dx*dx+dz*dz>r2)continue;
@@ -380,12 +350,12 @@ function checkPickups(){
         it.cool=11;
       }else if(it.type==='box'){
         if(k.held)continue;                              /* hands already full */
-        k.held=ITEMPOOL[(Math.random()*ITEMPOOL.length)|0];k.roll=ROLLT;   /* the slot spins first */
+        giveItem(k,...rollItem());k.roll=ROLLT;   /* the slot spins first */
         for(let p=0;p<8;p++)puff(it.x+rand(-.7,.7),it.y+rand(.4,1.5),it.z+rand(-.7,.7),.95,.76,.2,.4);
         it.cool=6;
       }else if(it.type==='rocket'){
         if(k.held)continue;
-        k.held='rocket';
+        giveItem(k,'rocket',1);
         if(k===player){toast('SPETTEKAKA!');ping(440,760,.10);}
         it.cool=8;
       }else if(it.type==='shield'){
@@ -393,14 +363,6 @@ function checkPickups(){
         for(let p=0;p<12;p++)puff(it.x+rand(-.9,.9),it.y+rand(.3,1.4),it.z+rand(-.9,.9),.95,.82,.4,.5);
         if(k===player){toast('ÄGGKAKA! SKÖLD');ping(380,720,.14);}
         it.cool=9;
-      }else if(it.type==='sugar'){
-        if(k.sugar>=SUGARMAX)continue;
-        k.sugar++;
-        for(let p=0;p<10;p++)puff(it.x+rand(-.6,.6),it.y+rand(.3,1.4),it.z+rand(-.6,.6),1,1,1,.4);
-        if(k===player){                                  /* the held item grows a level */
-          toast(k.held&&!k.roll?'→ '+itemName(k.held,itemLvl(k))+'!':'SOCKERBIT '+k.sugar+'/'+SUGARMAX);
-          ping(900,k.held?1700:1400,k.held?.14:.08);}
-        it.cool=12;
       }else if(milk){
         k.boost=Math.max(k.boost,1.3*k.milk);k.boostLvl=Math.max(k.boostLvl,1);k.slow=0;
         for(let p=0;p<12;p++)puff(it.x+rand(-.8,.8),it.y+rand(.3,1.5),it.z+rand(-.8,.8),1,1,1,.55);
@@ -410,13 +372,11 @@ function checkPickups(){
         for(let p=0;p<14;p++)puff(it.x+rand(-1,1),it.y+rand(.3,1.3),it.z+rand(-1,1),.95,.82,.4,.6);
         it.cool=5;
       }else if(it.type==='coffee'){                      /* kaffe på vägen: a short spin */
-        dropSugar(k);
         k.spun=Math.max(k.spun,0.9*k.spinResist);k.boost=0;k.drift=0;k.charge=0;
         for(let p=0;p<14;p++)puff(it.x+rand(-1.1,1.1),it.y+rand(.1,.9),it.z+rand(-1.1,1.1),.42,.26,.14,.6);
         if(k===player){toast('KAFFE PÅ VÄGEN!');ping(420,110,.2);shake=Math.min(1,shake+.35);}
         it.cool=5;
       }else{
-        dropSugar(k);
         k.boost=0;k.slow=1.45;k.drift=0;k.charge=0;
         for(let p=0;p<16;p++)puff(it.x+rand(-1.1,1.1),it.y+rand(.2,1.2),it.z+rand(-1.1,1.1),.88,.44,.48,.75);
         if(k===player){toast('PAJ I ANSIKTET!');ping(300,90,.22);shake=Math.min(1,shake+.45);}
@@ -444,7 +404,6 @@ function checkMine(it){
     const dx=k.x-it.x,dz=k.z-it.z;if(dx*dx+dz*dz>42)continue;
     k.trapAt=raceTime;
     if(blockHit(k))continue;
-    dropSugar(k);
     const s=Math.sign(dx*rx[i]+dz*rz[i])||1;
     k.vx+=rx[i]*s*13;k.vz+=rz[i]*s*13;
     k.slow=Math.max(k.slow,0.9);k.boost=0;k.drift=0;k.charge=0;

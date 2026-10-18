@@ -835,8 +835,8 @@ const karts=ROSTER.map((r,i)=>{
     line:0,lapStart:0,best:null,total:null,done:false,
     fuel:TANK,atPump:false,warned:0,held:null,roll:0,shield:0,spun:0,burn:1,spinResist:1,milk:1,
     rib:0,plan:0,planned:{},mi:0,recoverT:0,ghost:0,stuckT:0,stuckP:-1e9,bandMax:1.16,rival:false,
-    gate:0,mass:1,shieldMul:1,bucket:false,bucketLap:-1,kvart:false,suck:0,wheelie:false,orig:false,clean:false,lineVar:0,wantFuel:false,rtp:false,rtpT:0,offT:0,sfx:'',sugar:0,curse:0,
-    boostLvl:0,shieldLvl:0,pans:0,panHit:{},panG:null,trapAt:-9,slick:0,tow:0,rattle:0,fartT:0,hazAt:-9,parked:false,lapTimes:[],ghostBuf:null,
+    gate:0,mass:1,shieldMul:1,bucket:false,bucketLap:-1,kvart:false,suck:0,wheelie:false,orig:false,clean:false,lineVar:0,wantFuel:false,rtp:false,rtpT:0,offT:0,sfx:'',heldLvl:0,curse:0,
+    boostLvl:0,shieldLvl:0,pans:0,panHit:{},panG:null,trapAt:-9,slick:0,launch:0,rattle:0,fartT:0,hazAt:-9,parked:false,lapTimes:[],ghostBuf:null,
     maxSpeed:41,power:25,offRoad:.58,boostMul:1.36,gripOn:9.0};
 });
 const player=karts[0];

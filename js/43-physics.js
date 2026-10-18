@@ -50,7 +50,7 @@ function drive(k,dt,ctl){
   if(k.boost>0)k.boost=Math.max(0,k.boost-dt);
   if(k.boost<=0)k.boostLvl=0;
   if(k.slick>0)k.slick=Math.max(0,k.slick-dt);   /* ärtsoppa: no grip */
-  if(k.tow>0)k.tow=Math.max(0,k.tow-dt);         /* on the hook's rope */
+  if(k.launch>0)k.launch=Math.max(0,k.launch-dt);   /* launched off the hook's rope */
   if(k.slow>0)k.slow=Math.max(0,k.slow-dt);
   if(k.shield>0)k.shield=Math.max(0,k.shield-dt);
   if(k.spun>0){k.spun=Math.max(0,k.spun-dt);k.yaw+=11*dt;}   /* spettekaka-träff */
@@ -105,10 +105,11 @@ function drive(k,dt,ctl){
   /* gräddfil and up shrug off the verge; skånsk grädde also pulls harder and goes faster */
   const cream=k.boost>0?k.boostLvl:0, offR=cream>=2?Math.max(k.offRoad,0.88):k.offRoad;
   side*=Math.exp(-(k.air?0.35:(k.drift!==0?2.1:(k.slow>0?3.2:(onRoad?k.gripOn*(surf?surf.grip(offR):1):4.2))))*(k.slick>0?0.3:1)*dt);
-  const top=k.maxSpeed*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.tow>0?1.3:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
+  const top=k.maxSpeed*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
   if(!k.air){
     const torque=1+0.35*clamp(1-sp/k.maxSpeed,0,1);  /* short gears down low */
     fwd+=thr*(k.boost>0?k.power+(cream>=3?34:21):k.power)*torque*(onRoad||cream>=2?1:0.6)*(k.slow>0?0.55:1)*dt;
+    if(k.launch>0)fwd+=HOOK.push*dt;                 /* the hook's surge: forward along your own nose */
     if(dry)fwd-=Math.sign(fwd)*1.6*dt;              /* coughing along on fumes */
     fwd-=ctl.brake*52*dt;
     fwd-=gslope*15*dt;                             /* climbs cost you, but not the lap */
@@ -359,7 +360,7 @@ function recoverKart(k){
     if(i<=COMMIT){T=MAIN;i=((R.a-6)%N+N)%N;k.rib=0;k.plan=0;}
   }else i=((k.si-10)%N+N)%N;
   k.si=i;k.x=T.X[i];k.z=T.Z[i];k.yaw=Math.atan2(T.FX[i],T.FZ[i]);
-  k.vx=k.vz=k.vy=0;k.speed=0;k.drift=0;k.charge=0;k.dstage=0;k.boost=0;k.spun=0;k.slow=0;
+  k.vx=k.vz=k.vy=0;k.speed=0;k.drift=0;k.charge=0;k.dstage=0;k.boost=0;k.spun=0;k.slow=0;k.launch=0;
   k.y=groundK(k,k.x,k.z);k.air=false;k.airT=0;k.ghost=1.5;k.stuckT=0;k.stuckP=-1e9;k.recoverT=0;k.rtp=false;k.offT=0;
   if(k.fuel<14)k.fuel=14;                 /* Arne tips a can in: dry on a climb is not a dead end */
   tractor.position.set(k.x+T.RX[i]*3.4,k.y,k.z+T.RZ[i]*3.4);

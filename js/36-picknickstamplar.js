@@ -92,8 +92,7 @@ function checkStamps(){
 /** AI leans toward milk and steps around pies */
 /* ───────── hazards: track objects on timers ─────────
    Each one runs off raceTime with its own period and phase, so a restart resets it.
-   hit(k,u) says whether a kart is touching it; a shield takes the hit instead, and a
-   hit knocks the sugar cubes loose. */
+   hit(k,u) says whether a kart is touching it; a shield takes the hit instead. */
 let HAZARDS=[];
 /** the äggakaka shield (or one flying pan), then Anders' bucket (once a lap), takes a hit; true if one did */
 function blockHit(k){
@@ -144,7 +143,7 @@ function updateHazards(dt){
       if(!H.hit(k,u))continue;
       k.hazAt=raceTime;
       if(!H.unblockable&&blockHit(k))continue;
-      dropSugar(k);H.effect(k);
+      H.effect(k);
     }
   }
 }

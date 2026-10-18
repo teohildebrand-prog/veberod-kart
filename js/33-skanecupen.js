@@ -220,13 +220,13 @@ function placeOnGrid(){
     k.vx=k.vz=0;k.vy=0;k.air=false;k.airT=0;k.lap=0;k.cp=0;k.gate=0;k.progress=s;
     k.drift=0;k.charge=0;k.dstage=0;k.boost=0;k.slow=0;k.itemBias=0;k.lean=0;k.spin=0;k.speed=0;
     k.lapStart=0;k.best=null;k.total=null;k.done=false;
-    k.lineVar=k.ai?((Math.random()*3)|0)-1:0;k.wantFuel=false;k.rtp=false;k.offT=0;k.sugar=0;k.curse=0;k.hazAt=-9;
+    k.lineVar=k.ai?((Math.random()*3)|0)-1:0;k.wantFuel=false;k.rtp=false;k.offT=0;k.curse=0;k.hazAt=-9;
     k.lapTimes=[];k.ghostBuf=TT&&!k.ai?[]:null;k.noBand=false;
     k.parked=(TT||FREE)&&k.ai;k.v.root.visible=!k.parked;k.blob.visible=!k.parked;
     const R=k.cfg;
     k.line=k.ai?rand(-R.lineSpread,R.lineSpread):0;
-    k.fuel=TANK;k.atPump=false;k.warned=0;k.held=null;k.roll=0;k.shield=0;k.spun=0;
-    k.boostLvl=0;k.shieldLvl=0;k.pans=0;k.panHit={};k.trapAt=-9;k.slick=0;k.tow=0;k.rattle=0;k.fartT=0;
+    k.fuel=TANK;k.atPump=false;k.warned=0;k.held=null;k.heldLvl=0;k.roll=0;k.shield=0;k.spun=0;
+    k.boostLvl=0;k.shieldLvl=0;k.pans=0;k.panHit={};k.trapAt=-9;k.slick=0;k.launch=0;k.rattle=0;k.fartT=0;
     k.burn=1;k.spinResist=1;
     if(k.ai){
       k.maxSpeed=R.maxSpeed*C.speed*(CUP&&CUP.mirror&&CUP.rival===i&&cupChamp()?1.02:1);k.power=R.power;k.offRoad=R.offRoad;
