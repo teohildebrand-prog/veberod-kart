@@ -224,3 +224,9 @@ Roadmap step 4, second track.
 - Zoom: menus allow pinch-zoom (body touch-action manipulation); only `body.racing` is touch-action none. Headless Chromium can't synthesize a pinch at all, so tests read touch-action and defaultPrevented instead.
 - `tools/menu_fit_test.py` (in Jenkins): seven menus on four phone screens (844x390, 780x320 with toolbar, 667x320, 390x660); fails if the main action is off screen, the page scrolls sideways, a button is under 44 px or a menu blocks pinch-zoom.
 
+
+## 2026-10-18 — Åhus-parken: Berg-och-dalbanan and Spökhuset
+- Berg-och-dalbanan (196-292, open): an asphalt service road down the hill under a red coaster on white trestles, with three humps (new route field `hills:[[f,h,w]]`, which raises the lane and the ground with it). AI gain +2.8 s average; the humps keep karts on the ground on the steep drop, without them they float and gain only +1.5 s.
+- Spökhuset (606-704, closed): a ghost house with skeletons and green lamps; double doors at `mouth:22` that swing open when shot. AI gain +1.3 s. All three forward-attack levels open it.
+- The first inside pump sat on the coaster fork, so Åhus pumps are now both on the outside (`stations:[[0.27,-1],[0.71,-1]]`). Tents, pines, kiosks and flag poles keep off the lanes.
+- Stamps: Våffla med sylt (outer edge before the coaster), Brända mandlar (inside Spökhuset), Sockervadd (top of the middle hump).

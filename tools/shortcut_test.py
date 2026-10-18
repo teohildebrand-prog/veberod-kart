@@ -25,7 +25,7 @@ from smoke_test import serve  # noqa: E402
 
 MIN_GAIN = 0.3        # seconds, averaged over the AI karts
 # the original tracks' shortcuts (roadmap: finish shortcuts and picnic stamps); name others to check them too
-DEFAULT_STAGES = ['lund', 'bron']
+DEFAULT_STAGES = ['lund', 'bron', 'ahus']
 
 SETUP = """(id) => {
   CUP = null; TT = false; FREE = false; mirrorSel = false;
@@ -65,7 +65,7 @@ DRIVE = """([ki, routeId, take, mirror]) => {
     if (!k.rib && d >= total && d < total + 30) break;
   }
   const chain = gates.every((g, n) => n === 0 || GATES[gates[n - 1]].next.includes(g));
-  const twins = GATES.some(H => H.route === Rr.idx), viaTwin = gates.some(g => GATES[g].route === Rr.idx);
+  const twins = GATES.some(H => H.route === Rr.idx && ((H.at - Rr.a) % N + N) % N > COMMIT + 16), viaTwin = gates.some(g => GATES[g].route === Rr.idx);
   return {t, onRoute, tractor, gates, chain, twinOk: !R || !twins || viaTwin, rib: k.rib, lap: k.lap - (s0 > end ? 1 : 0), mi: k.mi, s0, end, total};
 }"""
 

@@ -98,7 +98,7 @@ function sceneryAhus(){
   let tc=0,guard=0;
   while(tc<46&&guard++<5000){
     const x=rand(-300,300),z=rand(-300,300);
-    if(latAt(x,z)<HW+16)continue;
+    if(latAt(x,z)<HW+16||nearAlt(x,z,5))continue;
     const sc=rand(.7,1.5);
     p.set(x,meshY(x,z),z);e.set(0,rand(0,6.283),0);q.setFromEuler(e);
     m4.compose(p,q,new THREE.Vector3(sc,sc,sc));tent.setMatrixAt(tc++,m4);
@@ -113,6 +113,7 @@ function sceneryAhus(){
   for(const fr of [0.08,0.26,0.40,0.55,0.70,0.90]){
     const side=(fr*10|0)%2?1:-1;
     const b=ground(Math.round(N*fr),side*(HW+14));
+    if(nearAlt(b.x,b.z,5))continue;
     const g=new THREE.Group();
     const box=new THREE.Mesh(flat(new THREE.BoxGeometry(6,3.4,4.5)),rail);
     box.position.y=1.7;g.add(box);
@@ -133,6 +134,7 @@ function sceneryAhus(){
   let pc=0;
   for(let i=0;i<N;i+=16)for(const side of [-1,1]){
     const b=ground(i,side*(HW+5.4));
+    if(nearAlt(b.x,b.z,2))continue;
     p.set(b.x,b.y,b.z);e.set(0,b.rot,0);q.setFromEuler(e);
     m4.compose(p,q,one);pole.setMatrixAt(pc++,m4);
     const fl=new THREE.Mesh(new THREE.PlaneGeometry(1.8,1.2),
@@ -149,7 +151,7 @@ function sceneryAhus(){
   let pn=0;guard=0;
   while(pn<130&&guard++<6000){
     const x=rand(-330,330),z=rand(-330,330);
-    if(latAt(x,z)<HW+22)continue;
+    if(latAt(x,z)<HW+22||nearAlt(x,z,5))continue;
     const sc=rand(.7,1.4);
     p.set(x,meshY(x,z)-.2,z);e.set(0,rand(0,6.283),0);q.setFromEuler(e);
     m4.compose(p,q,new THREE.Vector3(sc,sc*rand(.8,1.2),sc));
@@ -158,6 +160,123 @@ function sceneryAhus(){
   pin.count=trk.count=pn;
   pin.instanceMatrix.needsUpdate=trk.instanceMatrix.needsUpdate=true;
   world.add(pin);world.add(trk);
+  ahusLanes();
+}
+
+/** the two shortcuts: the coaster's service road and the ghost house */
+function ahusLanes(){
+  const at=(R,j,l)=>{const x=R.X[j]+R.RX[j]*l,z=R.Z[j]+R.RZ[j]*l;return new THREE.Vector3(x,meshY(x,z),z);};
+  const yaw=(R,j)=>Math.atan2(R.FX[j],R.FZ[j]);
+  const clearOfMain=(v,pad)=>{const i=nearestGlobal(v.x,v.z);
+    return Math.abs((v.x-sx[i])*rx[i]+(v.z-sz[i])*rz[i])>HW+pad;};
+  const sign=(txt,bg,fg,w)=>new THREE.Mesh(new THREE.PlaneGeometry(w,w/8),psMat({map:pixTex(128,16,g=>{
+    g.fillStyle=bg;g.fillRect(0,0,128,16);g.fillStyle=fg;g.fillRect(1,1,126,1);g.fillRect(1,14,126,1);
+    g.font='7px "Press Start 2P",monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,64,8);}),
+    unlit:true,side:THREE.DoubleSide}));
+  const C=ALTS.find(r=>r.id==='coaster');
+  if(C){
+    /* the coaster runs overhead the whole way down: two red rails on white trestles */
+    const red=psMat({color:0xd8362a}),white=psMat({color:0xeeeae0}),j0=COMMIT+4,j1=C.n-1-MERGE-4;
+    const top=j=>C.Y[j]+8.5+2.6*Math.sin((j-j0)*0.32);
+    for(let j=j0;j<j1;j++){
+      const ya=top(j),yb=top(j+1),len=Math.hypot(C.X[j+1]-C.X[j],C.Z[j+1]-C.Z[j],yb-ya)+.2;
+      for(const sg of [-1,1]){
+        const a=at(C,j,sg*1.1),b=at(C,j+1,sg*1.1);
+        const r=new THREE.Mesh(flat(new THREE.BoxGeometry(.32,.32,len)),red);
+        r.position.set((a.x+b.x)/2,(ya+yb)/2,(a.z+b.z)/2);r.lookAt(b.x,yb,b.z);world.add(r);
+      }
+      if(j%2)continue;
+      const tie=new THREE.Mesh(flat(new THREE.BoxGeometry(2.8,.18,.3)),white);
+      tie.position.set(C.X[j],ya-.2,C.Z[j]);tie.rotation.y=yaw(C,j);world.add(tie);
+      if(j%4)continue;
+      let ok=true;
+      for(const sg of [-1,1]){
+        const v=at(C,j,sg*(C.hw+1.2));
+        if(!clearOfMain(v,1.5)){ok=false;continue;}
+        const h=ya-v.y,leg=new THREE.Mesh(flat(new THREE.BoxGeometry(.5,h,.5)),white);
+        leg.position.set(v.x,v.y+h/2,v.z);world.add(leg);
+      }
+      if(ok){const cb=new THREE.Mesh(flat(new THREE.BoxGeometry(2*C.hw+2.9,.4,.4)),white);
+        cb.position.set(C.X[j],ya-.5,C.Z[j]);cb.rotation.y=yaw(C,j);world.add(cb);}
+    }
+    /* a train of three cars parked on the top of one hill */
+    let jt=j0;for(let j=j0;j<j1;j++)if(top(j)-C.Y[j]>top(jt)-C.Y[jt])jt=j;
+    const carC=[0xf2c500,0x3f7fbf,0x2f9a4a];
+    for(let n=0;n<3;n++){
+      const j=Math.max(j0,jt-n*2);
+      const car=new THREE.Mesh(flat(new THREE.BoxGeometry(2.4,1.1,2.6)),psMat({color:carC[n]}));
+      car.position.set(C.X[j],top(j)+.75,C.Z[j]);car.rotation.y=yaw(C,j);world.add(car);
+    }
+    const jg=COMMIT+4,g=at(C,jg,0),gy=top(jg)+2.2;
+    const s=sign('BERG-OCH-DALBANAN','#d8362a','#f2c500',9);
+    s.position.set(g.x,gy,g.z);s.rotation.y=yaw(C,jg)+Math.PI;world.add(s);
+  }
+  const S=ALTS.find(r=>r.id==='spok');
+  if(S){
+    /* the ghost house: a long black shed with crooked green windows, a tower at the doors */
+    const wallT=pixTex(16,16,g=>{g.fillStyle='#2a2036';g.fillRect(0,0,16,16);g.fillStyle='rgba(0,0,0,.3)';
+      for(let x=0;x<16;x+=4)g.fillRect(x,0,1,16);g.fillStyle='#7dff8a';g.fillRect(5,4,5,6);g.fillStyle='#2a2036';g.fillRect(7,4,1,6);g.fillRect(5,6,5,1);});
+    wallT.wrapS=wallT.wrapT=THREE.RepeatWrapping;
+    const wall=psMat({map:wallT}),roofM=psMat({color:0x15121a}),bone=psMat({color:0xf0ead6}),
+          glow=psMat({color:0x7dff8a,unlit:true});
+    const j0=S.mouth||COMMIT+3,j1=S.n-1-(S.mouth||COMMIT+3),wo=S.hw+2.6,step=3;
+    for(let j=j0;j<j1;j+=step){
+      const jj=Math.min(j+step,j1),m=Math.round((j+jj)/2),len=Math.hypot(S.X[jj]-S.X[j],S.Z[jj]-S.Z[j])+.4;
+      for(const sg of [-1,1]){
+        const v=at(S,m,sg*wo);
+        const w=new THREE.Mesh(flat(new THREE.BoxGeometry(1,7,len)),wall);
+        w.position.set(v.x,v.y+3.3,v.z);w.rotation.y=yaw(S,m);world.add(w);
+      }
+      const c=at(S,m,0),cy=Math.max(c.y,S.Y[m]);
+      const r=new THREE.Mesh(flat(new THREE.BoxGeometry(2*wo+2,.5,len)),roofM);
+      r.position.set(c.x,cy+7,c.z);r.rotation.y=yaw(S,m);world.add(r);
+    }
+    /* skeletons along the walls, and green lamps between them */
+    const skel=(v,ry)=>{
+      const g=new THREE.Group();
+      const sk=new THREE.Mesh(flat(new THREE.SphereGeometry(.42,6,5)),bone);sk.position.y=3.3;g.add(sk);
+      for(const sx2 of [-.16,.16]){const e=new THREE.Mesh(flat(new THREE.BoxGeometry(.12,.12,.06)),roofM);e.position.set(sx2,3.36,.38);g.add(e);}
+      for(let k=0;k<4;k++){const rib=new THREE.Mesh(flat(new THREE.BoxGeometry(.8-k*.08,.08,.36)),bone);rib.position.y=2.75-k*.22;g.add(rib);}
+      const sp=new THREE.Mesh(flat(new THREE.BoxGeometry(.1,1.6,.1)),bone);sp.position.y=2.2;g.add(sp);
+      for(const sg of [-1,1]){
+        const arm=new THREE.Mesh(flat(new THREE.BoxGeometry(.1,1.1,.1)),bone);arm.position.set(sg*.5,2.85,.25);arm.rotation.set(-1.1,0,sg*.4);g.add(arm);
+        const leg=new THREE.Mesh(flat(new THREE.BoxGeometry(.12,1.4,.12)),bone);leg.position.set(sg*.2,.7,0);g.add(leg);
+      }
+      g.position.copy(v);g.rotation.y=ry;world.add(g);
+    };
+    for(let j=j0+4,n=0;j<j1-3;j+=5,n++)for(const sg of [-1,1]){
+      const v=at(S,j,sg*(wo-1.2));
+      if(n%2===(sg>0?0:1))skel(v,yaw(S,j)-sg*Math.PI/2);
+      else{const l=new THREE.Mesh(flat(new THREE.BoxGeometry(.4,.6,.4)),glow);l.position.set(v.x,v.y+5.2,v.z);world.add(l);}
+    }
+    /* the crooked tower over the doors and the name board */
+    const d=at(S,j0,0),dy=Math.max(d.y,S.Y[j0]);
+    const tw=new THREE.Mesh(flat(new THREE.BoxGeometry(2*wo+2,6,3)),wall);
+    tw.position.set(d.x,dy+9.5,d.z);tw.rotation.set(0,yaw(S,j0),.06);world.add(tw);
+    const sp=new THREE.Mesh(flat(new THREE.ConeGeometry(3.4,6,4)),roofM);
+    sp.position.set(d.x,dy+15.4,d.z);sp.rotation.set(0,yaw(S,j0)+.785,-.08);world.add(sp);
+    const nb=sign('SPÖKHUSET','#15121a','#7dff8a',8);
+    nb.position.set(d.x-S.FX[j0]*1.6,dy+9.5,d.z-S.FZ[j0]*1.6);nb.rotation.y=yaw(S,j0)+Math.PI;world.add(nb);
+  }
+}
+/** the ghost house's double doors, built at local origin and turned along the lane */
+function ahusDoors(R,j){
+  const g=new THREE.Group(),turn=new THREE.Group();
+  turn.rotation.y=Math.atan2(R.FX[j],R.FZ[j]);g.add(turn);
+  const w=R.hw+.4,wood=psMat({color:0x3b2418}),iron=psMat({color:0x1a1a1e}),glow=psMat({color:0x7dff8a,unlit:true});
+  const leaves=[];
+  for(const sg of [-1,1]){
+    const hinge=new THREE.Group();hinge.position.x=sg*w;turn.add(hinge);
+    const leaf=new THREE.Mesh(flat(new THREE.BoxGeometry(w,5.2,.3)),wood);leaf.position.set(-sg*w/2,2.6,0);hinge.add(leaf);
+    for(const y of [1,4.2]){const band=new THREE.Mesh(flat(new THREE.BoxGeometry(w,.22,.4)),iron);band.position.set(-sg*w/2,y,0);hinge.add(band);}
+    const eye=new THREE.Mesh(flat(new THREE.BoxGeometry(.5,.3,.4)),glow);eye.position.set(-sg*w*.55,3.4,0);hinge.add(eye);
+    leaves.push([hinge,sg]);
+  }
+  g.userData.leaves=leaves;
+  return g;
+}
+function ahusDoorsAnim(B,drop){
+  for(const [h,sg] of B.mesh.userData.leaves||[])h.rotation.y=sg*drop*1.9;   /* they creak open */
 }
 
 function sceneryBron(){
