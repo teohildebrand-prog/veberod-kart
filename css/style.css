@@ -234,6 +234,21 @@
              box-shadow:0 3px 10px rgba(3,58,108,.6),inset 0 2px 6px rgba(0,40,80,.45)}
   .go:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
 
+  /* name entry: a box for keyboards, letter keys for thumbs and pads */
+  #nameBox{display:block;width:100%;box-sizing:border-box;margin:0 0 12px;padding:10px 14px;
+    font:inherit;font-size:22px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:#fff;background:rgba(0,30,60,.45);border:1px solid rgba(255,255,255,.6);border-radius:12px}
+  #nameBox:focus{outline:3px solid var(--lime);outline-offset:2px}
+  #nameBox::placeholder{color:rgba(255,255,255,.35)}
+  #nameKeys{display:grid;gap:5px;margin:0 0 14px}
+  .nk-row{display:flex;gap:5px}
+  .nk{flex:1 1 0;min-width:0;padding:8px 0;font:inherit;font-size:14px;font-weight:700;cursor:pointer;
+    color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);border-radius:8px}
+  .nk:hover{background:rgba(255,255,255,.26)}
+  .nk:focus-visible{outline:3px solid var(--lime);outline-offset:1px}
+  .nk-w{font-size:11px;letter-spacing:.08em}
+  #btnNameOk{width:100%}
+
   /* driver / car / stage pickers */
   #pick{align-items:end;padding-bottom:16px}
   /* short viewports: drop the car copy before the panel eats the preview */

@@ -249,6 +249,7 @@ function refreshMenu(){
   b.hidden=!(c&&!c.done);
   if(c&&!c.done)b.textContent='FORTSÄTT '+cupDef(c).name+' · '+(c.round+1)+'/'+cupRounds(c).length;
   const h2=document.querySelector('#start h2');if(h2)h2.textContent='SKÅNE · '+STAGES.length+' BANOR · '+CHARS.length+' FÖRARE';
+  document.getElementById('btnName').textContent='NAMN · '+(SAVE.name||CHARS[charSel].short);
   document.getElementById('btnAlbum').textContent='PICKNICKPASSET · '+stampCount()+'/'+allStamps().length;
   const shelf=(C,m)=>{const t=SAVE.trophies[C.id+m];
     return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.sub+(m?' · SPEGEL':'')+
@@ -327,6 +328,7 @@ function renderPaints(){
     SAVE.part=parts[(n+1)%parts.length].id;writeSave();showRig();renderPaints();});
 }
 function showBrief(){
+  nameKarts();
   const c=SAVE.cup;CUP=c;
   hideSheets();previewOn=false;state='menu';camInit=false;
   document.body.classList.remove('racing');
@@ -343,7 +345,7 @@ function showBrief(){
     ['UNDERLAG',[...new Set(surf)].join(', ')],
     ['GENVÄGAR',(S.routes||[]).map(R=>R.name).join(', ')||'Inga kända'],
     ['PICKNICK',of?got+'/'+of+' stämplar':'Kommer i nästa version'],
-    ['DU',(c.res.length?c.pts[0]+' p · '+ordSv(me+1)+' plats':'Du startar sist i första rundan')+' · '+CHARS[c.char].short+' i '+CARS[c.car].name],
+    [SAVE.name||'DU',(c.res.length?c.pts[0]+' p · '+ordSv(me+1)+' plats':'Du startar sist i första rundan')+' · '+CHARS[c.char].short+' i '+CARS[c.car].name],
     [CD.champ?'MÄSTAREN':'RIVALEN',(CD.champ?CHAMPS[CD.champ].full:karts[c.rival].name)+HORN+' · '+c.pts[c.rival]+' p ('+gap(c.rival)+')']];
   if(CD.champ&&!c.res.length)rows.push(['',CHAMPS[CD.champ].name+': ”'+CHAMPS[CD.champ].say+'”']);
   if(ahead&&ahead.idx!==c.rival)rows.push(['NÄRMAST FÖRE',ahead.name+' · '+c.pts[ahead.idx]+' p ('+gap(ahead.idx)+')']);
