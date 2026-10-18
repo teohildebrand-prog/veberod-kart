@@ -42,6 +42,7 @@ const ITEMNAMES={boost:['MJÖLK','GRÄDDFIL','SKÅNSK GRÄDDE'],
   fart:['SKÅNSKA BÖNOR','SKÅNSK ÄRTSOPPA','BRUNA BÖNOR MED FLÄSK']};
 const itemName=(f,l)=>ITEMNAMES[f][l-1];
 const itemLvl=k=>Math.min(k.sugar,SUGARMAX)+1;
+const ROLLT=1.5;                 /* seconds the item slot spins before the item can be used */
 const ITEMICON={
   boost1:`<svg viewBox="0 0 48 48"><defs>
     <linearGradient id="ik1" x1="0" y1="0" x2="0" y2="1">
@@ -379,9 +380,8 @@ function checkPickups(){
         it.cool=11;
       }else if(it.type==='box'){
         if(k.held)continue;                              /* hands already full */
-        k.held=ITEMPOOL[(Math.random()*ITEMPOOL.length)|0];
+        k.held=ITEMPOOL[(Math.random()*ITEMPOOL.length)|0];k.roll=ROLLT;   /* the slot spins first */
         for(let p=0;p<8;p++)puff(it.x+rand(-.7,.7),it.y+rand(.4,1.5),it.z+rand(-.7,.7),.95,.76,.2,.4);
-        if(k===player){toast(itemName(k.held,itemLvl(k))+'!');ping(620,980,.10);}
         it.cool=6;
       }else if(it.type==='rocket'){
         if(k.held)continue;
@@ -398,7 +398,7 @@ function checkPickups(){
         k.sugar++;
         for(let p=0;p<10;p++)puff(it.x+rand(-.6,.6),it.y+rand(.3,1.4),it.z+rand(-.6,.6),1,1,1,.4);
         if(k===player){                                  /* the held item grows a level */
-          toast(k.held?'→ '+itemName(k.held,itemLvl(k))+'!':'SOCKERBIT '+k.sugar+'/'+SUGARMAX);
+          toast(k.held&&!k.roll?'→ '+itemName(k.held,itemLvl(k))+'!':'SOCKERBIT '+k.sugar+'/'+SUGARMAX);
           ping(900,k.held?1700:1400,k.held?.14:.08);}
         it.cool=12;
       }else if(milk){
