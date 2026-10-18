@@ -82,9 +82,20 @@
       <button class="alt" id="btnAlbum">PICKNICKPASSET</button>
       <button class="alt" id="btnTT">TIDSLOPP</button>
       <button class="alt" id="btnFree">SANDLÅDA</button>
+      <button class="alt" id="btnName">NAMN</button>
     </div>
     <div id="shelf"></div>
     <p class="note" id="saveNote" hidden>Den här webbläsaren kan inte spara. Stämplar och cupen sparas inte.</p>
+  </div>
+</div>
+
+<div class="sheet hide" id="namn">
+  <div class="sheet-in">
+    <h1>VAD HETER DU?</h1>
+    <h2>DITT NAMN STÅR I RESULTATEN</h2>
+    <input id="nameBox" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ditt namn" placeholder="NAMN">
+    <div id="nameKeys"></div>
+    <button class="go" id="btnNameOk">KLAR</button>
   </div>
 </div>
 
@@ -416,5 +427,6 @@
 <script src="js/54-stage-art.js"></script>
 <script src="js/55-stage-select.js"></script>
 <script src="js/56-loop.js"></script>
+<script src="js/57-player-name.js"></script>
 </body>
 </html>

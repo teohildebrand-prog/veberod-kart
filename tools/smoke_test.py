@@ -47,6 +47,8 @@ def main():
                    else r.abort())
         page.goto(url)
         try:
+            page.fill('#nameBox', 'teo', timeout=10000)   # first launch asks for a name
+            page.keyboard.press('Enter')
             for button in ('#btnStart', '#btnStageGo', '#btnGo'):
                 page.click(button, timeout=10000)
         except Exception as e:

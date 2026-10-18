@@ -56,7 +56,7 @@ function padPick(root){
   (go||b).click();
 }
 const PADBACK={pick:'btnBack',cupsetup:'btnCupBack',album:'btnAlbumBack',brief:'btnBriefMenu',
-  podium:'btnPodDone',paused:'btnResume',stages:'btnStageBack'};
+  podium:'btnPodDone',paused:'btnResume',stages:'btnStageBack',namn:'nkDel'};
 function padBack(root){
   if(root===padHelp)return hidePadHelp();
   if(root===dbgEl)return setDbg(false);

@@ -5,6 +5,7 @@ const input={throttle:0,brake:0,steer:0,drift:false};
 const touch={l:false,r:false,a:false,b:false,d:false};
 addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
+  if(nameKeys(e))return;                  /* typing a name: letters are letters, not shortcuts */
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
   if(stageKeys(e,k))return;               /* the stage picker has its own keys, V and Esc included */
   keys[k]=true;

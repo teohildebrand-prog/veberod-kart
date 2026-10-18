@@ -44,6 +44,7 @@ function applyChampion(){
     if(k.v!==v){k.v.root.visible=false;k.v=v;}
     k.cfg=cfg;k.name=cfg.name;k.color=cfg.color;
   });
+  nameKarts();
 }
 const POINTS=[10,7,5,3,2,1];
 const CLASSES=[
@@ -134,10 +135,19 @@ function showRig(){
   if(playerRig&&playerRig!==v)playerRig.root.visible=false;
   v.root.visible=true;playerRig=v;player.v=v;
   player.color=CHARS[charSel].color;
-  player.name=CHARS[charSel].short;
+  nameKarts();
+  renderCombo();
+}
+/** the player races under their own name (or the driver's); nobody else may share it */
+function nameKarts(){
+  player.name=SAVE.name||CHARS[charSel].short;
   karts.forEach((k,i)=>{if(i)k.name=k.cfg.name;});         /* only one of each */
   const tw=TWIN[CHARS[charSel].id];if(tw&&karts[tw[0]].cfg===ROSTER[tw[0]])karts[tw[0]].name=tw[1];
-  renderCombo();
+  karts.forEach((k,i)=>{
+    if(!i||k.name!==player.name)return;
+    const t=Object.values(TWIN).find(w=>w[0]===i&&k.cfg===ROSTER[i]);
+    k.name=t&&t[1]!==player.name?t[1]:k.name+' II';
+  });
 }
 function applyCharacter(i){
   const c=CHARS[i];

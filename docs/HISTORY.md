@@ -127,3 +127,9 @@ Teo's proposal "Power-Ups and Sugar Cubes": five item families, each with three 
 - AI: hook only with someone within reach, pans when someone is close, beans when someone is on their bumper (level 1) or close (2–3).
 - Debug menu FÖREMÅL lists all 15 items by level; OÄNDLIGA FÖREMÅL refills the same level.
 - Code: js/37-power-ups.js (was spettekaka-raketer) holds the families; trap items (coffee, mine) live in js/35-pickups.js.
+
+## Player name (2026-10-18)
+- First launch asks VAD HETER DU? (up to 12 letters/digits, stored as SAVE.name; an empty name falls back to the driver's name). NAMN on the start menu changes it.
+- Typed on a keyboard, or with the on-screen letter keys by touch or pad (A types, B rubs out, KLAR saves).
+- The name replaces the driver name for the player's kart in results, cup table, podium and briefing. An AI with the same name races under its twin name (TEO becomes TEODOR) or gets " II".
+- Code: js/57-player-name.js; nameKarts() in js/33-skanecupen.js.
