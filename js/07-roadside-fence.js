@@ -71,9 +71,17 @@ function jerseyTollarp(){                  /* concrete barriers and mesh fence *
 }
 function railBron(){
   const steel=psMat({color:0x9aa2a8,side:THREE.DoubleSide});
+  /* a lane crossing the rail leaves a gap in it */
+  const gap=(i,o)=>nearAlt(sx[i]+rx[i]*o,sz[i]+rz[i]*o,1.5);
   for(const sg of [-1,1]){
-    sweep(0,N,sg*(HW+3.9),1.00,sg*(HW+3.9),1.32,steel);
-    sweep(0,N,sg*(HW+3.9),0.42,sg*(HW+3.9),0.62,steel);
+    const o=sg*(HW+3.9);
+    for(let a=0;a<N;){
+      if(gap(a,o)){a++;continue;}
+      let b=a;while(b<N&&!gap(b,o))b++;
+      sweep(a,b,o,1.00,o,1.32,steel);
+      sweep(a,b,o,0.42,o,0.62,steel);
+      a=b+1;
+    }
   }
   const post=new THREE.InstancedMesh(flat(new THREE.BoxGeometry(.2,1.5,.2)),
     psMat({color:0x848c92}),Math.ceil(N/2)*2);
@@ -82,6 +90,7 @@ function railBron(){
   let c=0;
   for(let i=0;i<N;i+=2)for(const sg of [-1,1]){
     const o=sg*(HW+3.9);
+    if(gap(i,o))continue;
     p.set(sx[i]+rx[i]*o, sy[i]+o*bank[i]+.7, sz[i]+rz[i]*o);
     e.set(0,Math.atan2(fx[i],fz[i]),0);q.setFromEuler(e);
     m4.compose(p,q,one);post.setMatrixAt(c++,m4);

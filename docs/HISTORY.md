@@ -209,3 +209,10 @@ Roadmap step 2 (Teo: "add the missing shortcuts and stamps for the tracks"), Lun
 - Zoom fix: iPhone Safari ignores touch-action and user-scalable, so touchstart/move/end, gesture* and dblclick are cancelled on the race surface (not on sheets or real buttons). Menus keep normal scrolling and zoom.
 - Auto-gas turns on with any touch and off when keys or a controller drive. Björn's academic quarter: auto-gas waits for the first pad touch after the lights (or 2.2 s).
 - Slim HUD on touch: compact VARV/PLATS, round map, small clock, pause top right, speedo bottom centre.
+
+## 2026-10-18 — Öresundsbron: Servicespåret
+
+Roadmap step 4, second track.
+- SERVICESPÅRET (open, concrete): the maintenance crews' crossover between the carriageways at the Copenhagen end (samples 289 to 394). It turns early on a radius of about 15 m on its own slab and girder, with yellow edge lines, a low rail round the outside and chevron boards at the apex, and skips the long hairpin out at the end. The inner deck rails have gaps where it crosses.
+- Measured (tools/shortcut_test.py): +1.34 s on average, +0.39 to +3.53 s by kart.
+- Stamps: Koldskål (edge of the first straight), Rød pølse (middle of Servicespåret), Æbleskiver (inside of the tighter hairpin).

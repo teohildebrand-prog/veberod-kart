@@ -93,7 +93,21 @@ const STAGES=[
         [ 520, 12, -20],[ 566, 11,  -8],[ 566, 11,   8],
         [ 520, 12,  20],[ 380, 16,  20],[ 240, 21,  20],[ 120, 25,  20],
         [   0, 27,  20],[-120, 25,  20],[-240, 21,  20],[-380, 16,  20],
-        [-520, 12,  20],[-566, 11,   8],[-566, 11,  -8]] },
+        [-520, 12,  20],[-566, 11,   8],[-566, 11,  -8]],
+  routes:[
+    {id:'service',name:'SERVICESPÅRET',a:289,b:394,hw:4.6,side:1,lead:14,leadLat:6,
+     mid:[[0.02,-45],[0.147,-55],[0.5,-59],[0.853,-55],[0.98,-45]],surface:'road',tex:'concrete',risk:0.25,
+     blurb:'The maintenance crews\' crossover between the carriageways. It turns early and tight, and skips the long hairpin at the end.'}],
+  stamps:[
+    {id:'bro1',dish:'Koldskål',ini:'K',kind:'intro',route:'main',i:120,lat:-9.2,
+     hint:'Ute vid kanten på första rakan, mot Köpenhamn.',
+     story:'Danish summer in a bowl: cold buttermilk whisked with egg yolk, sugar, vanilla and lemon, eaten with small crisp kammerjunker biscuits crumbled on top. Halfway over the bridge you are in Denmark, and on a warm evening that is what they are eating.'},
+    {id:'bro2',dish:'Rød pølse',ini:'R',kind:'route',route:'service',f:0.5,lat:0,
+     hint:'Mitt på Servicespåret, där vägarbetarna vänder.',
+     story:'The bright red Danish sausage from the pølsevogn, the hot-dog wagon: a boiled pork sausage dyed red, in a bun with ketchup, mustard, remoulade, raw and fried onion and sliced pickles. The road crews on the bridge take theirs at the turning loop.'},
+    {id:'bro3',dish:'Æbleskiver',ini:'Æ',kind:'line',route:'main',i:'tight',lat:'inside',
+     hint:'Tätt intill innerkanten i den tvärare hårnålen.',
+     story:'Round little pancake balls turned in a special iron pan with a knitting needle, dusted with icing sugar and dipped in jam. In Denmark they come with gløgg at Christmas, and in Skåne they turn up at every December market too.'}] },
 
 { id:'ahus', name:'ÅHUS-PARKEN', sub:'NÖJESFÄLTET',
   order:4, tag:'Ett nöjesfält med en väg rakt igenom. Doserade kurvor, fyra hopp och pariserhjulet.',

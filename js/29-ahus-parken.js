@@ -222,6 +222,8 @@ function sceneryBron(){
   }
   col.count=c;col.instanceMatrix.needsUpdate=true;world.add(col);
 
+  bronService();
+
   /* Turning Torso on the Malmö side */
   const tt=new THREE.Group();
   for(let k=0;k<9;k++){
@@ -279,5 +281,55 @@ function sceneryBron(){
     g.add(rot);turbines.push({rot,speed:.3+hash2(k,5)*.2});
     g.position.set(-420+k*108,0,(k%2?1:-1)*(150+hash2(k,9)*90));
     g.rotation.y=1.4;world.add(g);
+  }
+}
+
+/* ───────── Servicespåret: the maintenance crews' crossover ─────────
+   A concrete slab on its own girder between the carriageways, yellow edge lines,
+   a low rail round the outside of the turn and chevron boards at the apex. */
+function bronService(){
+  const R=ALTS.find(r=>r.id==='service');if(!R)return;
+  const conc=psMat({color:0xb9bcbd,side:THREE.DoubleSide});
+  const off=j=>{const i=R.MI[j];return Math.abs((R.X[j]-sx[i])*rx[i]+(R.Z[j]-sz[i])*rz[i])>HW+2;};
+  /* the slab and its girder, only where the lane leaves the decks */
+  let j0=0;while(j0<R.n&&!off(j0))j0++;
+  let j1=R.n-1;while(j1>0&&!off(j1))j1--;
+  j0=Math.max(0,j0-2);j1=Math.min(R.n-1,j1+2);
+  if(j1>j0){
+    world.add(new THREE.Mesh(altRibbon(R,-R.hw-1.4,R.hw+1.4,-.12,6,j0,j1),conc));
+    for(let j=j0;j<j1;j++){
+      const len=Math.hypot(R.X[j+1]-R.X[j],R.Z[j+1]-R.Z[j])+.3,y=(R.Y[j]+R.Y[j+1])/2;
+      const g=new THREE.Mesh(flat(new THREE.BoxGeometry(2*R.hw+1.6,2.6,len)),conc);
+      g.position.set((R.X[j]+R.X[j+1])/2,y-1.5,(R.Z[j]+R.Z[j+1])/2);g.rotation.y=Math.atan2(R.FX[j],R.FZ[j]);world.add(g);
+    }
+    const jm=Math.round((j0+j1)/2);                         /* one pier under the apex */
+    const pier=new THREE.Mesh(flat(new THREE.BoxGeometry(3.4,R.Y[jm]-2.8,5)),conc);
+    pier.position.set(R.X[jm],(R.Y[jm]-2.8)/2,R.Z[jm]);pier.rotation.y=Math.atan2(R.FX[jm],R.FZ[jm]);world.add(pier);
+  }
+  /* yellow edge lines down the whole lane */
+  const yl=pixTex(4,16,g=>{g.fillStyle='#f2c81c';g.fillRect(0,0,4,16);});
+  yl.wrapS=yl.wrapT=THREE.RepeatWrapping;
+  const ym=psMat({map:yl,unlit:true});ym.polygonOffset=true;ym.polygonOffsetFactor=-4;ym.polygonOffsetUnits=-4;
+  for(const sg of [-1,1])world.add(new THREE.Mesh(altRibbon(R,sg*(R.hw-.7),sg*(R.hw-.3),.05,3,COMMIT,R.n-1-COMMIT),ym));
+  /* a low steel rail round the outside of the turn, on the slab only */
+  const steel=psMat({color:0x9aa2a8}),postG=flat(new THREE.BoxGeometry(.2,1.2,.2));
+  const outer=R.mid[2][1]<0?-1:1;                          /* the apex bulges away from the decks */
+  const side=-outer*R.side;
+  for(let j=j0;j<=j1;j+=2){
+    const x=R.X[j]+R.RX[j]*side*(R.hw+1),z=R.Z[j]+R.RZ[j]*side*(R.hw+1);
+    const ps=new THREE.Mesh(postG,steel);ps.position.set(x,R.Y[j]+.6,z);world.add(ps);
+    if(j+2<=j1){const x2=R.X[j+2]+R.RX[j+2]*side*(R.hw+1),z2=R.Z[j+2]+R.RZ[j+2]*side*(R.hw+1);
+      const bar=new THREE.Mesh(flat(new THREE.BoxGeometry(.12,.16,Math.hypot(x2-x,z2-z))),steel);
+      bar.position.set((x+x2)/2,(R.Y[j]+R.Y[j+2])/2+1.1,(z+z2)/2);bar.rotation.y=Math.atan2(x2-x,z2-z);world.add(bar);}
+  }
+  /* chevron boards round the apex, pointing the way round */
+  const chev=pixTex(32,16,g=>{g.fillStyle='#1e1e22';g.fillRect(0,0,32,16);g.fillStyle='#f2c81c';
+    for(const x0 of [2,13,24]){g.beginPath();g.moveTo(x0,2);g.lineTo(x0+6,8);g.lineTo(x0,14);g.lineTo(x0+3,14);g.lineTo(x0+9,8);g.lineTo(x0+3,2);g.fill();}});
+  const cm=psMat({map:chev,unlit:true,side:THREE.DoubleSide});
+  for(let k=-2;k<=2;k++){
+    const j=Math.round((j0+j1)/2)+k*3;if(j<0||j>=R.n)continue;
+    const x=R.X[j]+R.RX[j]*side*(R.hw+1.6),z=R.Z[j]+R.RZ[j]*side*(R.hw+1.6);
+    const b=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.2),cm);
+    b.position.set(x,R.Y[j]+1.6,z);b.rotation.y=Math.atan2(R.RX[j],R.RZ[j])*1+(side>0?Math.PI:0);world.add(b);
   }
 }
