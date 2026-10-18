@@ -111,3 +111,7 @@ Teo's spec: a roster of illustrated stage cards with a large preview of the high
 - The world is not drawn while the stage picker covers it.
 - tools/join.py builds the single-file working copy from the repo (split.py's inverse).
 
+
+## Easier sugar cubes (built 2026-10-18)
+- Teo found the sockerbitar too scattered and hard to get. The main road now has up to five rows of three cubes per lap, on the centre line with a small pull to the inside of a bend, set between the item-box rows and clear of jumps, forks and the start. They replace the old risky spots (after jump landings, out on the inside verge of the two tightest corners). The two cubes in every lane stay.
+- Sugar pickup radius grew from 2.5 to 3.4 units, so driving through a row collects it.
