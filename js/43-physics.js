@@ -29,8 +29,9 @@ function drive(k,dt,ctl){
   const i=k.si, i1=RT?Math.min(i+1,RT.n-1):(i+1)%N;
   const dx=k.x-T.X[i],dz=k.z-T.Z[i];
   let lat=dx*T.RX[i]+dz*T.RZ[i];
-  const surf=RT&&Math.abs(lat)<RT.hw+0.8?SURF[RT.S[i]]:null;
-  k.surf=surf?RT.S[i]:'';
+  const ms=!RT&&MAINS[i]&&Math.abs(lat)<HW+1.3?MAINS[i]:'';
+  const surf=RT&&Math.abs(lat)<RT.hw+0.8?SURF[RT.S[i]]:(ms?SURF[ms]:null);
+  k.surf=surf?(RT?RT.S[i]:ms):'';
   k.atPump=!RT&&!!atPumpNow(i,lat);
   if(k.atPump)k.fuel=Math.min(TANK,k.fuel+26*dt);
   else if(!k.air)k.fuel=Math.max(0,k.fuel-(0.5+ctl.throttle*2.0+(k.boost>0?1.6:0))*k.burn*(surf?surf.fuel:1)*dt);
@@ -43,7 +44,7 @@ function drive(k,dt,ctl){
   }
   const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.atPump;
   if(TT||FREE)k.fuel=TANK;                                /* nothing to manage in a time trial */
-  {const sf=RT?(surf?RT.S[i]:'grass'):(onRoad||stage.ground==='sea'?(stage.sfxRoad||(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road'))):
+  {const sf=RT?(surf?RT.S[i]:'grass'):ms?(SFX[ms]?ms:'road'):(onRoad||stage.ground==='sea'?(stage.sfxRoad||(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road'))):
       (stage.sfxOff||(stage.ground==='dunes'?'sand':'grass')));
    if(sf!==k.sfx){const was=k.sfx;k.sfx=sf;if(was)surfaceEnter(k,sf);}}
   if(k.boost>0)k.boost=Math.max(0,k.boost-dt);
@@ -300,7 +301,7 @@ function walkPt(k,s){
 function routeCost(k,T,i0,n){
   let t=0;const G=AI_G*(2.7/k.caution);
   for(let q=0;q<n;q++){
-    const i=T===MAIN?(i0+q)%N:i0+q, s=T===MAIN?null:SURF[T.S[i]];
+    const i=T===MAIN?(i0+q)%N:i0+q, s=T===MAIN?(MAINS[i]?SURF[MAINS[i]]:null):SURF[T.S[i]];
     const top=k.maxSpeed*(s?s.top(k.offRoad):1);
     const v=Math.min(top,Math.sqrt(G*(k.gripOn*(s?s.grip(k.offRoad):1)/9.5)*14*SEG/Math.max(T.CURV[i],1e-4)));
     t+=SEG/Math.max(v,4);
@@ -395,7 +396,7 @@ function aiControl(k){
   /* Corner speed from the radius the curvature implies. The old linear falloff
      saturated at its floor on ordinary bends, pinning the whole field at 42%. */
   const R=14*SEG/Math.max(cmax,1e-4);
-  const sg=T===MAIN?1:SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
+  const sg=T===MAIN?(MAINS[t]?SURF[MAINS[t]].grip(k.offRoad):1):SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
   const hold=AI_G*(k.gripOn*sg/9.5)*(2.7/k.caution)*(k.drift!==0?1.18:1);
   const limit=Math.min(k.maxSpeed,Math.sqrt(hold*R));
   let band=k.noBand?1:clamp(1+((player.progress-k.progress)/N)*0.095,0.95,k.bandMax);

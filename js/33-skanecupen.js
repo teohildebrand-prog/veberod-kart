@@ -1,14 +1,14 @@
 "use strict";
 /* ───────── Skånecupen ───────── */
-const CUP_ROUNDS=['veberod','lund','tollarp','ahus','bron'];
+const CUP_ROUNDS=['veberod','lund','tollarp','horby','ahus','bron'];
 const CUP_ROLE={veberod:'Blandat underlag och de första genvägarna.',lund:'Precision och kurvtagning.',
-  tollarp:'Långa raksträckor och fart.',ahus:'Hopp och jämn kontroll.',bron:'Två varv fullt ut, under press.',
+  tollarp:'Långa raksträckor och fart.',horby:'Torgkurvor, grus och gyttja, och grisar på vägen.',ahus:'Hopp och jämn kontroll.',bron:'Två varv fullt ut, under press.',
   glimminge:'Ren racing i månsken, utan genvägar.',ales:'Fart på sanden och två hemliga passager.'};
 /* LEGO Racers' shape: three cups of four with a champion each, the same three mirrored and
    in reverse order once won, then one final race. Skånecupen stays as it was. */
 const CUPS=[
   {id:'skane',name:'SKÅNECUPEN',short:'SKÅNE',rounds:CUP_ROUNDS,
-   blurb:'The original five: Veberöd, Lund, Tollarp, Åhus and the bridge. No champion, just the village rivals.'},
+   blurb:'The home six: Veberöd, Lund, Tollarp, Hörby, Åhus and the bridge. No champion, just the village rivals.'},
   {id:'osterlen',name:'ÖSTERLENCUPEN',short:'ÖSTERLEN',rounds:['glimminge','kivik','ales','soderasen'],champ:'spoket',
    blurb:'Castle, cairn, sand and gorge. The ghost of Glimmingehus has never lost on home ground.'},
   {id:'kust',name:'KUSTCUPEN',short:'KUSTEN',rounds:['foteviken','karlskrona','ven','limhamn'],champ:'viking',need:'osterlen',

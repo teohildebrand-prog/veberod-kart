@@ -2,6 +2,7 @@
 /* ───────── stages ───────── */
 const N=720, TANK=100, CPN=8, AI_G=30;   /* AI cornering grip */   /* checkpoints per lap */
 let HW=8.2, BANKLAT=12.7, SEG=1, JUMPS=[];
+const MAINS=new Array(N).fill('');   /* main-road surface per sample, '' = the stage's own road */
 const sx=new Float32Array(N),sy=new Float32Array(N),sz=new Float32Array(N);
 const fx=new Float32Array(N),fz=new Float32Array(N);
 const rx=new Float32Array(N),rz=new Float32Array(N);
@@ -181,6 +182,7 @@ const ROADTEX={}, VERGEC={}, EDGES={};
 /** put the ramps on the straightest bits of whatever layout we just sampled */
 function autoJumps(spec,spans){
   spans=spans||[];
+  if(spec.length&&spec.every(q=>q.at!=null))return spec.map(q=>({at:q.at,h:q.h,drop:q.drop,up:q.up,dn:q.dn,rec:q.rec}));   /* placed by hand */
   const head=i=>{const a=(i-3+N)%N,b=(i+3)%N;return Math.atan2(sx[b]-sx[a],sz[b]-sz[a]);};
   const sc=[];
   for(let i=0;i<N;i++){
@@ -215,6 +217,8 @@ function sampleTrack(st){
     fx[i]=dx;fz[i]=dz;rx[i]=-dz;rz[i]=dx;
   }
   JUMPS=autoJumps(st.jumpSpec,(st.routes||[]).map(r=>[r.a,r.b]));
+  MAINS.fill('');                              /* stretches of the main road on another surface */
+  for(const [a,b,s] of (st.zones||[]))for(let i=a;i!==b;i=(i+1)%N)MAINS[i]=s;
   for(const J of JUMPS){                       /* ramp up, then the ground falls away */
     for(let k=0;k<=J.up;k++){const t=k/J.up;sy[(J.at-J.up+k+N)%N]+=J.h*t*t;}
     for(let k=1;k<=J.dn;k++){const t=k/J.dn;sy[(J.at+k)%N]+=J.h*(1-t)-J.drop*t;}
@@ -549,7 +553,14 @@ function vergeTex(kind){
 }
 
 function buildRoad(st){
-  world.add(new THREE.Mesh(ribbon(-HW,HW,0,7,ROADSTEP),psMat({map:roadTex(st.road)})));
+  if(st.zones&&st.zones.length){                    /* stretch by stretch, each on its own surface */
+    const own=psMat({map:roadTex(st.road)}),mats={};
+    for(let a=0,n=0;n<N;){
+      const s0=MAINS[a];let len=1;while(len<N-n&&MAINS[(a+len)%N]===s0)len++;
+      sweep(a,a+len,-HW,0,HW,0,s0?(mats[s0]=mats[s0]||psMat({map:roadTex(s0)})):own);
+      a=(a+len)%N;n+=len;
+    }
+  }else world.add(new THREE.Mesh(ribbon(-HW,HW,0,7,ROADSTEP),psMat({map:roadTex(st.road)})));
   if(st.verge==='glow'){                             /* the rainbow-road bit */
     const band=['#1e3f8c','#1f7fbf','#3fc9c0','#e8c33a','#f08a3c','#d8465e','#7a4fb5'];
     const gl=pixTex(4,56,(g)=>{

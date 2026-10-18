@@ -159,7 +159,7 @@ function ssInfoRows(S){
   if(m==='race'||m==='cup')rows.push(['VARV',String(S.laps||3)]);
   if(m==='tt')rows.push(['VARV','1 + 3 flygande']);
   const known=knownRoutes(S);
-  const surf=[ROADNAME[S.road]||'ASFALT'].concat(known.map(R=>SURF[R.surface].name),known.some(R=>R.mud)?['LERA']:[]);
+  const surf=[ROADNAME[S.road]||'ASFALT'].concat((S.zones||[]).map(z=>SURF[z[2]].name),known.map(R=>SURF[R.surface].name),known.some(R=>R.mud)?['LERA']:[]);
   rows.push(['UNDERLAG',[...new Set(surf)].map(t=>t[0]+t.slice(1).toLowerCase()).join(' · ')]);
   rows.push(['GENVÄGAR',known.length?String(known.length):'Inga kända']);
   const [got,of]=stageStamps(S);
