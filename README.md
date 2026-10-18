@@ -3,11 +3,12 @@
 A silly PS1-style kart racer through the Skåne countryside. Three.js r128,
 plain JavaScript, no build step.
 
-20 tracks in five groups: Skånecupen's eight (with Hörby, Glimmingehus and
-Ales stenar), and four championships built on LEGO Racers' cup shape (ideas
-only): Österlencupen, Kustcupen and Vildmarkscupen (four tracks and a champion
-each, then mirrored and in reverse once won) and Finalen against Raket-Rune
-(Rosengård, then Raket-Runes runda).
+20 tracks and six cups of at most four rounds. Two home cups without a
+champion: Skånecupen (Veberöd, Lund, Tollarp, Hörby) and Sommarcupen (Åhus,
+Glimmingehus, Ales stenar, the bridge). Then championships built on LEGO
+Racers' cup shape (ideas only): Österlencupen, Kustcupen and Vildmarkscupen
+(four tracks and a champion each, then mirrored and in reverse once won) and
+Finalen against Raket-Rune (Rosengård, then Raket-Runes runda).
 
 ## Play
 

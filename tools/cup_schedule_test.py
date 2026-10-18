@@ -4,9 +4,10 @@
     CHROMIUM=/path/to/chrome python3 tools/cup_schedule_test.py [page.html]
 
 A cup saved before schedules were stored (cup save v1) must finish on the rounds
-it started with; a new cup uses today's schedule (Skånecupen 8 rounds, Finalen
-Rosengård then Raket-Rune). Briefing, table, menu and stage select must agree,
-and each round's points go in exactly once.
+it started with; a new cup uses today's schedule (no cup over four rounds:
+Skånecupen and Sommarcupen four each, Finalen Rosengård then Raket-Rune).
+Briefing, table, menu and stage select must agree, and each round's points go
+in exactly once.
 """
 import json
 import os
@@ -132,26 +133,40 @@ def new_final(page):
     expect(page.evaluate("SAVE.trophies.final_normal") == 1, 'Finalen trophy key unchanged (final_normal)')
 
 
-def new_skane(page):
-    start_cup(page, 'skane')
+def home_cup(page, cup_id, name, rounds, trophy):
+    start_cup(page, cup_id)
     s = page.evaluate(STATE)
-    eight = ['veberod', 'lund', 'tollarp', 'horby', 'ahus', 'glimminge', 'ales', 'bron']
-    expect(s['rounds'] == eight, 'new Skånecupen has eight rounds, Hörby 4th')
-    expect('RUNDA 1 AV 8' in s['brief'] and s['resume'].endswith('1/8'), 'new Skånecupen briefing and resume')
-    for n in range(8):
+    expect(s['rounds'] == rounds, f'new {name}: {", ".join(rounds)}')
+    expect('RUNDA 1 AV 4' in s['brief'] and s['resume'].endswith('1/4'), f'new {name} briefing and resume')
+    for n in range(4):
         r = page.evaluate(RACE)
         expect(r['gained'] == 10 and r['round'] == n + 1, f'round {n + 1} scores once')
         if n == 0:
             page.evaluate('showTable()')
             sub = page.evaluate("document.getElementById('tableSub').textContent")
-            expect('EFTER RUNDA 1 AV 8' in sub, 'table: ' + sub)
-    expect(r['done'], 'new Skånecupen finishes after round 8')
+            expect('EFTER RUNDA 1 AV 4' in sub, 'table: ' + sub)
+    expect(r['done'], f'new {name} finishes after round 4')
+    expect(page.evaluate(f'SAVE.trophies["{trophy}"]') == 1, f'{name} trophy key {trophy}')
     # reload mid-cup: a v2 save is left alone
-    page.evaluate("SAVE.cup.done=false;SAVE.cup.round=5;writeSave()")
+    page.evaluate("SAVE.cup.done=false;SAVE.cup.round=2;writeSave()")
     page.reload()
     page.wait_for_function('typeof SAVE!=="undefined"', timeout=20000)
-    expect(page.evaluate('SAVE.cup.rounds.length') == 8 and page.evaluate('SAVE.cup.round') == 5,
+    expect(page.evaluate('SAVE.cup.rounds.length') == 4 and page.evaluate('SAVE.cup.round') == 2,
            'a v2 save reloads unchanged')
+
+
+def new_skane(page):
+    home_cup(page, 'skane', 'Skånecupen', ['veberod', 'lund', 'tollarp', 'horby'], 'normal')
+
+
+def new_sommar(page):
+    home_cup(page, 'sommar', 'Sommarcupen', ['ahus', 'glimminge', 'ales', 'bron'], 'sommar_normal')
+
+
+def every_cup(page):
+    longest = page.evaluate('Math.max(...CUPS.map(C => C.rounds.length))')
+    expect(longest <= 4, f'no cup has more than four rounds (longest {longest})')
+    expect(page.evaluate("mirrorOpen(cupDef({cup:'sommar'}))"), 'Sommarcupen gets SPEGELCUPEN once a cup is finished')
 
 
 def main():
@@ -166,6 +181,8 @@ def main():
         run(browser, url, save(v1cup('final', 0, 0), WON), old_final)
         run(browser, url, save(None, WON), new_final)
         run(browser, url, save(None, WON), new_skane)
+        run(browser, url, save(None, WON), new_sommar)
+        run(browser, url, save(None, WON), every_cup)
         browser.close()
     httpd.shutdown()
     if expect.failed:

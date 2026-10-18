@@ -263,7 +263,7 @@ function refreshMenu(){
   const shelf=(C,m)=>{const t=SAVE.trophies[C.id+m];
     return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.sub+(m?' · SPEGEL':'')+
       '<b>'+(t?MEDAL[t]:'—')+'</b></div>';};
-  const champs=CUPS.filter(C=>C.champ&&(cupOpen(C)||bestMedal(C))).map(C=>{const t=bestMedal(C);
+  const champs=CUPS.filter(C=>C.id!=='skane'&&(cupOpen(C)||bestMedal(C))).map(C=>{const t=bestMedal(C);
     return '<div>'+(t?CUPSVG(MEDALC[t],MEDAL[t]):CUPSVG('rgba(255,255,255,.18)','Ingen pokal'))+C.short+'<b>'+(t?MEDAL[t]:'—')+'</b></div>';}).join('');
   document.getElementById('shelf').innerHTML=CLASSES.map(C=>shelf(C,'')).join('')+
     (SAVE.unlock.cup?CLASSES.map(C=>shelf(C,'_m')).join(''):'')+champs;
@@ -311,7 +311,7 @@ function pickCup(i){
 }
 function renderCupMirror(){
   const C=CUPS[cupSel],host=document.getElementById('cupMirror'),open=mirrorOpen(C);
-  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">'+(C.id==='skane'?'SPEGELCUPEN':'SPEGELVÄND OCH BAKLÄNGES')+': '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
+  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">'+(!C.champ?'SPEGELCUPEN':'SPEGELVÄND OCH BAKLÄNGES')+': '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
   if(open)document.getElementById('btnCupMirror').addEventListener('click',()=>{cupMirrorSel=!cupMirrorSel;renderCupMirror();});
 }
 function showCupSetup(){
