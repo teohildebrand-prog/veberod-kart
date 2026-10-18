@@ -11,7 +11,7 @@ function dropSugar(k){
   if(k===player)setTimeout(()=>toast(k.held?'SOCKERBIT TAPPAD: '+itemName(k.held,itemLvl(k)):'SOCKERBIT TAPPAD'),700);
 }
 function useItem(k){
-  if(!k.held||k.spun>0||k.fartT>0)return;
+  if(!k.held||k.roll>0||k.spun>0||k.fartT>0)return;         /* nothing while the slot still spins */
   if(k.rib&&(k.held==='pie'||k.held==='rocket')){            /* no room in a farm lane */
     if(k===player)toast('FÖR TRÅNGT HÄR!');
     return;
@@ -377,6 +377,10 @@ function blast(k,lvl){
 function updateFarts(dt){
   for(const k of karts){
     if(k.rattle>0)k.rattle=Math.max(0,k.rattle-dt);
+    if(k.roll>0){                                       /* the item slot lands */
+      k.roll=k.held?Math.max(0,k.roll-dt):0;
+      if(!k.roll&&k===player){toast(itemName(k.held,itemLvl(k))+'!');ping(620,980,.10);}
+    }
     if(k.fartT>0){k.fartT-=dt;if(k.fartT<=0)blast(k,3);}
   }
   for(let n=farts.length-1;n>=0;n--){

@@ -22,21 +22,25 @@ function drawHUD(dt){
   el.spd.innerHTML=Math.round(player.speed*4.35)+'<b>KM/H</b>';
   el.spd.className=player.slow>0?'sour':'';
   el.fill.style.width=((player.boost>0?1:clamp(player.charge/1.45,0,1))*100)+'%';
-  /* the held item at its current level, or the shield that is running */
-  const fam=player.held||(player.shield>0?'shield':null);
+  /* the held item at its current level, or the shield that is running;
+     a fresh item box spins through the families first, ticking slower and slower */
+  const spin=player.held&&player.roll>0;
+  const frame=spin?Math.floor((1-(player.roll/ROLLT)**2)*14):0;   /* 0..13, the last one just before the real item */
+  const fam=spin?FAMILIES[(FAMILIES.indexOf(player.held)+frame+1)%FAMILIES.length]:player.held||(player.shield>0?'shield':null);
   const lvl=player.held?itemLvl(player):(player.shieldLvl||1);
-  const key=fam?fam+lvl+(player.held?'':'!'):'';
+  const key=fam?fam+lvl+(player.held?'':'!')+(spin?'~'+frame:''):'';
   if(key!==lastSlot){
     if(fam){
       el.slotv.innerHTML=ITEMICON[fam+lvl];
       el.slot.title=el.slotname.textContent=itemName(fam,lvl);
       el.slot.className=el.slotname.className='plate lvl'+lvl+(player.held?'':' run');
-      el.slot.classList.remove('pop');void el.slot.offsetWidth;el.slot.classList.add('pop');
+      void el.slot.offsetWidth;el.slot.classList.add(spin?'spin':'pop');
+      if(spin)ping(1500-frame*40,1100-frame*30,.03);
     }
     lastSlot=key;
   }
   el.slot.classList.toggle('off',!key);
-  el.slotname.classList.toggle('off',!player.held);
+  el.slotname.classList.toggle('off',!player.held||spin);
   el.slotn.textContent=(!player.held&&player.shield>0)?(player.pans?'×'+player.pans:Math.ceil(player.shield)):'';
   if(player.sugar!==lastSugar){
     lastSugar=player.sugar;sugarEl.classList.toggle('off',!lastSugar);
