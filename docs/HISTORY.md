@@ -147,3 +147,13 @@ Teo's vehicle concepts: every driver gets a vehicle you can recognise from its s
 ## Every vehicle for every driver (2026-10-18)
 - Teo: all vehicles are open to all drivers. Picking a driver selects their own vehicle (EGET FORDON on the panel); ◀ ▶, Q/E, keys 1–9 and the debug menu then reach any of the 20, the four original cars, the signature vehicles, Nisse's and the champions'. Re-picking the same driver keeps the chosen vehicle.
 - Handling is still the driver's numbers times the vehicle's: the original four and Björn's, Mehmet's and Anders' vehicles keep their multipliers (now for whoever drives them); the rest are neutral. Driver abilities (Skopan, akademisk kvart, Mehmet's wheelie and so on) stay with the driver.
+
+## Victor (2026-10-18)
+Teo's spec: Victor from Veberöd, Teo's friend and rival. "Teo built the game; Victor knows how it should be played."
+- Driver: white polo with burgundy tipping, dark trousers, trimmed beard, short dark hair swept up, a challenging smirk, black racing gloves and a bright yellow watch. Stats 0.88 / 0.72 / 0.45 (maxSpeed 42.6, gripOn 9.2, offRoad 0.54). Not in the AI roster.
+- Select screen: his arms and legs sit on joints (buildVictor), so on the turntable he stands beside the kart with his hands on his hips, climbs in, adjusts his gloves and taps the wheel twice. The steering wheel now hangs on its own group, so it stays in the kart when a driver gets out.
+- VEBERÖD ORIGINAL (CARS id 'original', appended so cup saves keep their indices): low wide racing kart, white with burgundy and black, 13 on nose and pods, VEBERÖD ORIGINAL across the nose, exposed engine with an oversized exhaust that spits a short flame when a boost starts, a battered taped spoiler that vibrates in a boost, a yellow rim on the wheel (SPEC.trim) and a DET VAR BÄTTRE FÖRR sticker on the rear bumper.
+- ORIGINALKÄNSLA: a fully charged (amber) drift with no kart contact or wall knock during it gives a 1.95 s boost instead of 1.5 s, with a pixel PERFEKT! over the kart. Drift boosts only; milk and cream are untouched.
+- Lines (toasts): start, a home line on Veberöd (CHARS[].home), passing Teo, a hit from Teo's rocket or semla wall, a perfect drift, driving into mud, win and lose (also on the result screen), and a rare idle line after 8 s standing still. Helpers: bark(), hitLine(), raceLines() in js/36-picknickstamplar.js.
+- Veberöd: a KÖR VICTOR! cloth banner by the start straight with TEO OCKSÅ added underneath in blue marker.
+- The driver grid goes four across once there are more than nine drivers (GRID_COLS).

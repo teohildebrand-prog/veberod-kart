@@ -109,6 +109,30 @@ function blockHit(k){
   return false;
 }
 function sayLine(w){const c=CHARS[charSel];return c.say&&c.say[w];}
+/** the player's driver says their line for the moment, at most once per cd seconds */
+const barkAt={};
+function bark(w,cd){
+  const ln=sayLine(w);if(!ln||clock-(w in barkAt?barkAt[w]:-1e9)<(cd||0))return false;
+  barkAt[w]=clock;toast(ln);return true;
+}
+/** what the player shouts when hit: Victor has a special line for Teo */
+function hitLine(src,fallback){
+  return (src&&src.cfg&&src.cfg.kind==='teo'&&sayLine('hitTeo'))||sayLine('hit')||fallback;
+}
+/** lines that come from the race itself: passing Teo, standing still too long */
+function raceLines(dt){
+  const c=CHARS[charSel];if(!c.say||state!=='race'||raceTime<3)return;
+  if(c.say.pass){
+    const t=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind==='teo');
+    if(t){const ahead=player.progress>t.progress;
+      if(ahead&&player.teoGap<0)bark('pass',20);
+      player.teoGap=ahead?1:-1;}
+  }
+  if(c.say.idle&&!player.idleDone){                  /* rare: only after a long wait, and only sometimes */
+    player.idleT=input.throttle===0&&player.speed<1?player.idleT+dt:0;
+    if(player.idleT>8){player.idleDone=true;if(Math.random()<.5)bark('idle');}
+  }
+}
 function hazU(H){return ((((raceTime+H.phase)%H.period)+H.period)%H.period)/H.period;}
 function updateHazards(dt){
   for(const H of HAZARDS){

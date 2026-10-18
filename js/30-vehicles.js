@@ -207,6 +207,56 @@ const VEHICLES={
     return {fx:1.2,fz:1.45,rx:1.2,rz:-1.45,r:.46,cy:.3,cz:-.25};
   },
 
+  /* Victor: Veberöd Original, a proper racing kart with a few improvements of his own */
+  original(add,paint,dark,steel,A){
+    const burg=psMat({color:0x7a1f30}),blk=psMat({color:0x15161a}),tape=psMat({color:0xb8bcc2});
+    const num=psMat({map:plateTex(16,16,'13','#15161a','#f6f5f0',8)});
+    add(VB(1.5,.1,3.3),dark,0,.3,-.1);                       /* the frame, low and wide */
+    for(const g of [-1,1]){                                  /* side pods: white, a burgundy flash, black below */
+      add(VB(.4,.32,1.5),paint,g*1.0,.48,-.05);
+      add(VB(.42,.08,1.52),burg,g*1.0,.6,-.05);
+      add(VB(.42,.1,1.52),blk,g*1.0,.34,-.05);
+      add(VB(.03,.3,.3),num,g*1.215,.5,.2);                  /* 13 on both sides */
+    }
+    /* the angular nose with its name across the top */
+    const nose=add(VB(1.5,.26,1.1),paint,0,.5,1.5);nose.rotation.x=-.18;
+    add(VB(1.62,.1,.36),blk,0,.38,2.12);
+    add(VB(1.3,.03,.3),psMat({map:plateTex(96,12,'VEBERÖD ORIGINAL','#7a1f30','#f6f5f0',5)}),0,.66,1.62).rotation.x=-.18;
+    for(const g of [-.42,.42])add(VB(.12,.03,.9),g<0?burg:blk,g,.65,1.35).rotation.x=-.18;
+    add(VB(.44,.36,.04),num,0,.56,2.06).rotation.x=-.25;     /* number board on the nose */
+    /* the low racing seat */
+    add(VB(.82,.14,.75),blk,0,.42,-.55);
+    add(VB(.82,.8,.14),blk,0,.8,-1.0).rotation.x=-.25;
+    add(VC(.04,.04,.9,5),steel,0,.72,.5).rotation.x=1.05;    /* steering column */
+    /* exposed rear engine with an oversized exhaust */
+    add(VB(.8,.5,.66),dark,0,.66,-1.55);
+    for(const z of [-1.4,-1.55,-1.7])add(VB(.86,.05,.1),steel,0,.94,z);   /* cooling fins */
+    add(VC(.16,.16,.22,8),burg,-.42,.72,-1.5).rotation.z=Math.PI/2;     /* air box */
+    const ex=add(VC(.13,.2,1.3,8),steel,.48,.86,-2.15);ex.rotation.x=Math.PI/2-.2;
+    add(VC(.22,.22,.12,8),blk,.48,.98,-2.78).rotation.x=Math.PI/2-.2;
+    const flame=A.grp(.48,1.0,-2.9);
+    const fc=A.put(flame,new THREE.ConeGeometry(.2,.7,6),psMat({color:0xffa83a,unlit:true}),0,0,-.3);fc.rotation.x=-Math.PI/2+.2;
+    A.put(flame,new THREE.ConeGeometry(.1,.4,5),psMat({color:0xfff2b0,unlit:true}),0,0,-.15).rotation.x=-Math.PI/2+.2;
+    flame.visible=false;
+    add(VB(1.7,.16,.22),blk,0,.42,-2.3);                     /* rear bumper and its sticker */
+    add(VB(1.0,.13,.02),psMat({map:plateTex(80,10,'DET VAR BÄTTRE FÖRR','#15161a','#f2d21a',4)}),-.2,.42,-2.42);
+    /* small, battered, carefully adjusted spoiler */
+    const sp=A.grp(0,1.12,-2.1);
+    A.put(sp,VB(1.5,.06,.42),paint,0,.28,0).rotation.z=.03;
+    A.put(sp,VB(.5,.065,.42),burg,.48,.285,0).rotation.z=-.09;           /* the dented corner, repainted */
+    A.put(sp,VB(.22,.07,.44),tape,-.3,.3,0);                              /* gaffer tape */
+    for(const g of [-1,1]){A.put(sp,VB(.05,.36,.5),blk,g*.76,.2,0);A.put(sp,VB(.06,.3,.06),steel,g*.3,0,0);}
+    const st={};
+    A.anim.push(k=>{
+      const t=since(st,'still',!(k.boost>0));                /* seconds into the current boost */
+      flame.visible=k.boost>0&&(t<.35||Math.random()<.15);
+      flame.scale.setScalar(.8+Math.random()*.5);
+      sp.rotation.x=k.boost>0?Math.sin(clock*60)*.07:0;
+      sp.position.y=1.12+(k.boost>0?Math.sin(clock*47)*.02:0);
+    });
+    return {fx:1.05,fz:1.35,rx:1.12,rz:-1.4,r:.34,rr:.42,fw:.38,rw:.56,cy:-.25,cz:-.1,trim:0xf2d21a};
+  },
+
   /* Farmor Britta: Åhus Hembakat, a miniature bakery delivery van */
   hembak(add,paint,dark,steel,A){
     const blue=psMat({color:0x2f63c8}),brick=psMat({color:0x8a3a2a}),bun=psMat({color:0xc07a34});

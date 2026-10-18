@@ -12,6 +12,12 @@ const el={lap:document.getElementById('lap'),pos:document.getElementById('pos'),
 let toastT=0, lastSlot='', lastSugar=-1;
 const sugarEl=document.getElementById('sugar');
 function toast(m){el.toast.textContent=m;el.toast.classList.add('on');toastT=1.5;}
+/** Victor's clean drift: a small pixel PERFEKT! over the kart */
+const perfektEl=document.getElementById('perfekt');
+function perfekt(){
+  perfektEl.classList.remove('on');void perfektEl.offsetWidth;perfektEl.classList.add('on');
+  bark('perfect',6);
+}
 function flash(m){el.flash.textContent=m;el.flash.classList.remove('pop');void el.flash.offsetWidth;el.flash.classList.add('pop');}
 function drawHUD(dt){
   el.lap.textContent=Math.min(player.lap+1,LAPS);

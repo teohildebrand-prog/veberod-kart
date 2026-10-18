@@ -31,8 +31,11 @@ function resetRace(){
   dbgOnReset();
   if(FREE)toast('SANDLÅDA · F1 FÖR DEBUG');
 }
+let lastWord='';
 function finish(){
   state='over';setPause(false);
+  lastWord=sayLine(player.place===1?'win':'lose')||'';
+  if(lastWord)toast(lastWord);
   if(CUP){cupFinishPending=true;return;}    /* the rest of the field finishes first */
   showDone();
 }
@@ -42,6 +45,7 @@ function showDone(){
   document.getElementById('doneTitle').textContent=(me===1?'SEGER!':'PLATS '+me);
   document.getElementById('doneSub').textContent=
     'TID '+fmt(player.total)+'  ·  BÄSTA VARV '+fmt(player.best);
+  document.getElementById('doneSay').textContent=lastWord?CHARS[charSel].short+': ”'+lastWord+'”':'';
   const ol=document.getElementById('grid');ol.innerHTML='';
   sorted.forEach((k,i)=>{
     const li=document.createElement('li');
@@ -173,6 +177,7 @@ function portrait(ci){
   return url;
 }
 (function buildCards(){
+  document.getElementById('cards').style.setProperty('--cols',GRID_COLS);
   document.getElementById('cards').innerHTML=GRID.map(i=>
     '<button class="vcard" role="option" data-i="'+i+'" aria-label="'+CHARS[i].name+'"><img alt="" src="'+portrait(i)+'"><span>'+
     CHARS[i].short+'</span></button>').join('');

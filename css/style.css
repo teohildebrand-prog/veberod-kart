@@ -142,6 +142,13 @@
   @keyframes pop{0%{opacity:0;transform:scale(1.7)}18%{opacity:1;transform:scale(1)}
                  72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.92)}}
 
+  #perfekt{position:absolute;top:38%;left:50%;transform:translateX(-50%);opacity:0;pointer-events:none;
+    font:14px/1 "Press Start 2P",monospace;color:#ffd54a;letter-spacing:.06em;
+    text-shadow:2px 2px 0 #7a1f30,-2px -2px 0 #15161a,2px -2px 0 #15161a,-2px 2px 0 #15161a;
+    -webkit-font-smoothing:none;font-smooth:never}
+  #perfekt.on{animation:perfekt .9s steps(6) forwards}
+  @keyframes perfekt{0%{opacity:1;transform:translate(-50%,8px) scale(1.4)}30%{opacity:1;transform:translate(-50%,0) scale(1)}
+                     80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}
   #toast{bottom:104px;left:50%;transform:translateX(-50%);font-size:14px;font-weight:700;
          letter-spacing:.06em;color:#fff;opacity:0;transition:opacity .2s;white-space:nowrap;
          padding:7px 18px;border-radius:999px;
@@ -326,7 +333,7 @@
     color:#eef2fb;letter-spacing:.02em;text-shadow:3px 3px 0 #07163f;
     background:none;-webkit-text-fill-color:currentColor;filter:none}
   .vs-mode{font:700 13px/1.2 "Titillium Web",sans-serif;letter-spacing:.12em;color:#9fb6e6;text-align:right}
-  .vs-grid{grid-area:grid;align-self:start;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  .vs-grid{grid-area:grid;align-self:start;display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:8px;
     padding:10px;border-radius:10px;background:linear-gradient(180deg,#1b3f9a,#10276b);
     border:3px solid #3f74d8;box-shadow:0 0 0 3px #0a1a4a,0 14px 30px rgba(0,10,40,.5)}
   .vcard{pointer-events:auto;position:relative;padding:0;border:3px solid #2a55b8;border-radius:4px;

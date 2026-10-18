@@ -13,8 +13,8 @@ addEventListener('keydown',e=>{
     const g=GRID.indexOf(charSel),mv=d=>{unpeek();applyCharacter(GRID[(g+d+GRID.length)%GRID.length]);ping(700,980,.04);};
     if(k==='arrowleft'||k==='a')mv(-1);
     if(k==='arrowright'||k==='d')mv(1);
-    if(k==='arrowup'||k==='w')mv(-3);
-    if(k==='arrowdown'||k==='s')mv(3);
+    if(k==='arrowup'||k==='w')mv(-GRID_COLS);
+    if(k==='arrowdown'||k==='s')mv(GRID_COLS);
     if(k==='q')stepCar(-1);
     if(k==='e')stepCar(1);
     if(k.length===1&&k>='1'&&k<='9')applyCar(FREECARS[+k-1]);

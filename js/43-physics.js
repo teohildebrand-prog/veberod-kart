@@ -80,14 +80,16 @@ function drive(k,dt,ctl){
 
   {                                          /* AI drifts too, same rules */
     const want=ctl.drift&&!k.air&&sp>13&&Math.abs(ctl.steer)>0.15;
-    if(want&&k.drift===0)k.drift=Math.sign(ctl.steer)||1;
+    if(want&&k.drift===0){k.drift=Math.sign(ctl.steer)||1;k.clean=true;}
     if(k.drift!==0&&(!ctl.drift||sp<8)){
       if(k.charge>0.55){
         const big=k.charge>1.45;
-        k.boost=big?1.5:0.95;
+        const perfect=big&&k.orig&&k.clean;              /* Victor: ORIGINALKÄNSLA */
+        k.boost=big?(perfect?1.95:1.5):0.95;
         for(let p=0;p<10;p++)puff(k.x+rand(-1,1),k.y+.5,k.z+rand(-1,1),
           big?1:.42, big?.70:.76, big?.18:.95, .5);
-        if(k===player){toast(big?'TURBO!':'FART!');ping(big?520:620,big?1200:900,.17);}
+        if(k===player&&perfect){perfekt();ping(520,1500,.2);}
+        else if(k===player){toast(big?'TURBO!':'FART!');ping(big?520:620,big?1200:900,.17);}
       }
       k.drift=0;k.charge=0;k.dstage=0;
     }
@@ -131,6 +133,7 @@ function drive(k,dt,ctl){
     const vl=k.vx*T.RX[j]+k.vz*T.RZ[j],vf=k.vx*T.FX[j]+k.vz*T.FZ[j];
     /* a real hit costs speed; leaning on the fence just slides you along it */
     const keep=Math.abs(vl)>3?0.72:0.995;
+    if(keep<1)k.clean=false;                         /* a knock spoils a clean drift */
     k.vx=T.FX[j]*vf*keep-T.RX[j]*vl*0.25;k.vz=T.FZ[j]*vf*keep-T.RZ[j]*vl*0.25;
     if(!k.ai&&Math.abs(vl)>9)shake=Math.min(1,shake+0.5);
     /* pinned nose-first at walking pace: the fence turns you along itself */
@@ -443,6 +446,7 @@ function separate(){
     const rel=(B.vx-A.vx)*dx+(B.vz-A.vz)*dz;
     if(rel<-3.5&&state==='race')hotBump(A,B,dx,dz);
     if(rel<0){
+      A.clean=B.clean=false;
       A.vx+=dx*rel*0.4*wa;A.vz+=dz*rel*0.4*wa;B.vx-=dx*rel*0.4*wb;B.vz-=dz*rel*0.4*wb;
       if(A===player||B===player)shake=Math.min(1,shake+0.22);
     }
