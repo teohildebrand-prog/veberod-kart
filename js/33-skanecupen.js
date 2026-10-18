@@ -246,6 +246,7 @@ function placeOnGrid(){
     k.mass=P?(P.mass||1):1;k.shieldMul=P?(P.shieldMul||1):1;
     k.bucket=!!P&&P.id==='anders';k.bucketLap=-1;
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
+    k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);
   });

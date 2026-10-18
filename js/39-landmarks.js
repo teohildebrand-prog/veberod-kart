@@ -43,6 +43,27 @@ function landmarksVeberod(){
     world.add(pl);
   }
 
+  /* KÖR VICTOR! on a cloth banner by the start, TEO OCKSÅ squeezed underneath in marker */
+  (function banner(){
+    const tex=pixTex(128,40,(g)=>{
+      g.fillStyle='#f6f5f0';g.fillRect(0,0,128,40);
+      g.fillStyle='#7a1f30';g.fillRect(0,0,128,3);g.fillRect(0,37,128,3);
+      g.font='12px "Press Start 2P",monospace';g.textAlign='center';g.textBaseline='middle';
+      g.fillText('KÖR VICTOR!',64,14);
+      g.save();g.translate(70,30);g.rotate(-.07);g.scale(.78,1);       /* added later, by hand */
+      g.fillStyle='#2a4fb8';g.font='bold 11px "Comic Sans MS","Marker Felt",cursive';
+      g.fillText('TEO OCKSÅ',0,0);g.restore();
+    });
+    const i=26,o=-(HW+4.2),p=atTrack(i,o,0),yaw=Math.atan2(fx[i],fz[i]);
+    const cloth=new THREE.Mesh(new THREE.PlaneGeometry(7.2,2.25),psMat({map:tex,side:THREE.DoubleSide}));
+    cloth.position.set(p.x,p.y+2.6,p.z);cloth.rotation.y=yaw-Math.PI/2;cloth.rotation.z=.02;world.add(cloth);
+    const postG=flat(new THREE.CylinderGeometry(.12,.12,3.8,5)),postM=psMat({color:0x8d6a44});
+    for(const sg of [-1,1]){
+      const q=new THREE.Mesh(postG,postM);
+      q.position.set(p.x+fx[i]*sg*3.7,p.y+1.9,p.z+fz[i]*sg*3.7);world.add(q);
+    }
+  })();
+
   /* ── giant dalahäst at the summit hairpin ── */
   (function dala(){
     const g=new THREE.Group();

@@ -130,7 +130,7 @@ function updateRockets(dt){
         k.spun=1.5*k.spinResist;k.boost=0;k.drift=0;k.charge=0;
         for(let p=0;p<18;p++)
           puff(k.x+rand(-1.3,1.3),k.y+rand(.2,1.4),k.z+rand(-1.3,1.3),1,.72,.34,.7);
-        if(k===player){toast(sayLine('hit')||'TRÄFFAD!');ping(300,60,.3);shake=Math.min(1,shake+.8);}
+        if(k===player){toast(hitLine(r.owner,'TRÄFFAD!'));ping(300,60,.3);shake=Math.min(1,shake+.8);}
         else if(r.owner===player){toast('TRÄFF!');ping(880,420,.12);}
       }
       done=true;break;
@@ -267,7 +267,7 @@ function updateWalls(dt){
         dropSugar(o);
         o.spun=Math.max(o.spun,1.2*o.spinResist);o.slow=Math.max(o.slow,.6);o.boost=0;o.drift=0;o.charge=0;
         for(let p=0;p<20;p++)puff(o.x+rand(-1.4,1.4),o.y+rand(.3,1.8),o.z+rand(-1.4,1.4),1,.96,.88,.8);
-        if(o===player){toast('SEMLOR I ANSIKTET!');ping(260,70,.3);shake=Math.min(1,shake+.7);}
+        if(o===player){toast(hitLine(k,'SEMLOR I ANSIKTET!'));ping(260,70,.3);shake=Math.min(1,shake+.7);}
         else if(k===player){toast('SEMLA-TRÄFF!');ping(880,420,.12);}
       }
     }

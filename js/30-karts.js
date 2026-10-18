@@ -48,7 +48,11 @@ const CARS=[
   {id:'nattvagn',name:'GLIMMINGEHUS NATTVAGN', sub:'SPÖKVAGN', npc:true, bars:[.8,.8,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
   {id:'langskepp',name:'KUSTENS LÅNGSKEPP', sub:'LÅNGSKEPP PÅ HJUL', npc:true, bars:[.8,.7,.6],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
   {id:'tallrik', name:'ÄNGELHOLM TALLRIK 46', sub:'FLYGANDE TEFAT', npc:true, bars:[.8,.8,.8],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
-  {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}}
+  {id:'overljud',name:'MALMÖ ÖVERLJUD', sub:'RAKETDRAGSTER', npc:true, bars:[1,.7,.5],blurb:'',mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}},
+  /* later arrivals go on the end: a cup save keeps the vehicle as an index */
+  {id:'original',name:'VEBERÖD ORIGINAL', sub:'NUMMER 13', sig:'victor', bars:[.88,.72,.45],
+   blurb:'Proper racing equipment until Victor added a few improvements. Carefully tuned, well used and far too serious for a race with a cow in it.',
+   mul:{maxSpeed:1,power:1,offRoad:1,gripOn:1,boostMul:1,burn:1}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 
@@ -381,6 +385,84 @@ function buildDriver(kind,addc,add,skin,dark,car){
     }
   }
 }
+/** Victor: white polo with burgundy tipping, trimmed beard, hair swept up, yellow watch.
+    Arms and legs hang on joints, so on the select turntable he can stand with his hands on
+    his hips, climb in, fix his gloves and tap the wheel twice. Racing, he just sits. */
+function buildVictor(cab,skin,dark,anim){
+  const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+  const put=(p,g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);p.add(e);return e;};
+  const addc=(g,m,x,y,z)=>put(cab,g,m,x,y,z);
+  const polo=psMat({color:0xf6f5f0}),burg=psMat({color:0x7a1f30}),hair=psMat({color:0x2a201a}),
+        pants=psMat({color:0x262a33}),glove=psMat({color:0x17181c}),watch=psMat({color:0xf2d21a});
+  addc(B(.94,.62,.56),polo,0,1.34,-.6);                                     /* polo */
+  addc(B(.92,.26,.54),pants,0,.92,-.6);                                     /* trousers from the waist */
+  addc(B(.94,.06,.56),glove,0,1.04,-.6);                                    /* belt */
+  addc(B(.16,.3,.04),polo,0,1.5,-.31);                                      /* placket, two buttons */
+  for(const y of [1.56,1.44])addc(B(.05,.05,.03),burg,0,y,-.29);
+  for(const sg of [-1,1]){                                                  /* collar, tipped in burgundy */
+    addc(B(.26,.08,.2),polo,sg*.17,1.66,-.4).rotation.z=-sg*.25;
+    addc(B(.26,.03,.2),burg,sg*.17,1.62,-.4).rotation.z=-sg*.25;
+  }
+  const limb=[];
+  for(const sg of [-1,1]){
+    const sh=new THREE.Group();sh.position.set(sg*.42,1.55,-.6);cab.add(sh);
+    put(sh,B(.28,.3,.28),polo,0,-.13,0);                                    /* short sleeve */
+    put(sh,B(.29,.06,.29),burg,0,-.29,0);                                   /* its burgundy edge */
+    put(sh,B(.21,.24,.21),skin,0,-.42,0);
+    const el=new THREE.Group();el.position.y=-.52;sh.add(el);
+    put(el,B(.2,.4,.2),skin,0,-.2,0);
+    put(el,B(.23,.16,.25),glove,0,-.46,0);                                  /* racing gloves */
+    if(sg<0)put(el,B(.24,.08,.24),watch,0,-.34,0);                         /* the bright yellow watch */
+    const hip=new THREE.Group();hip.position.set(sg*.22,.86,-.6);cab.add(hip);
+    put(hip,B(.32,.8,.36),pants,0,-.4,0);
+    put(hip,B(.32,.14,.48),glove,0,-.8,.07);                                /* shoes */
+    limb.push({sg,sh,el,hip});
+  }
+  const y=1.86;
+  blockFace(addc,skin,dark,y,{w:.52,mouth:0x7a3a34});
+  addc(B(.09,.05,.05),psMat({color:0x7a3a34}),.12,y-.12,-.355);            /* one corner up: the smirk */
+  addc(B(.14,.04,.04),hair,-.13,y+.15,-.355);                               /* brows, the right one raised */
+  addc(B(.14,.04,.04),hair,.13,y+.18,-.355).rotation.z=-.25;
+  addc(B(.54,.12,.16),hair,0,y-.22,-.4);                                    /* trimmed beard */
+  addc(B(.58,.26,.38),hair,0,y-.15,-.58);
+  addc(B(.24,.05,.05),hair,0,y-.08,-.352);                                  /* moustache */
+  for(const sg of [-1,1])addc(B(.05,.22,.16),hair,sg*.28,y-.06,-.5);        /* sideburns into the beard */
+  addc(B(.56,.12,.5),hair,0,y+.3,-.62);                                     /* short sides, swept up on top */
+  addc(B(.5,.2,.22),hair,0,y+.4,-.42).rotation.x=-.45;
+  addc(B(.42,.16,.24),hair,0,y+.42,-.62).rotation.x=-.25;
+  addc(B(.14,.12,.12),hair,-.14,y+.52,-.44).rotation.z=.3;
+  /* poses: shoulder (x tilt, z spread), elbow bend, hip bend */
+  const seatP=cab.position.clone(),side=-1.7;
+  const SIT={sx:-1.25,sz:.05,ex:-.12,ez:0,hx:-1.45},HIPS={sx:0,sz:.9,ex:0,ez:-1.8,hx:0};
+  function pose(P,dy){
+    for(const L of limb){
+      L.sh.rotation.set(P.sx,0,L.sg*P.sz);L.el.rotation.set(P.ex+(dy||0),0,L.sg*P.ez);L.hip.rotation.x=P.hx;
+    }
+  }
+  const mix=(a,b,t)=>{const o={};for(const k in a)o[k]=lerp(a[k],b[k],t);return o;};
+  pose(SIT);
+  const st={t:0,last:-9};
+  anim.push((k,dt)=>{
+    if(!(previewOn&&k===player)){if(st.t){st.t=0;cab.position.copy(seatP);pose(SIT);}return;}
+    if(clock-st.last>.25)st.t=0;                       /* shown again: start over beside the kart */
+    st.last=clock;st.t+=dt;const t=st.t;
+    if(t<1.8){                                          /* hands on hips, sizing you up */
+      cab.position.set(side,0,.3);pose(HIPS);
+    }else if(t<2.7){                                    /* climbs in */
+      const u=(t-1.8)/.9,e=u*u*(3-2*u);
+      cab.position.set(lerp(side,seatP.x,e),lerp(0,seatP.y,e)+Math.sin(u*Math.PI)*.9,lerp(.3,seatP.z,e));
+      pose(mix(HIPS,SIT,Math.min(1,u*1.4)));
+    }else if(t<4.0){                                    /* adjusts his gloves */
+      cab.position.copy(seatP);pose(SIT);
+      const w=Math.sin((t-2.7)*18)*.12;
+      limb[0].sh.rotation.set(-.9,0,-.1);limb[0].el.rotation.set(-1.3,0,.6);
+      limb[1].sh.rotation.set(-.85,0,-.25);limb[1].el.rotation.set(-1.25+w,0,-.7);
+    }else if(t<5.2){                                    /* tap, tap */
+      const u=(t-4.0)/1.2;
+      pose(SIT,u<.85?-Math.abs(Math.sin(u/.85*Math.PI*2))*.35:0);
+    }else pose(SIT);
+  });
+}
 /** the four cup champions: the ghost, the chieftain, the green man and Raket-Rune */
 function buildChampion(kind,addc,add,skin,dark,car){
   const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
@@ -583,6 +665,8 @@ function buildKart(color,kind,car,opt){
       addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
       addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
     }
+  }else if(kind==='victor'){
+    buildVictor(cab,skin,dark,anim);
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
@@ -595,7 +679,11 @@ function buildKart(color,kind,car,opt){
     helm.scale.set(1,.94,1.05);
     addc(new THREE.BoxGeometry(.48,.18,.14),psMat({color:0x14181c}),0,1.8,-.32);
   }
-  if(!SPEC.noWheel)addc(new THREE.BoxGeometry(.5,.12,.5),dark,0,1.18,.55).rotation.x=-.5;
+  const wg=new THREE.Group();wg.position.copy(cab.position);lean.add(wg);   /* the wheel stays put if the driver gets out */
+  const addw=(g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);wg.add(e);return e;};
+  if(!SPEC.noWheel)addw(new THREE.BoxGeometry(.5,.12,.5),dark,0,1.18,.55).rotation.x=-.5;
+  if(SPEC.trim!=null&&!SPEC.noWheel)                  /* a coloured rim round the wheel */
+    addw(new THREE.TorusGeometry(.27,.045,4,8),psMat({color:SPEC.trim}),0,1.25,.55).rotation.x=Math.PI/2-.5;
 
   const wheelG=(r,w)=>{const t=new THREE.CylinderGeometry(r,r,w,8);t.rotateZ(Math.PI/2);return flat(t);};
   const hubOf=(r,w,k)=>{const c=new THREE.CylinderGeometry(r*k,r*k,w+.04,6);c.rotateZ(Math.PI/2);return flat(c);};
@@ -673,9 +761,19 @@ const CHARS=[
   {id:'britta',kind:'granny',short:'BRITTA',name:'FARMOR BRITTA',role:'ÅHUS',sig:'hembak',
    color:0xf2d36b,maxSpeed:41.0,power:27,offRoad:0.64,boostMul:1.38,gripOn:10.4,shieldMul:2,
    stats:[0.80,0.80,0.60],quirk:['HEMBAKAT','Hennes äggkaka skyddar dubbelt så länge.'],
-   blurb:'Bakes for the whole village and drives like she is late for the bus. Her own äggkaka holds twice as long.'}
+   blurb:'Bakes for the whole village and drives like she is late for the bus. Her own äggkaka holds twice as long.'},
+  /* Teo built the game; Victor knows how it should be played. home = the stage he starts on with his own line */
+  {id:'victor',short:'VICTOR',name:'VICTOR',role:'VEBERÖD',sig:'original',home:'veberod',
+   color:0xf4f2ec,maxSpeed:42.6,power:27,offRoad:0.54,boostMul:1.40,gripOn:9.2,orig:true,
+   stats:[0.88,0.72,0.45],quirk:['ORIGINALKÄNSLA','En ren, fulladdad sladd ger en längre fartboost.'],
+   say:{start:'Okej. Nu kör vi på riktigt.',home:'Här behöver jag ingen karta.',
+        pass:'Du byggde banan. Jag är uppvuxen här.',hitTeo:'DET DÄR ÄR JU EN BUGG!',
+        perfect:'Där! Originalkänslan!',mud:'Vem har designat det här?',
+        win:'En gång till. Så du får en chans.',lose:'Vi kör bäst av tre.',idle:'Och låt Halo vara.'},
+   blurb:'Victor från Veberöd har åsikter om racinglinjer, kontrollkänsla och varför originalet alltid var bättre. Hans VEBERÖD ORIGINAL belönar rena sladdar och sena omkörningar. Förlorar han var det förmodligen något med kontrollen.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','amanda','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','amanda','britta'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID_COLS=Math.ceil(Math.sqrt(GRID.length));   /* 3x3 for nine, four across past that */
 const kindOf=c=>c.kind||c.id;
 /* an AI who is also the player's driver races as a twin: [roster slot, name, paint] in the
    same vehicle (Teodor's prototype is unfinished on the other side) */
@@ -737,7 +835,7 @@ const karts=ROSTER.map((r,i)=>{
     line:0,lapStart:0,best:null,total:null,done:false,
     fuel:TANK,atPump:false,warned:0,held:null,roll:0,shield:0,spun:0,burn:1,spinResist:1,milk:1,
     rib:0,plan:0,planned:{},mi:0,recoverT:0,ghost:0,stuckT:0,stuckP:-1e9,bandMax:1.16,rival:false,
-    gate:0,mass:1,shieldMul:1,bucket:false,bucketLap:-1,kvart:false,suck:0,wheelie:false,lineVar:0,wantFuel:false,rtp:false,rtpT:0,offT:0,sfx:'',sugar:0,curse:0,
+    gate:0,mass:1,shieldMul:1,bucket:false,bucketLap:-1,kvart:false,suck:0,wheelie:false,orig:false,clean:false,lineVar:0,wantFuel:false,rtp:false,rtpT:0,offT:0,sfx:'',sugar:0,curse:0,
     boostLvl:0,shieldLvl:0,pans:0,panHit:{},panG:null,trapAt:-9,slick:0,tow:0,rattle:0,fartT:0,hazAt:-9,parked:false,lapTimes:[],ghostBuf:null,
     maxSpeed:41,power:25,offRoad:.58,boostMul:1.36,gripOn:9.0};
 });

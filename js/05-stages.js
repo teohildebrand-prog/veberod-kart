@@ -269,6 +269,7 @@ function surfaceEnter(k,s){
   const S=SFX[s];
   if(S&&S.field&&isCow(k)&&clock-(k.mooT||-9)>4&&
      (k===player||Math.hypot(k.x-player.x,k.z-player.z)<45)){k.mooT=clock;moo();}
+  if(k===player&&s==='mud'&&state==='race')bark('mud',12);
 }
 const COMMIT=10, MERGE=12;           /* samples where you can still change your mind */
 let ALTS=[];

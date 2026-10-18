@@ -28,7 +28,7 @@ function frame(now){
     const n=Math.ceil(countdown-0.6);
     if(n!==lastBeep&&n>=0&&n<=3){lastBeep=n;flash(n===0?'KÖR!':String(n));}
     if(countdown<=0){state='race';raceTime=0;karts.forEach(k=>k.lapStart=0);
-      const ln=sayLine('start');if(ln)setTimeout(()=>{if(state==='race')toast(ln);},player.kvart?2600:900);
+      const ln=(stage.id===CHARS[charSel].home&&sayLine('home'))||sayLine('start');if(ln)setTimeout(()=>{if(state==='race')toast(ln);},player.kvart?2600:900);
       const ch=cupChamp();if(ch&&CUP.round===0)setTimeout(()=>{if(state==='race')toast(ch.name+': '+ch.say);},ln?3400:1200);}
   }
   readInput();
@@ -48,7 +48,7 @@ function frame(now){
     }
     if(steps>=10)acc=0;                       /* frame-rate spiral guard */
     raceTime+=steps*FIXED;          /* sim time, and it runs on after the flag so late finishers get real times */
-    checkPickups();checkStamps();updateHazards(dt);aiItemLines();
+    checkPickups();checkStamps();updateHazards(dt);aiItemLines();raceLines(dt);
     order();
     if(cupFinishPending){cupFinishPending=false;cupComplete();}
   }else{
