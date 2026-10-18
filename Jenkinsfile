@@ -15,6 +15,11 @@ pipeline {
         sh 'python3 tools/cup_schedule_test.py'
       }
     }
+    stage('Shortcut test') {
+      steps {
+        sh 'python3 tools/shortcut_test.py'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
