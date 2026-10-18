@@ -216,3 +216,11 @@ Roadmap step 4, second track.
 - SERVICESPÅRET (open, concrete): the maintenance crews' crossover between the carriageways at the Copenhagen end (samples 289 to 394). It turns early on a radius of about 15 m on its own slab and girder, with yellow edge lines, a low rail round the outside and chevron boards at the apex, and skips the long hairpin out at the end. The inner deck rails have gaps where it crosses.
 - Measured (tools/shortcut_test.py): +1.34 s on average, +0.39 to +3.53 s by kart.
 - Stamps: Koldskål (edge of the first straight), Rød pølse (middle of Servicespåret), Æbleskiver (inside of the tighter hairpin).
+
+## Phone menus, step 1: sizing (2026-10-18)
+- Teo's phone-menu plan, in his order: sizing/clipping first, then stage select, main menu, driver select, glass polish (one PR each).
+- Each sheet's main action row is `.actbar`: sticky at the bottom of the screen while the rest scrolls above it (name entry KLAR, menu, cup setup, briefing, table, podium, picnic pass, results). Driver select's footer is sticky too. Pause puts FORTSÄTT first; restart and quit sit below the sound settings.
+- Darker panel glass (text was light on light over bright scenery), sheets padded by safe areas, tighter spacing under 540 px tall, buttons at least 48 px (letter keys, cup cards, arrows, mirror toggle 44 px; filter chips 34 px), no button text clipping in portrait.
+- Zoom: menus allow pinch-zoom (body touch-action manipulation); only `body.racing` is touch-action none. Headless Chromium can't synthesize a pinch at all, so tests read touch-action and defaultPrevented instead.
+- `tools/menu_fit_test.py` (in Jenkins): seven menus on four phone screens (844x390, 780x320 with toolbar, 667x320, 390x660); fails if the main action is off screen, the page scrolls sideways, a button is under 44 px or a menu blocks pinch-zoom.
+

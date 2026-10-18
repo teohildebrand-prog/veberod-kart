@@ -74,7 +74,7 @@
     <h1>VEBERÖD KART<i>JAKTEN</i></h1>
     <h2>SKÅNE · 19 BANOR · 9 FÖRARE</h2>
     <p>Three laps of a closed farm road through the rapeseed. Hold a drift all the way round a bend and you come out with a boost.</p><p>Grab the milk for speed. Miss the pies. Land a long jump and the kart rewards you with a boost.</p>
-    <div class="mrow">
+    <div class="mrow actbar">
       <button class="go" id="btnStart">ENKELT LOPP</button>
       <button class="go" id="btnCup">MÄSTERSKAP</button>
     </div>
@@ -96,7 +96,7 @@
     <h2>DITT NAMN STÅR I RESULTATEN</h2>
     <input id="nameBox" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ditt namn" placeholder="NAMN">
     <div id="nameKeys"></div>
-    <button class="go" id="btnNameOk">KLAR</button>
+    <div class="mrow actbar"><button class="go" id="btnNameOk">KLAR</button></div>
   </div>
 </div>
 
@@ -109,7 +109,7 @@
     <p class="cb" id="classblurb"></p>
     <div class="tabs" id="cupMirror"></div>
     <p class="warn" id="cupWarn" hidden>Du har en cup på gång. Startar du en ny skrivs den över.</p>
-    <div class="mrow">
+    <div class="mrow actbar">
       <button class="go" id="btnCupNext">VÄLJ FÖRARE</button>
       <button class="alt" id="btnCupBack">TILLBAKA</button>
     </div>
@@ -121,7 +121,7 @@
     <h1 id="briefTitle"></h1>
     <h2 id="briefSub"></h2>
     <dl class="info" id="briefBody"></dl>
-    <div class="mrow">
+    <div class="mrow actbar">
       <button class="go" id="btnBriefGo">KÖR</button>
     </div>
     <div class="mrow">
@@ -137,7 +137,7 @@
     <h1>TABELLEN</h1>
     <h2 id="tableSub"></h2>
     <ol class="rows" id="tgrid"></ol>
-    <div class="mrow">
+    <div class="mrow actbar">
       <button class="go" id="btnTableNext">NÄSTA BANA</button>
       <button class="alt" id="btnTableAlbum">PICKNICKPASSET</button>
     </div>
@@ -150,7 +150,7 @@
     <h2 id="podSub"></h2>
     <div id="pod"></div>
     <p id="podNote"></p>
-    <button class="go" id="btnPodDone">TILL MENYN</button>
+    <div class="mrow actbar"><button class="go" id="btnPodDone">TILL MENYN</button></div>
   </div>
 </div>
 
@@ -161,7 +161,7 @@
     <div id="apage"></div>
     <div class="pick-h">BELÖNINGAR</div>
     <ul id="arewards"></ul>
-    <button class="go" id="btnAlbumBack">TILLBAKA</button>
+    <div class="mrow actbar"><button class="go" id="btnAlbumBack">TILLBAKA</button></div>
   </div>
 </div>
 
@@ -236,7 +236,8 @@
 <div class="sheet hide" id="paused">
   <div class="sheet-in" style="width:min(340px,100%);text-align:center">
     <h1 style="font-size:clamp(24px,6vw,34px)">PAUSAD</h1>
-    <h2 style="margin-bottom:20px">VEBERÖD KART</h2>
+    <h2 style="margin-bottom:14px">VEBERÖD KART</h2>
+    <button class="go" id="btnResume" style="width:100%">FORTSÄTT</button>
     <fieldset class="audio-settings">
       <legend>LJUD</legend>
       <div><span>Total volym</span><button type="button" data-volume="master" data-step="-.1" aria-label="Sänk total volym">−</button><output id="audio-master">70%</output><button type="button" data-volume="master" data-step=".1" aria-label="Höj total volym">+</button></div>
@@ -244,7 +245,6 @@
       <div><span>Ljudeffekter</span><button type="button" data-volume="effects" data-step="-.1" aria-label="Sänk ljudeffekter">−</button><output id="audio-effects">65%</output><button type="button" data-volume="effects" data-step=".1" aria-label="Höj ljudeffekter">+</button></div>
       <button type="button" class="alt" id="btnSoundMute" aria-pressed="false">LJUD: PÅ</button>
     </fieldset>
-    <button class="go" id="btnResume" style="width:100%">FORTSÄTT</button>
     <div style="margin-top:10px">
       <button class="alt" id="btnRestart" style="margin-left:0">BÖRJA OM</button>
       <button class="alt" id="btnQuit">BYT BANA</button>
@@ -262,8 +262,8 @@
     <p class="note" id="doneSay"></p>
     <ol class="rows" id="grid"></ol>
     <p class="note" id="doneStamps"></p>
-    <button class="go" id="btnAgain">EN GÅNG TILL</button><button class="alt" id="btnSwap">BYT FÖRARE</button><button class="alt" id="btnStage">BYT BANA</button><button class="alt" id="btnMenu">MENY</button>
-    <button class="go" id="btnTable" hidden>TABELLEN</button>
+    <div class="mrow actbar"><button class="go" id="btnAgain">EN GÅNG TILL</button><button class="go" id="btnTable" hidden>TABELLEN</button></div>
+    <div class="mrow"><button class="alt" id="btnSwap">BYT FÖRARE</button><button class="alt" id="btnStage">BYT BANA</button><button class="alt" id="btnMenu">MENY</button></div>
   </div>
 </div>
 

@@ -30,6 +30,11 @@ pipeline {
         sh 'python3 tools/touch_test.py'
       }
     }
+    stage('Menu fit test') {
+      steps {
+        sh 'python3 tools/menu_fit_test.py'
+      }
+    }
   }
   post {
     always { archiveArtifacts artifacts: 'smoke.png', allowEmptyArchive: true }
