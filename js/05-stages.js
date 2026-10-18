@@ -124,7 +124,26 @@ const STAGES=[
         [ 136,  6, 134],[  76,  2, 150],[  20, 10, 126],[  -8, 26,  86],
         [ -44, 34, 104],[ -92, 28, 136],[-140, 14, 110],[-150,  4,  58],
         [-108,  8,  22],[ -62, 20,  -6],[ -88, 34, -46],[-136, 24, -92],
-        [-104,  8,-132],[ -48,  0,-146]] },
+        [-104,  8,-132],[ -48,  0,-146]],
+  routes:[
+    {id:'coaster',name:'BERG-OCH-DALBANAN',a:196,b:292,hw:4.6,side:1,lead:14,leadLat:8,
+     mid:[[0.5,0]],surface:'road',tex:'asphalt',risk:0.35,hills:[[0.25,1.4,5],[0.5,1.4,5],[0.75,1.4,5]],
+     blurb:'Down the coaster\'s service road under the track: three humps, air on every one.'},
+    {id:'spok',name:'SPÖKHUSET',a:606,b:704,hw:4.6,side:1,lead:16,leadLat:6,
+     mid:[[0.5,-4]],surface:'road',tex:'concrete',risk:0.3,hidden:true,shoot:true,mouth:22,
+     blockMesh:(R,j)=>ahusDoors(R,j),blockAnim:(B,d)=>ahusDoorsAnim(B,d),
+     blurb:'Through the ghost house, past the skeletons. The doors are shut.'}],
+  stations:[[0.27,-1],[0.71,-1]],                 /* the default inside pump would sit on the coaster fork */
+  stamps:[
+    {id:'ahu1',dish:'Våffla med sylt',ini:'V',kind:'intro',route:'main',i:160,lat:-7.4,
+     hint:'Ytterkanten före berg-och-dalbanan, med pariserhjulet i sikte.',
+     story:'Every Swedish funfair smells of waffles: thin batter poured into a heart-shaped iron, cooked crisp and folded on a paper plate with a spoon of strawberry jam and a heap of whipped cream. Eaten standing up, in a sea wind, before the jam runs.'},
+    {id:'ahu2',dish:'Brända mandlar',ini:'B',kind:'route',route:'spok',f:0.55,lat:0,
+     hint:'Inne i Spökhuset, mellan skeletten. Dörrarna är stängda: en spettekaka?',
+     story:'Almonds tumbled in a copper pan with sugar, water and cinnamon until the sugar melts and sets in a crackling glaze. Sold warm in a paper cone from the stall by the ghost train, where the smell drifts in through the doors and makes the skeletons look hungry.'},
+    {id:'ahu3',dish:'Sockervadd',ini:'S',kind:'route',route:'coaster',f:0.5,lat:0,
+     hint:'Högst upp på mittenpuckeln under berg-och-dalbanan.',
+     story:'Pink sugar spun so fine it turns into a cloud: a spoon of sugar into the hot drum, a stick swirled round the bowl, and a fluffy pink head bigger than the child holding it. It is gone the moment it touches your tongue, which is why you need a second one.'}] },
 
 { id:'tollarp', name:'TOLLARP', sub:'INDUSTRIHÅLAN',
   order:5, tag:'Sprucken betong mellan skjul och rörbroar. Kortets snabbaste varv.',
@@ -346,6 +365,13 @@ function buildAlts(st){
       const mi=o.MI[j],ml=Math.abs((o.X[j]-sx[mi])*rx[mi]+(o.Z[j]-sz[mi])*rz[mi]);
       const lane=y0+(y1-y0)*smooth(0,1,(j-5)/(M-11));
       o.Y[j]=(j<=5||j>=M-6)?hm(j):lerp(lane,hm(j),1-smooth(HW-1,HW+6,ml));
+    }
+    /* hills:[[f,h,w]] — humps (or dips, h<0) along the lane at fraction f, w samples wide;
+       the ground settles onto the lane, so they stay real terrain */
+    for(const [f,h,w] of (R.hills||[])){
+      const c=f*(M-1),hw=w||8;
+      for(let j=Math.max(COMMIT+6,Math.floor(c-hw));j<=Math.min(M-MERGE-7,Math.ceil(c+hw));j++)
+        o.Y[j]+=h*0.5*(1+Math.cos(Math.PI*clamp((j-c)/hw,-1,1)));
     }
     /* curvature reads on into the main road after the merge, so the AI brakes for it */
     const hd=j=>{if(j<M)return Math.atan2(o.FX[j],o.FZ[j]);
