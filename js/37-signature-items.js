@@ -3,8 +3,9 @@
 /* Every driver has their own signature item, and since Teo asked for more chaos anyone can
    get any of them: a box first rolls SIG_CHANCE for a signature item, then the five families as
    usual. Within that roll the driver's own item is SIG_OWN times as likely as each of the others.
-   One fixed form, no levels; the HUD shows a star. The AI plays them too. */
-const SIG_CHANCE=0.15, SIG_OWN=2;
+   One fixed form, no levels; the HUD shows a star, and the box roulette
+   spins past them with the rest. The AI plays them too. */
+const SIG_CHANCE=0.25, SIG_OWN=2;
 const SIG_ALIAS={granny:'britta'};                 /* AI kinds that are a driver under another id */
 const sigOf=id=>SIGS[id]?id:(SIG_ALIAS[id]||null);
 /** which signature item a box hands k */
