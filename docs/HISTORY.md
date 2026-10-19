@@ -290,3 +290,10 @@ Teo's spec: Carl från Hörby (Teo's friend Calle) was only meant to deliver sev
 - Lines: selected ("Carl. Hörby. Sju lass." under the name on driver select, `say.pick`), home on Hörby, passing Victor (`rival:'victor'`; the pass line now follows a driver's rival, Teo by default), hit by Teo, mud, a big jump (`say.jump`, said 0.42 s into the air), win, lose and the rare idle line.
 - Rivals: whoever drives Carl or Victor brings the other along as an AI in Nisse's slot (`GUESTS`, `GUEST_SLOT`), except in a cup where Nisse is the rival.
 - `tools/svin_test.py` (also in Jenkins) checks the select panel, the vehicle order, the guest, every trap type, the seven-trap limit, the fork stop and the AI.
+
+## Beans: green gas (2026-10-19)
+Teo: the beans should let out a cloud of green gas from the kart, and you spin round like after a spettekaka hit. Read as: whoever drives into the gas spins; the one who ate the beans drives through their own.
+- Replaces the old shove (and ärtsoppa's grip loss, bruna bönor's slow). The gas is low-poly green billows (`gasClouds`, tuned in `GAS` in js/37-power-ups.js) that pour out of the back and hang over the road, then thin out. Skånska bönor: a single trail for 0.6 s, gas lasts 3.5 s after. Skånsk ärtsoppa: two trails side by side for 0.9 s, 4.5 s. Bruna bönor med fläsk: the 0.4 s pause, then a ring of gas all round the kart plus two trails for 1.1 s, 5.5 s.
+- Driving into it is the spettekaka hit: `spun` 1.5 s × spin resistance, boost, drift and charge gone. Once per cloud per kart; a shield, Anders' bucket or Björn's bike take it as usual. Once it is half thinned out it no longer spins anyone.
+- Each billow fades near the camera, so your own gas never covers the screen. The AI steers round gas up the road (like pies), uses Skånska bönor on anyone within 20 m behind, the other two on anyone behind or close.
+- `tools/beans_test.py` (also in Jenkins) checks all three levels in a race, the spin length, once per cloud, own gas, shield, the thinning, the restart clean-up and the AI.
