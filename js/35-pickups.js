@@ -374,12 +374,12 @@ function checkPickups(){
         for(let p=0;p<14;p++)puff(it.x+rand(-1,1),it.y+rand(.3,1.3),it.z+rand(-1,1),.95,.82,.4,.6);
         it.cool=5;
       }else if(it.type==='coffee'){                      /* kaffe på vägen: a short spin */
-        k.spun=Math.max(k.spun,0.9*k.spinResist);k.boost=0;k.drift=0;k.charge=0;
+        k.spun=Math.max(k.spun,0.9*k.spinResist*(k.chores?.6:1));k.boost=0;k.drift=0;k.charge=0;
         for(let p=0;p<14;p++)puff(it.x+rand(-1.1,1.1),it.y+rand(.1,.9),it.z+rand(-1.1,1.1),.42,.26,.14,.6);
         if(k===player){toast('KAFFE PÅ VÄGEN!');ping(420,110,.2);shake=Math.min(1,shake+.35);}
         it.cool=5;
       }else{
-        k.boost=0;k.slow=1.45;k.drift=0;k.charge=0;
+        k.boost=0;k.slow=k.chores?.95:1.45;k.drift=0;k.charge=0;
         for(let p=0;p<16;p++)puff(it.x+rand(-1.1,1.1),it.y+rand(.2,1.2),it.z+rand(-1.1,1.1),.88,.44,.48,.75);
         if(k===player){toast('PAJ I ANSIKTET!');ping(300,90,.22);shake=Math.min(1,shake+.45);}
         it.cool=5;
@@ -408,7 +408,7 @@ function checkMine(it){
     if(blockHit(k))continue;
     const s=Math.sign(dx*rx[i]+dz*rz[i])||1;
     k.vx+=rx[i]*s*13;k.vz+=rz[i]*s*13;
-    k.slow=Math.max(k.slow,0.9);k.boost=0;k.drift=0;k.charge=0;
+    k.slow=Math.max(k.slow,k.chores?.6:0.9);k.boost=0;k.drift=0;k.charge=0;
     if(k===player){toast('TÅRTMINA! GRÄDDE ÖVERALLT');ping(200,60,.3);shake=Math.min(1,shake+.6);}
     else if(it.owner===player)toast('BOOM! TÅRTA!');
   }

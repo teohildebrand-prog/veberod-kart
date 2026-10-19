@@ -70,7 +70,11 @@ const CARS=[
   {id:'original',name:'VEBERÖD ORIGINAL', sub:'NUMMER 13', sig:'victor',
    blurb:'Proper racing equipment until Victor added a few improvements. Carefully tuned, well used and far too serious for a race with a cow in it.',
    role:'TEKNISK PÅ ASFALT · SVAG I LERA',
-   mul:{maxSpeed:1.01,power:1.04,gripOn:1.04,offRoad:0.86,boostMul:1,burn:0.98,spinResist:1.08}}
+   mul:{maxSpeed:1.01,power:1.04,gripOn:1.04,offRoad:0.86,boostMul:1,burn:0.98,spinResist:1.08}},
+  {id:'svinexpress',name:'HÖRBY SVINEXPRESS', sub:'HEMBYGGD DJURTRANSPORT', sig:'carl',
+   blurb:'A short homemade livestock transporter: faded green, a pig-snout grille, oversized muddy tyres and a wooden crate behind the seat. Victor says it is unbalanced. Carl says the load is alive.',
+   role:'STARK IGÅNG · GRUS OCH LERA · LÅG TOPPFART · TÖRSTIG',
+   mul:{maxSpeed:0.95,power:1.09,gripOn:1.01,offRoad:1.18,boostMul:1,burn:1.15,spinResist:0.95}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 const OFFROAD_CAP=.95;
@@ -491,6 +495,134 @@ function buildVictor(cab,skin,dark,anim){
     }else pose(SIT);
   });
 }
+/** Grisabonden Carl: round dark glasses, light stubble, a relaxed smile and the enormous pink pig
+    hat, over a light open-collar shirt, a brown work vest, dark trousers and muddy boots.
+    The hat's ears flap when he brakes and stream back in a boost. Arms and legs hang on joints
+    like Victor's: on the select turntable he counts the load (seven), climbs in and tips the hat. */
+function buildCarl(cab,skin,dark,anim){
+  const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+  const put=(p,g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);p.add(e);return e;};
+  const addc=(g,m,x,y,z)=>put(cab,g,m,x,y,z);
+  const shirt=psMat({color:0xf1eee4}),vest=psMat({color:0x6b4a2e}),vestD=psMat({color:0x553a22}),
+        pants=psMat({color:0x2a2c33}),boot=psMat({color:0x3a2a1e}),mud=psMat({color:0x6b5032}),
+        hair=psMat({color:0x5a3e2a}),stub=psMat({color:0xb08a66}),
+        pig=psMat({color:0xf0b4a6}),snout=psMat({color:0xf7c6b8}),pinkD=psMat({color:0xd98a80}),
+        hoof=psMat({color:0x1d1c20}),frame=psMat({color:0x18191c}),
+        lens=psMat({color:0x2a3440,transparent:true,opacity:.55,depthWrite:false});
+  const trim=psMat({map:pixTex(4,16,g=>{g.fillStyle='#f1eee4';g.fillRect(0,0,4,16);   /* the patterned placket */
+    g.fillStyle='#3a4a5a';for(let y=1;y<16;y+=3){g.fillRect(1,y,2,1);g.fillRect(0,y+1,1,1);g.fillRect(3,y+1,1,1);}})});
+  /* torso: shirt, then the vest open down the front */
+  addc(B(.94,.62,.56),shirt,0,1.34,-.6);
+  addc(B(.92,.26,.54),pants,0,.92,-.6);
+  addc(B(.94,.06,.56),boot,0,1.04,-.6);                                     /* belt */
+  addc(B(.08,.34,.04),trim,0,1.38,-.31);
+  addc(B(.16,.14,.04),skin,0,1.58,-.31);                                    /* the open collar */
+  for(const sg of [-1,1]){
+    addc(B(.24,.08,.16),shirt,sg*.15,1.62,-.42).rotation.z=-sg*.35;
+    addc(B(.3,.62,.06),vest,sg*.33,1.33,-.31);                              /* vest fronts, a gap between */
+    addc(B(.18,.12,.03),vestD,sg*.33,1.2,-.275);                            /* pockets */
+    addc(B(.06,.62,.56),vest,sg*.48,1.33,-.6);
+  }
+  addc(B(.96,.62,.06),vest,0,1.33,-.89);
+  const limb=[];
+  for(const sg of [-1,1]){
+    const sh=new THREE.Group();sh.position.set(sg*.42,1.55,-.6);cab.add(sh);
+    put(sh,B(.26,.42,.26),shirt,0,-.21,0);
+    const el=new THREE.Group();el.position.y=-.52;sh.add(el);
+    put(el,B(.27,.09,.27),shirt,0,.02,0);                                   /* sleeves rolled to the elbow */
+    put(el,B(.2,.38,.2),skin,0,-.2,0);
+    put(el,B(.21,.14,.23),skin,0,-.45,0);
+    const hip=new THREE.Group();hip.position.set(sg*.22,.86,-.6);cab.add(hip);
+    put(hip,B(.32,.6,.36),pants,0,-.3,0);
+    put(hip,B(.34,.26,.5),boot,0,-.72,.06);                                 /* work boots */
+    put(hip,B(.35,.09,.52),mud,0,-.82,.06);                                 /* in the muck to the laces */
+    put(hip,B(.33,.12,.05),mud,sg*.02,-.55,-.17);
+    limb.push({sg,sh,el,hip});
+  }
+  /* the face: relaxed smile, light stubble, short brown hair under the hat */
+  const y=1.86;
+  blockFace(addc,skin,dark,y,{w:.52,grin:true,mouth:0x8c4038});
+  addc(B(.3,.07,.05),stub,0,y-.235,-.352);                                  /* chin */
+  for(const sg of [-1,1]){
+    addc(B(.1,.14,.05),stub,sg*.2,y-.14,-.352);
+    addc(B(.04,.2,.3),stub,sg*.27,y-.12,-.52);
+    addc(B(.05,.2,.34),hair,sg*.28,y+.1,-.68);                              /* short sides */
+  }
+  addc(B(.2,.035,.05),stub,0,y-.1,-.352);
+  addc(B(.54,.22,.06),hair,0,y+.08,-.86);
+  /* round dark glasses, chunky so they read at 320x240 */
+  for(const sx of [-.13,.13]){
+    addc(B(.2,.05,.04),frame,sx,y+.13,-.34);addc(B(.2,.05,.04),frame,sx,y-.04,-.34);
+    addc(B(.05,.2,.04),frame,sx-.09,y+.045,-.34);addc(B(.05,.2,.04),frame,sx+.09,y+.045,-.34);
+    addc(B(.14,.13,.02),lens,sx,y+.045,-.335);
+  }
+  addc(B(.08,.04,.04),frame,0,y+.07,-.34);
+  for(const sg of [-1,1])addc(B(.03,.04,.3),frame,sg*.27,y+.1,-.5);
+  /* the pig hat: a whole pig lying on his head, snout over the brow, legs dangling by the ears */
+  const hat=new THREE.Group();hat.position.set(0,y+.31,-.6);hat.scale.setScalar(1.15);cab.add(hat);
+  put(hat,B(.66,.3,.62),pig,0,.08,0);
+  put(hat,B(.56,.14,.5),pig,0,.28,-.02);
+  put(hat,B(.44,.36,.34),pig,0,.36,.2);                                     /* the pig's head */
+  const sn=put(hat,new THREE.CylinderGeometry(.13,.14,.16,8),snout,0,.31,.44);sn.rotation.x=Math.PI/2;
+  for(const sg of [-1,1]){
+    put(hat,B(.05,.08,.03),hoof,sg*.05,.31,.525);                           /* nostrils */
+    put(hat,B(.07,.07,.03),hoof,sg*.12,.45,.375);                           /* button eyes */
+  }
+  const tail=put(hat,new THREE.TorusGeometry(.06,.025,4,6),pinkD,0,.22,-.34);tail.rotation.y=Math.PI/2;
+  const ears=[],legs=[];
+  for(const sg of [-1,1]){
+    const e=new THREE.Group();e.position.set(sg*.17,.52,.24);hat.add(e);
+    put(e,B(.17,.22,.05),pig,0,.1,0);put(e,B(.1,.14,.02),pinkD,0,.09,.03);
+    ears.push({e,sg});
+    const l=new THREE.Group();l.position.set(sg*.38,.06,.06);hat.add(l);
+    put(l,B(.14,.38,.16),pig,0,-.2,0);put(l,B(.15,.12,.17),hoof,0,-.44,0);
+    legs.push(l);
+  }
+  const earRest=(t)=>{for(const {e,sg} of ears)e.rotation.set(t.x,0,sg*t.z);};
+  earRest({x:-.25,z:-.35});
+  /* poses, as Victor's: shoulder (x tilt, z spread), elbow bend, hip bend */
+  const seatP=cab.position.clone(),side=-1.75;
+  const SIT={sx:-1.25,sz:.05,ex:-.12,ez:0,hx:-1.45},STAND={sx:0,sz:.12,ex:-.15,ez:0,hx:0};
+  function pose(P,dy){
+    for(const L of limb){L.sh.rotation.set(P.sx,0,L.sg*P.sz);L.el.rotation.set(P.ex+(dy||0),0,L.sg*P.ez);L.hip.rotation.x=P.hx;}
+  }
+  const mix=(a,b,t)=>{const o={};for(const k in a)o[k]=lerp(a[k],b[k],t);return o;};
+  pose(SIT);
+  const st={t:0,last:-9,v:null,flap:0};
+  anim.push((k,dt)=>{
+    /* the hat: ears flap under braking, stream back in a boost, bob along otherwise */
+    const sp=k.speed,dec=st.v==null||!(dt>0)?0:(st.v-sp)/dt;st.v=sp;
+    const brake=(k===player&&!previewOn?input.brake>0&&sp>4:false)||dec>12;
+    st.flap=brake?.35:Math.max(0,st.flap-(dt||0));
+    const run=clamp(sp/40,0,1);
+    for(const {e,sg} of ears){
+      let x,z;
+      if(k.boost>0){x=-1.35+Math.sin(clock*40+sg)*.08;z=-.15;}
+      else if(st.flap>0){x=-.25+Math.sin(clock*30+sg*1.3)*.6;z=-.35+Math.sin(clock*24)*.25;}
+      else{x=-.25-run*.35+Math.sin(clock*7+sg)*.06*run;z=-.35;}
+      e.rotation.x=lerp(e.rotation.x,x,.35);e.rotation.z=lerp(e.rotation.z,sg*z,.35);
+    }
+    for(const l of legs)l.rotation.x=lerp(l.rotation.x,(st.flap>0?.5:0)-run*.35+Math.sin(clock*9)*.05*run,.2);
+    if(!(previewOn&&k===player)){if(st.t){st.t=0;cab.position.copy(seatP);pose(SIT);}return;}
+    if(clock-st.last>.25)st.t=0;                       /* shown again: start over beside the kart */
+    st.last=clock;st.t+=dt;const t=st.t;
+    if(t<2.4){                                          /* counts the load: one, two ... seven */
+      cab.position.set(side,0,-.9);pose(STAND);
+      const n=Math.min(6,Math.floor(t/.32)),u=(t-n*.32)/.32;
+      const R=limb[1];R.sh.rotation.set(.35,0,1.25);R.el.rotation.set(0,0,.25-Math.sin(Math.min(1,u*2)*Math.PI)*.35);
+      if(u<.15)for(const {e} of ears)e.rotation.x=-.7;  /* every pig counted gets a twitch */
+    }else if(t<3.3){                                    /* climbs in */
+      const u=(t-2.4)/.9,e=u*u*(3-2*u);
+      cab.position.set(lerp(side,seatP.x,e),lerp(0,seatP.y,e)+Math.sin(u*Math.PI)*.9,lerp(-.9,seatP.z,e));
+      pose(mix(STAND,SIT,Math.min(1,u*1.4)));
+    }else if(t<4.5){                                    /* tips the hat */
+      cab.position.copy(seatP);pose(SIT);
+      const u=(t-3.3)/1.2,a=Math.sin(u*Math.PI);
+      limb[1].sh.rotation.set(lerp(-1.25,-2.9,a),0,lerp(.05,.35,a));limb[1].el.rotation.set(lerp(-.12,-1.1,a),0,0);
+      hat.rotation.x=-a*.18;
+    }else{pose(SIT);hat.rotation.x=0;}
+  });
+}
 /** the four cup champions: the ghost, the chieftain, the green man and Raket-Rune */
 function buildChampion(kind,addc,add,skin,dark,car){
   const B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
@@ -623,7 +755,7 @@ function buildKart(color,kind,car,opt){
     addc(new THREE.CylinderGeometry(.06,.07,1.9,6),psMat({color:0x9a7b4f}),-.66,1.80,-1.50).rotation.x=.22;
     for(const t of [-.16,0,.16])
       addc(new THREE.BoxGeometry(.05,.40,.05),psMat({color:0xb9c2cc}),-.66+t,2.72,-1.72);
-    if(car!=='aker')addc(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),0,1.3,-2.2).rotation.z=Math.PI/2;
+    if(car!=='aker'&&car!=='svinexpress')addc(new THREE.CylinderGeometry(.6,.6,1.25,8),psMat({color:0xd8c47a}),0,1.3,-2.2).rotation.z=Math.PI/2;
   }else if(kind==='billy'){     /* uniform, rutig mössa, varselväst, blåljus (on the bar unless the car has its own) */
     const navy=psMat({color:0x17325e}), navyD=psMat({color:0x101f3c}),
           hiviz=psMat({color:0xe8d93a}), silver=psMat({color:0xc6ced6}),
@@ -689,12 +821,14 @@ function buildKart(color,kind,car,opt){
     addc(new THREE.BoxGeometry(.3,.12,.18),hide, .42,1.94,-.62);
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}),-.26,2.3,-.62).rotation.z=.7;
     addc(new THREE.CylinderGeometry(.05,.09,.34,5),psMat({color:0xd8cfae}), .26,2.3,-.62).rotation.z=-.7;
-    if(car!=='mjolk'){                                 /* the Mjölkexpress carries its own tank */
+    if(car!=='mjolk'&&car!=='svinexpress'){           /* the Mjölkexpress carries its own tank; the pig crate has no room */
       addc(new THREE.CylinderGeometry(.54,.54,1.3,8),psMat({color:0xb9c2cc}),0,1.3,-2.15);
       addc(new THREE.CylinderGeometry(.58,.58,.14,8),psMat({color:0x7e868f}),0,1.98,-2.15);
     }
   }else if(kind==='victor'){
     buildVictor(cab,skin,dark,anim);
+  }else if(kind==='carl'){
+    buildCarl(cab,skin,dark,anim);
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
@@ -819,9 +953,19 @@ const CHARS=[
    color:0xd82a2a,maxSpeed:44.0,power:30,offRoad:0.50,boostMul:1.56,gripOn:8.6,burn:1.15,
    quirk:['RAKETBRÄNSLE','Hårdaste turbon i fältet, men tanken tar slut fortare.'],
    say:{start:'Ingen slår Raket-Rune!',home:'Min runda. Mina regler.',hit:'MIN RAKET!'},
-   blurb:'Skånes snabbaste man, enligt honom själv. Ingen accelererar som Rune, och ingen bränner så mycket bensin på vägen.'}
+   blurb:'Skånes snabbaste man, enligt honom själv. Ingen accelererar som Rune, och ingen bränner så mycket bensin på vägen.'},
+  /* Victor's rival from Hörby. rival = the kind whose overtake gets the pass line (Teo by default);
+     chores = traps hold him for a shorter time (pickups) */
+  {id:'carl',short:'CARL',name:'GRISABONDEN CARL',role:'HÖRBY',sig:'svinexpress',home:'horby',rival:'victor',
+   color:0x7c9468,maxSpeed:40.8,power:28,offRoad:0.72,boostMul:1.36,gripOn:10.4,chores:true,
+   quirk:['RUTINJOBB','Paj, kaffe och grädde är vardag: fällorna håller honom kortare tid.'],
+   say:{pick:'Carl. Hörby. Sju lass.',home:'Här hittar till och med grisarna.',
+        pass:'Du får fila lite till på originalet.',hitTeo:'Det där var väl också en bugg?',
+        mud:'Äntligen lite ordentligt underlag.',jump:'HÅLL I LASTEN!',
+        win:'Levererat.',lose:'Jag hade faktiskt last.',idle:'Det var sju när vi åkte.'},
+   blurb:'Carl från Hörby skulle bara leverera sju lass svin. Nu har han hamnat i Skånecupen, tappat fraktsedeln och kört om sin bror. Victor säger att bilen är obalanserad. Carl säger att lasten lever.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','amanda','britta','spoket','viking','gubbe','rune'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','spoket','viking','gubbe','rune'].map(id=>CHARS.findIndex(c=>c.id===id));
 const GRID_COLS=Math.max(Math.ceil(Math.sqrt(GRID.length)),Math.ceil(GRID.length/3));   /* 3x3 for nine, then wider: never past three rows */
 const kindOf=c=>c.kind||c.id;
 /** a champion is playable once their cup is won; everyone else always is */
@@ -869,6 +1013,16 @@ const CHAMPS={
    maxSpeed:44.2,power:31,offRoad:.70,boostMul:1.55,gripOn:11.0,
    lineSpread:0.8,caution:2.4,lookAdd:5,driftLove:1.2,lean:{risk:1.3},
    say:'Ingen slår Raket-Rune på hans egen runda!'}};
+/* Carl and Victor each insist the other has an unfair advantage, so whichever one you drive
+   brings the other along: the guest takes Nisse's slot (unless Nisse is this cup's rival) */
+const GUEST_SLOT=4;
+const GUESTS={
+  carl:{name:'VICTOR',color:0xf4f2ec,ai:true,kind:'victor',car:'original',
+   maxSpeed:43.0,power:27,offRoad:.56,boostMul:1.40,gripOn:9.6,
+   lineSpread:1.2,caution:2.5,lookAdd:4,driftLove:1.35,lean:{risk:1.2}},
+  victor:{name:'CARL',color:0x7c9468,ai:true,kind:'carl',car:'svinexpress',
+   maxSpeed:41.6,power:28.5,offRoad:.74,boostMul:1.36,gripOn:10.4,
+   lineSpread:2.4,caution:2.7,lookAdd:2,driftLove:0.9,lean:{rough:-0.4}}};
 const karts=ROSTER.map((r,i)=>{
   const v=buildKart(r.color,r.kind||'generic',r.car);scene.add(v.root);
   const bg=new THREE.PlaneGeometry(3.6,4.4);bg.rotateX(-Math.PI/2);

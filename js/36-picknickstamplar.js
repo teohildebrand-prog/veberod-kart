@@ -115,15 +115,16 @@ function bark(w,cd){
   const ln=sayLine(w);if(!ln||clock-(w in barkAt?barkAt[w]:-1e9)<(cd||0))return false;
   barkAt[w]=clock;toast(ln);return true;
 }
-/** what the player shouts when hit: Victor has a special line for Teo */
+/** what the player shouts when hit: Victor and Carl have a special line for Teo */
 function hitLine(src,fallback){
   return (src&&src.cfg&&src.cfg.kind==='teo'&&sayLine('hitTeo'))||sayLine('hit')||fallback;
 }
-/** lines that come from the race itself: passing Teo, standing still too long */
+/** lines that come from the race itself: passing the rival (Teo, or Victor for Carl),
+    standing still too long */
 function raceLines(dt){
   const c=CHARS[charSel];if(!c.say||state!=='race'||raceTime<3)return;
   if(c.say.pass){
-    const t=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind==='teo');
+    const t=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind===(c.rival||'teo'));
     if(t){const ahead=player.progress>t.progress;
       if(ahead&&player.teoGap<0)bark('pass',20);
       player.teoGap=ahead?1:-1;}

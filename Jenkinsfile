@@ -25,6 +25,11 @@ pipeline {
         sh 'python3 tools/signature_test.py'
       }
     }
+    stage('Carl test') {
+      steps {
+        sh 'python3 tools/svin_test.py'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'

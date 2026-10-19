@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Headless check of all ten signature items, and that any driver can get any of them.
+"""Headless check of all eleven signature items (Carl's SJU LASS SVIN has its own svin_test.py), and that any driver can get any of them.
 
     CHROMIUM=/path/to/chrome python3 tools/signature_test.py
 
@@ -15,7 +15,7 @@ from playwright.sync_api import sync_playwright
 from smoke_test import serve
 
 ROOT = Path(__file__).resolve().parent.parent
-IDS = ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor']
+IDS = ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl']
 
 # helpers put into the page: move a kart onto the main road, and line the player up behind an AI
 HELPERS = """()=>{
@@ -69,16 +69,16 @@ def main():
                 wait(250)
             return bool(ev(js))
 
-        # the box: 25 % signature items, any of the ten, the driver's own twice as often
+        # the box: 25 % signature items, any of the eleven, the driver's own twice as often
         odds = ev("""()=>{const k=player,was=k.sig,n=60000,c={};let s=0;k.sig='arne';
             for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s++;c[r[2]]=(c[r[2]]||0)+1;}}
             k.sig=null;let s2=0;const c2={};for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s2++;c2[r[2]]=1;}}
             k.sig=was;return {share:s/n,own:c.arne/s,other:c.billy/s,kinds:Object.keys(c).length,share2:s2/n,kinds2:Object.keys(c2).length};}""")
         check(0.235 < odds['share'] < 0.265, f"signature share {odds['share']:.3f}")
-        check(0.16 < odds['own'] < 0.20 and 0.075 < odds['other'] < 0.107,
+        check(0.145 < odds['own'] < 0.19 and 0.068 < odds['other'] < 0.10,
               f"own item {odds['own']:.3f}, another driver's {odds['other']:.3f}")
-        check(odds['kinds'] == 10 and odds['kinds2'] == 10 and 0.235 < odds['share2'] < 0.265,
-              f"all ten turn up, also for a driver without one ({odds['kinds2']}, {odds['share2']:.3f})")
+        check(odds['kinds'] == 11 and odds['kinds2'] == 11 and 0.235 < odds['share2'] < 0.265,
+              f"all eleven turn up, also for a driver without one ({odds['kinds2']}, {odds['share2']:.3f})")
         # the roulette shows signature items among the normal ones and still lands on the real item
         reel = ev("""()=>{const out=[];for(const h of ['boost','sig']){giveItem(player,h,1,'arne');
             const f=[];for(let i=0;i<=1400;i++){player.roll=ROLLT*Math.sqrt(1-i/1400*13.99/14);const s=slotFrame(player);
@@ -90,15 +90,15 @@ def main():
         check(all(r['frames'] == 14 and r['sigs'] >= 4 and r['ids'] >= 4 and r['fams'] == 6 and r['ok'] for r in reel)
               and reel[0]['end'] == 'boost1' and reel[1]['end'] == 'sigarne', f'box roulette spins past signature items {reel}')
         own = ev("()=>CHARS.filter(c=>!c.boss).map(c=>sigOf(c.id))")
-        check(own == ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor'],
+        check(own == ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl'],
               f'every starting driver has their own item: {own}')
         check(ev("()=>sigOf('granny')==='britta'&&karts.filter(k=>k.ai).every(k=>k.cfg.kind==='generic'||k.sig)"),
               'AI drivers (Britta too) know their own item')
         names = ev(f"()=>{IDS}.map(id=>{{giveItem(player,'sig',1,id);const n=itemName('sig',1);player.held=null;return n;}})")
-        check(len(set(names)) == 10, f'ten HUD names {names}')
+        check(len(set(names)) == 11, f'eleven HUD names {names}')
         check(ev("()=>{DBG.open=true;renderDbg();const n=document.querySelectorAll('#dbg [data-a^=\"give:sig:\"]').length;"
-                 "DBG.open=false;return n||document.getElementById('dbg').innerHTML.split('give:sig:').length-1;}") >= 10,
-              'debug menu hands out all ten')
+                 "DBG.open=false;return n||document.getElementById('dbg').innerHTML.split('give:sig:').length-1;}") >= 11,
+              'debug menu hands out all eleven')
 
         page.keyboard.down('w')
         wait(4500)
@@ -257,7 +257,7 @@ def main():
         page.keyboard.up('w')
         wait(500)
         # a new race clears everything away
-        left = ev("""()=>{clearPowerups();return herds.length+muck.length+yarns.length+rings.length+
+        left = ev("""()=>{clearPowerups();return herds.length+svinHerds.length+muck.length+yarns.length+rings.length+
             karts.filter(k=>k.frozen||k.blind||k.pulled||k.mates||k.spread).length;}""")
         check(left == 0, f'clean-up leaves nothing behind ({left})')
         browser.close()

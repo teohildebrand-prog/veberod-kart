@@ -48,12 +48,14 @@ function cupChamp(){const C=CUP&&cupDef(CUP);return C&&C.champ?CHAMPS[C.champ]:n
 const champRigs={};
 /** the champion takes the rival's slot (kart, name, numbers); everyone else races as themselves */
 function applyChampion(){
-  const ch=cupChamp();
+  const ch=cupChamp(),guest=GUESTS[CHARS[charSel].id];
   karts.forEach((k,i)=>{
     if(!k.ai)return;
-    const cfg=ch&&CUP.rival===i?ch:ROSTER[i];
+    const rival=!!CUP&&CUP.rival===i;
+    const cfg=ch&&rival?ch:guest&&i===GUEST_SLOT&&!rival?guest:ROSTER[i];
     if(!k.v0)k.v0=k.v;
-    const v=cfg===ROSTER[i]?k.v0:(champRigs[cupDef(CUP).champ]||(champRigs[cupDef(CUP).champ]=
+    const key=cfg===ch?cupDef(CUP).champ:'guest:'+cfg.kind;
+    const v=cfg===ROSTER[i]?k.v0:(champRigs[key]||(champRigs[key]=
       (()=>{const r=buildKart(cfg.color,cfg.kind,cfg.car);scene.add(r.root);return r;})()));
     if(k.v!==v){k.v.root.visible=false;k.v=v;}
     k.cfg=cfg;k.name=cfg.name;k.color=cfg.color;
@@ -182,7 +184,11 @@ const bossLockText=ci=>'Låst: vinn '+cupDef({cup:CHARS[ci].boss}).name+' för a
 function applyCharacter(i,force){
   if(!force&&!charOpen(i)){peekCharacter(i);ping(220,160,.06);return;}   /* a look, and the lock text */
   if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;cmpCar=null;}   /* a new driver starts in their own vehicle */
+  const fresh=i!==charSel;
   charSel=i;previewChar=null;showRig();
+  const say=document.getElementById('vsSay');                /* a driver with a line says it when picked */
+  if(fresh&&say&&say.textContent){say.classList.remove('pop');void say.offsetWidth;say.classList.add('pop');
+    if(CHARS[i].sig==='svinexpress')grunt(.12,.06);}
 }
 function peekCharacter(i){                /* hover/focus: look, don't commit */
   if(!previewOn||previewChar===i)return;
@@ -235,7 +241,7 @@ function renderCombo(){
   host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-  set('vsName',c.name);set('vsHome',c.role);set('ptag',peek?'FÖRHANDSVISNING':'');
+  set('vsName',c.name);set('vsHome',c.role);set('vsSay',charOpen(ci)&&c.say&&c.say.pick?'”'+c.say.pick+'”':'');set('ptag',peek?'FÖRHANDSVISNING':'');
   set('vsCar',R.name);set('vsRole',R.role);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
   set('btnGoT',vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);
@@ -294,6 +300,7 @@ function placeOnGrid(){
     k.bucket=!!P&&P.id==='anders';k.bucketLap=-1;
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
     k.sig=sigOf(P?P.id:R.kind);k.heldSig=null;k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item (twins too), twice as likely from a box */
+    k.chores=!!(P||CHARS.find(c=>c.id===R.kind)||{}).chores;k.svinHerd=null;
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);

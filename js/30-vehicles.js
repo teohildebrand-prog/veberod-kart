@@ -257,6 +257,99 @@ const VEHICLES={
     return {fx:1.05,fz:1.35,rx:1.12,rz:-1.4,r:.34,rr:.42,fw:.38,rw:.56,cy:-.25,cz:-.1,trim:0xf2d21a};
   },
 
+  /* Grisabonden Carl: Hörby Svinexpress, a short homemade livestock transporter. A pig-snout
+     grille, oversized muddy tyres and a wooden crate behind the seat with SJU LASS — EN RESA
+     hung crooked on the back. In a boost the tailgate rattles and three snouts peek out. */
+  svinexpress(add,paint,dark,steel,A){
+    const pink=psMat({color:0xe9a3a0}),pinkL=psMat({color:0xf3bdb6}),nose=psMat({color:0x2a1c1c}),
+          mud=psMat({color:0x6b5032}),mudD=psMat({color:0x4e3a24}),post=psMat({color:0x5a3e22}),
+          straw=psMat({color:0xd8c47a}),rust=psMat({color:0x7a4a2e});
+    const plank=psMat({map:pixTex(16,16,g=>{g.fillStyle='#9a7246';g.fillRect(0,0,16,16);
+      g.fillStyle='#7c5a36';for(let y=0;y<16;y+=4)g.fillRect(0,y,16,1);
+      g.fillStyle='#3a2a1a';for(let y=3;y<16;y+=8)g.fillRect(0,y,16,1);
+      g.fillStyle='#b08454';g.fillRect(3,1,4,1);g.fillRect(9,6,5,1);g.fillRect(2,10,3,1);g.fillRect(10,13,4,1);})});
+    /* seven chalk tallies on the crate: one gate of five, then two */
+    const tally=psMat({map:pixTex(32,16,g=>{g.fillStyle='#9a7246';g.fillRect(0,0,32,16);
+      g.fillStyle='#7c5a36';for(let y=0;y<16;y+=4)g.fillRect(0,y,32,1);
+      g.fillStyle='#f2efe6';for(const x of [3,7,11,15,24,28])g.fillRect(x,3,2,10);
+      for(let i=0;i<16;i++)g.fillRect(1+i,11-Math.round(i*.5),2,1);})});
+    /* the chassis and the stubby cab */
+    add(VB(1.7,.22,4.6),dark,0,.5,-.2);
+    add(VB(1.8,.55,1.25),paint,0,.95,1.38);
+    add(VB(1.7,.2,.9),paint,0,1.3,1.22).rotation.x=-.12;
+    for(const g of [-1,1]){
+      add(VB(.14,.45,1.3),paint,g*.88,.95,.1);                               /* cockpit sides */
+      add(VB(.02,.12,.98),psMat({map:plateTex(96,12,'HÖRBY SVINEXPRESS','#eef0e0',hexCss(A.color),5)}),g*.955,1.0,.1);
+      add(VB(.5,.1,1.1),paint,g*1.12,1.2,1.3);                               /* fenders over the big tyres */
+      add(VB(.52,.1,1.15),paint,g*1.14,1.26,-1.5);
+      add(VB(.53,.11,.3),mud,g*1.14,1.2,-1.95);
+      add(VB(.03,.18,.5),mud,g*.955,.78,.4);                                 /* a field's worth on the sills */
+      add(VB(.03,.12,.3),mudD,g*.955,.74,-.2);
+    }
+    /* the pig-snout grille: two lamps for eyes, ears on the bonnet */
+    add(VC(.42,.42,.26,10),pink,0,.95,2.05).rotation.x=Math.PI/2;
+    add(VC(.32,.32,.06,10),pinkL,0,.95,2.19).rotation.x=Math.PI/2;
+    for(const g of [-1,1]){
+      add(VB(.12,.18,.04),nose,g*.12,.95,2.22);
+      add(VC(.13,.13,.1,8),psMat({color:0xfff2b0,unlit:true}),g*.62,1.18,2.0).rotation.x=Math.PI/2;
+      const ear=add(VB(.3,.26,.06),pink,g*.66,1.48,1.72);ear.rotation.set(-.3,0,g*.5);
+    }
+    add(VB(1.9,.18,.22),steel,0,.6,2.12);
+    add(VB(.5,.08,.04),mud,.5,.58,2.24);
+    /* the seat */
+    add(VB(.9,.14,.7),dark,0,.88,-.35);
+    add(VB(.9,.7,.14),dark,0,1.2,-.82);
+    /* the crate: plank walls, straw, corner posts, two cross rails */
+    add(VB(1.86,.12,1.6),dark,0,.82,-1.7);
+    add(VB(1.7,.1,1.5),straw,0,.93,-1.7);
+    for(const g of [-1,1]){
+      add(VB(.1,1.0,1.6),plank,g*.88,1.38,-1.7);
+      add(VB(.02,.42,.84),tally,g*.94,1.5,-1.7);
+      for(const z of [-.92,-2.48])add(VB(.13,1.15,.13),post,g*.9,1.43,z);
+    }
+    add(VB(1.86,1.0,.1),plank,0,1.38,-.92);
+    for(const z of [-1.2,-2.2])add(VB(1.9,.08,.1),post,0,1.9,z);
+    add(VC(.06,.07,.7,5),rust,.7,.9,-2.6).rotation.x=Math.PI/2-.3;            /* exhaust */
+    /* the tailgate, hinged at the bottom */
+    const gate=A.grp(0,.88,-2.5);
+    A.put(gate,VB(1.86,.95,.1),plank,0,.48,0);
+    A.put(gate,VB(1.9,.07,.12),post,0,.95,0);
+    A.put(gate,VB(.5,.12,.03),mud,-.4,.12,-.06);
+    /* SJU LASS — EN RESA, nailed on crooked, so it rattles with the gate */
+    const sign=A.grp(.05,.6,-.08,gate);
+    A.put(sign,VB(1.5,.3,.04),psMat({map:plateTex(112,16,'SJU LASS — EN RESA','#2a2a22','#f2ecd8',6)}),0,0,0);
+    for(const x of [-.66,.66])A.put(sign,VB(.05,.05,.03),dark,x,0,-.03);
+    sign.rotation.z=.13;
+    /* three curious pigs behind the tailgate, facing out */
+    const snouts=[];
+    for(const x of [-.55,0,.55]){
+      const s=A.grp(x,1.5,-2.22);
+      A.put(s,VB(.36,.3,.3),pink,0,0,0);
+      const n=A.put(s,VC(.1,.1,.1,8),pinkL,0,-.03,-.19);n.rotation.x=Math.PI/2;
+      for(const g of [-1,1]){A.put(s,VB(.03,.05,.02),nose,g*.035,-.03,-.245);A.put(s,VB(.1,.12,.04),pink,g*.13,.18,0).rotation.z=g*.4;
+        A.put(s,VB(.04,.04,.02),nose,g*.08,.06,-.155);}
+      snouts.push(s);
+    }
+    const st={};
+    A.anim.push((k,dt)=>{
+      const b=k.boost>0,t=since(st,'calm',!b);
+      gate.rotation.x=b?-Math.abs(Math.sin(clock*38))*.13:lerp(gate.rotation.x,0,.3);
+      snouts.forEach((s,i)=>{
+        const up=b&&t>.15*i;                                                  /* one, two, three */
+        s.position.y=lerp(s.position.y,up?2.0+Math.sin(clock*11+i*2)*.05:1.5,.25);
+        s.position.z=lerp(s.position.z,up?-2.4:-2.22,.25);
+        s.rotation.y=up?Math.sin(clock*4+i*1.7)*.4:0;
+      });
+      sign.rotation.z=.13+Math.sin(clock*7)*clamp(Math.abs(k.speed)/40,0,1)*.05+(b?Math.sin(clock*31)*.06:0);
+    });
+    return {fx:1.12,fz:1.3,rx:1.15,rz:-1.5,r:.56,rr:.6,fw:.46,rw:.54,cy:.22,cz:0,
+      wheel(w,r,wd){                                                          /* oversized, muddy */
+        w.add(new THREE.Mesh(flat(VC(r*.4,r*.4,wd+.04,6).rotateZ(Math.PI/2)),psMat({color:0x8a8f6a})));
+        for(const a of [.4,2.3,4.1]){const m=new THREE.Mesh(flat(VB(wd+.03,.2,.26)),a>2?mudD:mud);
+          m.position.set(0,Math.cos(a)*r,Math.sin(a)*r);m.rotation.x=-a;w.add(m);}
+      }};
+  },
+
   /* Farmor Britta: Åhus Hembakat, a miniature bakery delivery van */
   hembak(add,paint,dark,steel,A){
     const blue=psMat({color:0x2f63c8}),brick=psMat({color:0x8a3a2a}),bun=psMat({color:0xc07a34});

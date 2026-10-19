@@ -170,7 +170,7 @@ function portrait(ci,sil){
   const c=CHARS[ci],v=buildKart(c.color,kindOf(c),'kart'),ps=new THREE.Scene();
   ps.add(v.root);if(sil)ps.overrideMaterial=SILHOUETTE;
   const cam=new THREE.PerspectiveCamera(30,1,.1,50);
-  const hy=kindOf(c)==='cow'?1.92:1.86;
+  const hy=kindOf(c)==='cow'?1.92:kindOf(c)==='carl'?1.98:1.86;
   cam.position.set(.7,hy+.32,1.55);cam.lookAt(0,hy-.12,-.6);
   const keep=RES.clone(),cc=new THREE.Color();renderer.getClearColor(cc);const ca=renderer.getClearAlpha();
   RES.set(72,72);renderer.setSize(72,72,false);renderer.setClearColor(0x3d86dc,1);

@@ -598,7 +598,7 @@ function updateSigs(dt){
     }else k.onPlan=false;
     if(k.planG)drawPlan(k);
   }
-  updateHerds(dt);updateMuck(dt);updateYarns(dt);
+  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);
   for(let n=rings.length-1;n>=0;n--){
     const r=rings[n];r.t+=dt;
     if(r.t>.5){scene.remove(r.m);rings.splice(n,1);continue;}
@@ -662,4 +662,5 @@ function clearSigs(){
   for(const r of rings)scene.remove(r.m);
   herds.length=0;muck.length=0;yarns.length=0;rings.length=0;
   if(tifoEl)tifoEl.classList.remove('on');
+  clearSvin();
 }
