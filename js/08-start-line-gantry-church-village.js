@@ -72,7 +72,7 @@ function buildStart(st){
     pl.rotation.y=Math.atan2(fx[0],fz[0])+s;world.add(pl);
   }
 
-  if(st.ground==='sea')return;
+  if(st.ground==='sea'||st.stand===false)return;   /* stand:false = the track brings its own spectators */
   // wooden grandstand
   const stand=new THREE.Group();
   for(let i=0;i<6;i++){

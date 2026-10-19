@@ -276,7 +276,9 @@ function routeSwitch(k,lat){
       const j=nearestAlt(R,k.x,k.z,Math.min(d,R.n-1));
       if(j>COMMIT+6)continue;
       const la=Math.abs(altLat(R,j,k.x,k.z));
-      if(la<R.hw-0.3||la+0.4<Math.abs(lat)){k.rib=R.idx;k.si=j;if(k===player&&R.hidden)foundRoute(R);return true;}
+      if(la<R.hw-0.3||la+0.4<Math.abs(lat)){k.rib=R.idx;k.si=j;if(k===player&&R.hidden)foundRoute(R);
+        if(k===player&&state==='race')bark('shortcut',20);        /* Amanda at home: Det är kortare här. */
+        return true;}
     }
     return false;
   }

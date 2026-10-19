@@ -87,6 +87,8 @@ function checkStamps(){
     const n=stampCount();
     toast('PICKNICK! '+o.def.dish.toUpperCase()+' '+n+'/'+allStamps().length);
     if(n===6)setTimeout(()=>toast('MUU-TUTAN UPPLÅST! TRYCK H'),1600);
+    const [got,of]=stageStamps(stage);
+    if(of&&got===of)setTimeout(()=>toast('VYKORT FRÅN '+stage.name+'! TITTA I PASSET'),n===6?3200:1600);
   }
 }
 /** AI leans toward milk and steps around pies */
@@ -108,7 +110,8 @@ function blockHit(k){
   }
   return false;
 }
-function sayLine(w){const c=CHARS[charSel];return c.say&&c.say[w];}
+/** the driver's line for the moment; on their home stage, homeSay takes over where it has one */
+function sayLine(w){const c=CHARS[charSel],h=stage&&stage.id===c.home&&c.homeSay;return (h&&h[w])||(c.say&&c.say[w]);}
 /** the player's driver says their line for the moment, at most once per cd seconds */
 const barkAt={};
 function bark(w,cd){
