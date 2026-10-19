@@ -264,3 +264,11 @@ Roadmap step 4, last track: every original track now has its shortcuts and stamp
 - `.go` is now the yellow main action (the same gradient as the driver and stage screens' VÄLJ button). `.go.sec` is the dark-blue style for big choices and ways back that aren't the main action: MÄSTERSKAP, TIDSLOPP and SANDLÅDA on the main menu, and TILLBAKA, TILL MENYN and STÄNG. While a cup is running, FORTSÄTT is the yellow one and KÖR turns blue.
 - Panels, cards, secondary pills and the sticky action bar are darker navy with much less sheen; the selected cup and class cards get a yellow edge.
 - `tools/menu_fit_test.py` fails if a menu shows more than one yellow main action.
+
+## Vehicle stats rework (2026-10-19)
+- Teo: redo the kart stats following the vehicle-stats proposal (all 19 vehicles get their own handling).
+- `CARS[].mul` in 30-karts.js holds the proposal's seven multipliers for every vehicle (speed, power, road grip, off-road, boost, fuel burn, spin duration) plus a one-line `role`. IDs and order are unchanged because cup saves keep the vehicle as an index. The unused decorative `CARS.bars` and `CHARS.stats` are gone.
+- `effStats(driver, vehicleIndex)` is the one place a driver and a vehicle combine (off-road capped at `OFFROAD_CAP` 0.95). Race setup, Tidslopp's Arne ghost (still the plain kart) and the select screen all use it. AI karts now race with their own vehicle's multipliers too (`ROSTER/CHAMPS[].car`), with cup class and rival tweaks applied after, so cup difficulty shifts a little.
+- Driver select shows five bars (FART, ACCELERATION, GREPP, ÅKER, BRÄNSLESNÅLHET) on one fixed scale from the effective numbers; the right column is the vehicle's own effect, better positive, and TAK when the driver's off-road is already at the cap. Cells won or lost against the previous vehicle show yellow or red. FLER EGENSKAPER holds boost and spin ("KORTARE SPINN VID VISSA TRÄFFAR").
+- Saves get `rec:2`: Tidslopp ghosts and single-race best times from before the rework move to `SAVE.legacy`; unlocks earned with them stay.
+- `<link rel="icon" href="data:,">` stops the favicon request that failed the smoke test with newer Chromium.
