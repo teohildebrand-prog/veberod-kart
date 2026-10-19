@@ -9,6 +9,7 @@ function suget(k,dt){
     const dx=o.x-k.x,dz=o.z-k.z,f=dx*Fx+dz*Fz,l=Math.abs(dx*Fz-dz*Fx);
     if(f>3&&f<15&&l<2.4){behind=true;break;}
   }
+  if(k.mates>0&&!k.air)behind=true;                /* Kompisarna: always someone to tuck in behind */
   if(behind){
     const was=k.suck;k.suck+=dt;
     if(k===player&&was<0.6&&k.suck>=0.6)ping(600,700,.05);
@@ -24,6 +25,10 @@ function suget(k,dt){
 function drive(k,dt,ctl){
   if(k.recoverT>0){k.recoverT-=dt;if(k.recoverT<=0)recoverKart(k);}
   if(k.ghost>0)k.ghost-=dt;
+  if(k.frozen>0){                                  /* Tidtagningsrättelse: time stands still for this kart */
+    k.frozen=Math.max(0,k.frozen-dt);k.vx=0;k.vz=0;k.vy=0;k.speed=0;k.drift=0;k.charge=0;
+    return;
+  }
   const RT=k.rib?ALTS[k.rib-1]:null, T=RT||MAIN, hwR=RT?RT.hw:HW;
   k.si=RT?nearestAlt(RT,k.x,k.z,k.si):nearestLocal(k.x,k.z,k.si);
   const i=k.si, i1=RT?Math.min(i+1,RT.n-1):(i+1)%N;
@@ -388,6 +393,7 @@ function aiControl(k){
                   :clamp(k.line*0.3,-(T.hw-1),T.hw-1);
   const err=wrapAng(Math.atan2(T.X[t]+T.RX[t]*L-k.x,T.Z[t]+T.RZ[t]*L-k.z)-k.yaw);
   let steer=clamp(err*(k.drift!==0?2.0:2.85),-1,1);  /* calmer hands mid-slide */
+  if(k.blind>0)steer=clamp(steer+Math.sin(clock*6.5+k.idx*1.7)*0.6,-1,1);   /* Tifot: driving blind behind a scarf */
   let cmax=0;
   for(let o=6;o<46;o+=6){const w=walkPt(k,o);cmax=Math.max(cmax,w[0].CURV[w[1]]);}
   let cnear=0;                                         /* the corner they are in now */
@@ -414,7 +420,7 @@ function aiControl(k){
   if(Math.abs(k.lat)>(k.rib?ALTS[k.rib-1].hw:HW))throttle=1;
   /* stuck against something: back out for a second, then call the tractor */
   /* judged on progress, not speed: a kart bouncing off a barrier still reads as moving */
-  if(state==='race'&&!k.atPump&&!k.done&&k.recoverT<=0){
+  if(state==='race'&&!k.atPump&&!k.done&&k.recoverT<=0&&!(k.frozen>0)){   /* frozen in time is not stuck */
     if(k.progress>k.stuckP+6/SEG){k.stuckP=k.progress;k.stuckT=0;}else k.stuckT+=FIXED;   /* 6 m */
   }
   /* return to path: stuck, or crawling off the road, first drive back to a point about
@@ -443,7 +449,9 @@ function separate(){
     const d=Math.hypot(dx,dz);
     if(d>2.9||d<1e-4)continue;
     dx/=d;dz/=d;
-    const wa=2*B.mass/(A.mass+B.mass),wb=2*A.mass/(A.mass+B.mass);   /* the tractor barely moves */
+    const fa=A.frozen>0,fb=B.frozen>0;if(fa&&fb)continue;
+    let wa=2*B.mass/(A.mass+B.mass),wb=2*A.mass/(A.mass+B.mass);   /* the tractor barely moves */
+    if(fa){wa=0;wb=2;}else if(fb){wa=2;wb=0;}                        /* frozen in time: an ice block does not budge */
     const push=(2.9-d)*0.5;
     A.x-=dx*push*wa;A.z-=dz*push*wa;B.x+=dx*push*wb;B.z+=dz*push*wb;
     const rel=(B.vx-A.vx)*dx+(B.vz-A.vz)*dz;

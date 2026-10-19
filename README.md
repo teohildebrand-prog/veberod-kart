@@ -62,7 +62,7 @@ tools/serve.sh        local web server
 tools/smoke_test.py   headless test: start a race, fail on JS errors
 tools/cup_schedule_test.py  headless test: cup schedules, old saves, points once
 tools/shortcut_test.py      headless test: each shortcut is driveable, quicker, and opens to every forward attack
-tools/signature_test.py     headless test: box odds and the three signature items (tow, bike, planned line)
+tools/signature_test.py     headless test: box odds and all ten signature items
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js

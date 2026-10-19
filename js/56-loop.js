@@ -56,6 +56,7 @@ function frame(now){
   }
 
   for(const k of karts)drawKart(k);
+  drawSigs();
   drawRivalTag();
   drawGhosts();
   stepParticles(dt);updateCamera(dt);drawHUD(dt);drawMap();audioUpdate();
