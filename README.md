@@ -40,7 +40,10 @@ stick (analog: a small push is a gentle turn); gas is automatic. Right thumb
 has BROMS (hold to brake, then reverse), SLADD and ANVÄND (shows your item);
 a thumb can slide between BROMS and SLADD. Camera (KAM), pause and
 back-on-track sit at the top. Pinch, double-tap zoom and page scrolling are
-blocked during a race (menus still scroll); `tools/touch_test.py` checks it. On Android the
+blocked during a race (menus still scroll); `tools/touch_test.py` checks it.
+Picking a driver on a phone takes two steps: tap a portrait (the preview
+shows the bars and the ability), NÄSTA, then flip through vehicles and paint
+and press STARTA. On Android the
 first tap goes fullscreen; on iPhone use Share → Add to Home Screen for a
 fullscreen icon.
 

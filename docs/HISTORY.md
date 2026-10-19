@@ -252,3 +252,9 @@ Roadmap step 4, last track: every original track now has its shortcuts and stamp
 - New sheets: SÅ SPELAR DU (`#howto`, the old intro text now in Swedish plus phone, keyboard and controller lines) and INSTÄLLNINGAR (`#settings`: sound, NAMN, KONTROLLER). Settings borrows the pause menu's sound panel node and puts it back on TILLBAKA or NAMN. PADBACK has entries for both.
 - `tools/menu_fit_test.py` covers the two new sheets and now fails on cut-off button labels (driver portraits exempt until the driver-select step).
 
+## Phone menus, step 4: driver select (2026-10-19)
+- Teo: small portrait grid beside one driver preview with name, three stat bars and a one-line ability; vehicle selection as a separate step.
+- On phones (the same media query as the stage list, `VS_PHONE` in 33-skanecupen.js) driver select has two steps, set as `#pick.vsphone[data-step]`. VÄLJ FÖRARE: a scrolling portrait grid (auto-fill columns, 62 px minimum) beside the preview, main action NÄSTA. VÄLJ FORDON: the vehicle arrows, bars and paint in the left column with the kart on its turntable to the right, main action STARTA (STARTA CUPEN in a cup). TILLBAKA on the vehicle step goes back to the driver step. Desktop keeps the one-screen layout.
+- Keyboard and controller follow the steps: Enter/A moves on, Backspace/B goes back, arrows flip vehicles on the vehicle step.
+- Fixed: the stacked one-column layout was meant for portrait but also caught small phones on their side (667x320), pushing the vehicle panel below the bottom bar.
+- `tools/menu_fit_test.py` checks both steps, that the grid scrolls to the last driver, and no longer exempts portrait names from the cut-label check.
