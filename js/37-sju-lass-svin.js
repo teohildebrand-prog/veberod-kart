@@ -21,12 +21,12 @@ const SVIN={
   back:10           /* seconds before the road's own pies come back */
 };
 const SVIN_FOOD={pie:1,coffee:1,mine:1};
-const herds=[];
+const svinHerds=[];
 let lastHerdOink=-9;
 
 SIGS.carl={name:'SJU LASS SVIN',lane:false,
   text:'Vissla ut sju grisar som springer före längs din linje. Varje gris äter upp en fälla: äppelpaj, kafferep eller tårtmina.',
-  use:fireHerd,ai:(s,k)=>(!!k&&svinWork(k)>0)||Math.random()<0.002,
+  use:fireSvin,ai:(s,k)=>(!!k&&svinWork(k)>0)||Math.random()<0.002,
   icon:`<svg viewBox="0 0 48 48">
     <path d="M10 15 6 4 18 9ZM38 15 42 4 30 9Z" fill="#e9a3a0" stroke="#a85a58" stroke-width="2" stroke-linejoin="round"/>
     <circle cx="24" cy="25" r="16" fill="#f3b8b0" stroke="#a85a58" stroke-width="2"/>
@@ -89,8 +89,8 @@ const pigParts=(function(){
   };
 })();
 
-function fireHerd(k){
-  if(k.herd)endHerd(k.herd);
+function fireSvin(k){
+  if(k.svinHerd)endSvin(k.svinHerd);
   const h={owner:k,s:(k.mi+SVIN.start/SEG)%N,lat:clamp(k.lat,-HW*.75,HW*.75),t:0,pigs:[],cleared:0,stop:false,why:''};
   const at={};
   for(let n=0;n<SVIN.pigs;n++){
@@ -100,7 +100,7 @@ function fireHerd(k){
   }
   svinPt(h.s,h.lat,at);
   for(let p=0;p<16;p++)puff(at.x+rand(-1.5,1.5),k.y+rand(.2,1.4),at.z+rand(-1.5,1.5),.95,.72,.7,.55);
-  herds.push(h);k.herd=h;
+  svinHerds.push(h);k.svinHerd=h;
   if(k===player){
     toast('UT MED ER, PÅGAR!');
     audioTone(820,1100,.12,.05,'sine');audioTone(900,1100,.16,.05,'sine',.16);   /* the whistle */
@@ -109,14 +109,14 @@ function fireHerd(k){
   return h;
 }
 /** gone: a puff of dust where each pig stood */
-function endHerd(h){
+function endSvin(h){
   for(const p of h.pigs){
     if(p.mode==='gone')continue;
     puff(p.x,p.y+.5,p.z,.85,.75,.6,.5);scene.remove(p.g);p.mode='gone';
     if(p.trap&&p.trap.svin===h)p.trap.svin=null;
   }
-  const i=herds.indexOf(h);if(i>=0)herds.splice(i,1);
-  if(h.owner.herd===h)h.owner.herd=null;
+  const i=svinHerds.indexOf(h);if(i>=0)svinHerds.splice(i,1);
+  if(h.owner.svinHerd===h)h.owner.svinHerd=null;
 }
 /** a trap eaten: a temporary one goes for good, the road's own pie comes back later.
     A Kafferep's pie and coffee go together. */
@@ -135,9 +135,9 @@ function svinOink(p){
   lastHerdOink=clock;oink(0,.05);
 }
 const svinTo={};
-function updateHerds(dt){
-  for(let n=herds.length-1;n>=0;n--){
-    const h=herds[n],k=h.owner;
+function updateSvin(dt){
+  for(let n=svinHerds.length-1;n>=0;n--){
+    const h=svinHerds[n],k=h.owner;
     h.t+=dt;
     if(!h.stop&&(h.t>SVIN.time||k.done||k.parked||k.rib||state!=='race')){h.stop=true;h.why=h.t>SVIN.time?'time':'gone';}
     let ahead=fwdS(h.s,k.mi);if(ahead>N/2)ahead=0;    /* he drove past the herd */
@@ -199,10 +199,10 @@ function updateHerds(dt){
       p.g.rotation.y=p.yaw;
       p.g.userData.legs.forEach((l,i)=>{l.rotation.x=spd?Math.sin(clock*22+i*Math.PI*(i<2?1:.5)+p.n)*.6:0;});
     }
-    if(!live){herds.splice(n,1);if(k.herd===h)k.herd=null;}
+    if(!live){svinHerds.splice(n,1);if(k.svinHerd===h)k.svinHerd=null;}
   }
 }
-function clearHerds(){
-  while(herds.length)endHerd(herds[herds.length-1]);
+function clearSvin(){
+  while(svinHerds.length)endSvin(svinHerds[svinHerds.length-1]);
   for(const it of items)it.svin=null;
 }

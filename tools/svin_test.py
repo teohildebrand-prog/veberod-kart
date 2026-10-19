@@ -90,7 +90,7 @@ def main():
         ev(f"()=>{{const a=items[{idx[1]}],b=items[{idx[2]}];a.pair=b;b.pair=a;}}")   # a Kafferep
         ev(f"()=>{{window._svin={idx}.map(i=>items[i]);}}")
         ev("()=>{dbgGive('sig','carl');useItem(player);}")
-        check(ev("()=>!!player.herd&&player.herd.pigs.length===7"), 'seven pigs out')
+        check(ev("()=>!!player.svinHerd&&player.svinHerd.pigs.length===7"), 'seven pigs out')
         page.wait_for_timeout(1000)
         page.screenshot(path=str(ROOT / 'sig-svin-herd.png'))
         page.wait_for_timeout(2300)
@@ -103,12 +103,12 @@ def main():
         check(not gone(r[6]), f'a pie outside the corridor stays {r[6]}')
         check(r[7]['there'] and gone(r[7]) and 5 < r[7]['cool'] <= 10, f"the road's own pie comes back later {r[7]}")
         page.wait_for_timeout(4000)
-        check(ev("()=>!player.herd&&herds.length===0&&_svin.every(it=>!it.svin)"), 'herd gone afterwards, no claims left')
+        check(ev("()=>!player.svinHerd&&svinHerds.length===0&&_svin.every(it=>!it.svin)"), 'herd gone afterwards, no claims left')
 
         # seven pigs, seven traps at most
         at = ev(PARK, 90)
         idx = ev(LAY, [at, [['pie', 8 + 4 * n, 0, 30] for n in range(9)]])
-        ev(f"()=>{{window._svin={idx}.map(i=>items[i]);dbgGive('sig','carl');useItem(player);window._h=player.herd;}}")
+        ev(f"()=>{{window._svin={idx}.map(i=>items[i]);dbgGive('sig','carl');useItem(player);window._h=player.svinHerd;}}")
         page.wait_for_timeout(4500)
         n = ev("()=>({cleared:_h.cleared,left:_svin.filter(it=>items.includes(it)&&it.mesh.visible&&!(it.cool>0)).length})")
         check(n['cleared'] == 7 and n['left'] == 2, f'nine pies, seven eaten {n}')
@@ -119,7 +119,7 @@ def main():
             const k=player,i=((R.a-Math.round(20/SEG))%N+N)%N;
             k.rib=0;k.plan=0;k.si=i;k.x=sx[i];k.z=sz[i];k.yaw=Math.atan2(fx[i],fz[i]);k.vx=k.vz=0;
             k.y=groundK(k,k.x,k.z);k.mi=mappedIdx(k);k.lat=0;
-            dbgGive('sig','carl');useItem(player);window._h=player.herd;return R.a;}""")
+            dbgGive('sig','carl');useItem(player);window._h=player.svinHerd;return R.a;}""")
         if fork is None:
             print('skip fork check (no open fork on this stage)')
         else:
@@ -132,14 +132,14 @@ def main():
         ai = ev("""()=>{const a=karts.find(k=>k.ai&&!k.parked&&!k.rib);if(!a)return null;
             const i=Math.floor(a.mi);let ok=svinCap(a)>40/SEG;if(!ok)return 'fork';
             const it=addItem('pie',(i+Math.round(16/SEG))%N,clamp(a.lat,-HW*.7,HW*.7));it.temp=20;
-            a.sig='carl';a.held='sig';a.heldLvl=1;a.roll=0;window._ai=a;return svinWork(a);}""")
+            a.held='sig';a.heldSig='carl';a.heldLvl=1;a.roll=0;window._ai=a;return svinWork(a);}""")
         if ai in (None, 'fork'):
             print('skip AI check', ai)
         else:
             used = False
             for _ in range(10):
                 page.wait_for_timeout(200)
-                used = used or ev("()=>_ai.held!=='sig'||!!_ai.herd")
+                used = used or ev("()=>_ai.held!=='sig'||!!_ai.svinHerd")
             check(ai >= 1 and used, f'the AI lets the pigs out at food ahead ({ai})')
         browser.close()
     httpd.shutdown()

@@ -300,7 +300,7 @@ function placeOnGrid(){
     k.bucket=!!P&&P.id==='anders';k.bucketLap=-1;
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
     k.sig=sigOf(P?P.id:R.kind);k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item, twins too */
-    k.chores=!!(P||CHARS.find(c=>c.id===R.kind)||{}).chores;k.herd=null;
+    k.chores=!!(P||CHARS.find(c=>c.id===R.kind)||{}).chores;k.svinHerd=null;
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);
