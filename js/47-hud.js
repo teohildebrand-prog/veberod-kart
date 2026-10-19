@@ -19,6 +19,21 @@ function perfekt(){
   bark('perfect',6);
 }
 function flash(m){el.flash.textContent=m;el.flash.classList.remove('pop');void el.flash.offsetWidth;el.flash.classList.add('pop');}
+/* the box roulette passes the five families and, every third frame, a signature item */
+const REEL=['boost','rocket','sig','shield','pie','sig','fart','sig'];
+/** what the item slot shows now: the held item at its awarded level, or the shield that is running;
+    a fresh item box spins through the reel first, ticking slower and slower */
+function slotFrame(k){
+  const spin=!!k.held&&k.roll>0;
+  if(!spin){
+    const fam=k.held||(k.shield>0?'shield':null);
+    return {spin,frame:0,fam,lvl:k.held?itemLvl(k):(k.shieldLvl||1),sid:k.heldSig};
+  }
+  const frame=Math.floor((1-(k.roll/ROLLT)**2)*14);     /* 0..13, the last one just before the real item */
+  const at=k.held==='sig'?2:REEL.indexOf(k.held), fam=REEL[(at+frame+1)%REEL.length];
+  const ids=Object.keys(SIGS), sid=ids[(ids.indexOf(k.heldSig)+1+frame*3+ids.length)%ids.length];
+  return {spin,frame,fam,lvl:(itemLvl(k)+frame)%3+1,sid};
+}
 function drawHUD(dt){
   el.lap.textContent=Math.min(player.lap+1,LAPS);
   el.laps.textContent=FREE?'/∞':'/'+LAPS;
@@ -28,18 +43,13 @@ function drawHUD(dt){
   el.spd.innerHTML=Math.round(player.speed*4.35)+'<b>KM/H</b>';
   el.spd.className=player.slow>0?'sour':'';
   el.fill.style.width=((player.boost>0?1:clamp(player.charge/1.45,0,1))*100)+'%';
-  /* the held item at its awarded level, or the shield that is running;
-     a fresh item box spins through every variant first, ticking slower and slower */
-  const spin=player.held&&player.roll>0;
-  const frame=spin?Math.floor((1-(player.roll/ROLLT)**2)*14):0;   /* 0..13, the last one just before the real item */
-  const fam=spin?FAMILIES[(FAMILIES.indexOf(player.held)+frame+1)%FAMILIES.length]:player.held||(player.shield>0?'shield':null);
-  const lvl=spin?(itemLvl(player)+frame)%3+1:player.held?itemLvl(player):(player.shieldLvl||1);
-  const key=fam?fam+lvl+(fam==='sig'?player.heldSig:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
+  const {spin,frame,fam,lvl,sid}=slotFrame(player);
+  const key=fam?fam+lvl+(fam==='sig'?sid:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
   if(key!==lastSlot){
     if(fam){
       const own=fam==='sig';                             /* a signature item: a star, no level */
-      el.slotv.innerHTML=own?SIGS[player.heldSig].icon:ITEMICON[fam+lvl];
-      el.slot.title=el.slotname.textContent=itemName(fam,lvl);
+      el.slotv.innerHTML=own?SIGS[sid].icon:ITEMICON[fam+lvl];
+      el.slot.title=el.slotname.textContent=own?SIGS[sid].name:itemName(fam,lvl);
       el.slot.className=el.slotname.className='plate '+(own?'sig':'lvl'+lvl)+(player.held?'':' run');
       lvlEl.textContent=own?'★':ROMAN[lvl-1];lvlEl.className='plate '+(own?'sig':'lvl'+lvl);lvlEl.title=own?'Signaturföremål':'Nivå '+lvl;
       void el.slot.offsetWidth;el.slot.classList.add(spin?'spin':'pop');
