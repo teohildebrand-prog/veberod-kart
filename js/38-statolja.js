@@ -102,6 +102,18 @@ function aiItemLines(){
         if(Math.abs(gap)<3.6)bias+=(gap>=0?1:-1)*(3.6-Math.abs(gap))*1.15*w;
       }
     }
+    for(const c of gasClouds){                                   /* steer round green gas up the road */
+      if(c.owner===k||c.hit.has(k))continue;
+      let push=0;
+      for(const b of c.blobs){
+        let d=b.si-k.mi;
+        if(d>N/2)d-=N;else if(d<-N/2)d+=N;
+        if(d<1||d>30)continue;
+        const gap=k.line-b.lat,R=b.r*.85+1.6;
+        if(Math.abs(gap)<R){const f=(gap>=0?1:-1)*(R-Math.abs(gap))*(1-(d-1)/29);if(Math.abs(f)>Math.abs(push))push=f;}
+      }
+      bias+=push*.9;
+    }
     if(k.held){                                            /* play what they picked up */
       let ahead=false,near=false,behind=false,tail=false,close=false;
       for(const o of karts){
@@ -112,7 +124,7 @@ function aiItemLines(){
         if(d>4&&d<30&&!o.rib)near=true;                    /* in reach of the hook */
         if(d<-2&&d>-30)behind=true;
         const g=Math.hypot(o.x-k.x,o.z-k.z);
-        if(d<0&&g<11)tail=true;
+        if(d<0&&g<20)tail=true;                           /* close enough to drive into the gas */
         if(g<12)close=true;
       }
       const lvl=itemLvl(k),h=k.held;
@@ -120,7 +132,7 @@ function aiItemLines(){
       else if(h==='rocket'&&(lvl===2?near:ahead))useItem(k);
       else if(h==='pie'&&behind)useItem(k);
       else if(h==='shield'&&(lvl===3?close||behind:behind||Math.random()<0.004))useItem(k);
-      else if(h==='fart'&&(lvl===1?tail:close))useItem(k);
+      else if(h==='fart'&&(lvl===1?tail:behind||close))useItem(k);
       else if(h==='sig'&&SIGS[k.heldSig].ai({ahead,near,behind,close},k))useItem(k);
     }
     if(!k.wantFuel&&!k.atPump&&wantsFuel(k))k.wantFuel=true;  /* decided before the pump */

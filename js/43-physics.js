@@ -54,7 +54,7 @@ function drive(k,dt,ctl){
    if(sf!==k.sfx){const was=k.sfx;k.sfx=sf;if(was)surfaceEnter(k,sf);}}
   if(k.boost>0)k.boost=Math.max(0,k.boost-dt);
   if(k.boost<=0)k.boostLvl=0;
-  if(k.slick>0)k.slick=Math.max(0,k.slick-dt);   /* ärtsoppa: no grip */
+  if(k.slick>0)k.slick=Math.max(0,k.slick-dt);   /* Garnnystanet: no grip */
   if(k.launch>0)k.launch=Math.max(0,k.launch-dt);   /* launched off the hook's rope */
   if(k.slow>0)k.slow=Math.max(0,k.slow-dt);
   if(k.shield>0)k.shield=Math.max(0,k.shield-dt);

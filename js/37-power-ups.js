@@ -2,7 +2,7 @@
 /* ───────── power-ups ───────── */
 /* Five families, three levels each. An item box gives the family and the level together;
    the item keeps that level until it is used, whatever hits the kart meanwhile. */
-const rockets=[], hooks=[], walls=[], farts=[];
+const rockets=[], hooks=[], walls=[];
 function useItem(k){
   if(!k.held||k.roll>0||k.spun>0||k.fartT>0||k.frozen>0)return;   /* nothing while the slot still spins, or frozen */
   if(k.rib&&(k.held==='pie'||k.held==='rocket'||(k.held==='sig'&&SIGS[k.heldSig].lane===false))){            /* no room in a farm lane */
@@ -396,36 +396,56 @@ function drawShield(k){
   });
 }
 
-/* close-range disruption */
-/* Skånska bönor push a tailgater off your bumper, ärtsoppa breaks up the pack behind and
-   beside you and takes their grip for a moment, bruna bönor med fläsk shove everyone
-   round you outward and steal some speed. The cloud is quick and clears again. */
-const FART=[{r:13,push:9},{r:15,push:11},{r:20,push:17}];
+/* close-range disruption: a cloud of green gas */
+/* The beans come out the back as a cloud of green gas that hangs over the road for a few
+   seconds. Skånska bönor leave a short trail straight behind, ärtsoppa a wider one over
+   both sides of you, and bruna bönor med fläsk wait a moment, then go off all round you and
+   keep pouring out behind. Whoever drives into the gas spins round like a spettekaka hit,
+   once per cloud; whoever ate the beans drives through their own. */
+const GAS={lvl:[{emit:.6,side:0,r:2.5,life:3.5,ring:0},{emit:.9,side:2.6,r:3.0,life:4.5,ring:0},
+                {emit:1.1,side:2.2,r:3.2,life:5.5,ring:9}],
+           every:.06,grow:.35,fade:1.2,spin:1.5,opacity:.62};
+const gasClouds=[];
+const gasGeo=flat(new THREE.IcosahedronGeometry(1,1));
 function blast(k,lvl){
-  const F=FART[lvl-1],Fx=Math.sin(k.yaw),Fz=Math.cos(k.yaw);
-  farts.push({x:k.x,y:k.y,z:k.z,yaw:k.yaw,lvl,t:0,r:F.r});
-  for(let p=0;p<8*lvl;p++)puff(k.x-Fx*1.8+rand(-1,1),k.y+rand(.3,1.2),k.z-Fz*1.8+rand(-1,1),.8,.88,.32,.5);
+  const G=GAS.lvl[lvl-1];
+  const c={owner:k,lvl,G,t:0,emit:G.emit,tick:0,blobs:[],hit:new Set(),end:G.emit+G.life};
+  gasClouds.push(c);
+  if(G.ring)for(let q=0;q<G.ring;q++){                 /* BRÖÖÖÖP: the cloud goes off all round */
+    const a=q/G.ring*Math.PI*2+rand(-.2,.2),d=rand(3.8,5.2);
+    gasBlob(c,k.x+Math.sin(a)*d,k.z+Math.cos(a)*d,Math.sin(a)*3,Math.cos(a)*3,G.r*rand(1,1.2));
+  }
+  gasEmit(c);
   k.rattle=0.5+lvl*0.25;k.boost=Math.max(k.boost,.2*lvl);
   if(k===player||Math.hypot(k.x-player.x,k.z-player.z)<30)fartSound(lvl);
   if(k===player){toast(lvl===3?'BRÖÖÖÖP!':lvl===2?'ÄRTSOPPA!':'PRRRT!');shake=Math.min(.5,shake+.12*lvl);}
-  let hits=0;
-  for(const o of karts){
-    if(o===k||o.parked||o.ghost>0||Math.abs(o.y-k.y)>3)continue;
-    const dx=o.x-k.x,dz=o.z-k.z,d=Math.hypot(dx,dz);
-    if(d>F.r||d<1e-3)continue;
-    const f=dx*Fx+dz*Fz,s=Math.abs(dx*Fz-dz*Fx);
-    if(lvl===1&&!(f<0&&s<-f*0.7+2))continue;           /* a short cone straight back */
-    if(lvl===2&&f>1.5)continue;                        /* behind and beside, not ahead */
-    if(blockHit(o))continue;
-    hits++;
-    const push=F.push*(1-0.5*d/F.r);
-    o.vx+=dx/d*push;o.vz+=dz/d*push;o.drift=0;o.charge=0;o.suck=Math.min(o.suck,-1.5);   /* no slipstream either */
-    o.rattle=0.5;
-    if(lvl>=2)o.slick=Math.max(o.slick,1.3);
-    if(lvl===3){o.slow=Math.max(o.slow,1.0);o.boost=0;}
-    if(o===player){toast(lvl===3?'BRÖÖÖÖP! VILKEN STANK':'USCH! BÖNOR');shake=Math.min(1,shake+.3);}
+}
+/** one billow of gas, where it sits on the road kept for the AI; each fades on its own near the camera */
+function gasBlob(c,x,z,vx,vz,r){
+  const k=c.owner,m=new THREE.Mesh(gasGeo,psMat({color:0x8ccf3c,transparent:true,opacity:0,depthWrite:false}));
+  m.rotation.set(rand(0,6.283),rand(0,6.283),0);m.scale.setScalar(.01);scene.add(m);
+  const i=nearestLocal(x,z,k.si);
+  c.blobs.push({m,x,y:k.y+rand(.7,1.1),z,vx,vy:rand(.4,.9),vz,r,t:0,ph:rand(0,6.283),
+                si:i,lat:(x-sx[i])*rx[i]+(z-sz[i])*rz[i]});
+}
+/** a puff out of the exhaust, or two side by side for ärtsoppa */
+function gasEmit(c){
+  const k=c.owner,G=c.G,Fx=Math.sin(k.yaw),Fz=Math.cos(k.yaw);
+  const sides=G.side?[-G.side,G.side]:[0];
+  for(const s of sides){
+    const l=s+rand(-.6,.6);
+    gasBlob(c,k.x-Fx*2.6+Fz*l,k.z-Fz*2.6-Fx*l,k.vx*.2-Fx*2+Fz*s*.6,k.vz*.2-Fz*2-Fx*s*.6,G.r*rand(.85,1.1));
   }
-  if(k===player&&hits)setTimeout(()=>toast(hits>1?hits+' TRÄFFADE!':'TRÄFF!'),600);
+  for(let p=0;p<2;p++)puff(k.x-Fx*2.4+rand(-.6,.6),k.y+rand(.4,1),k.z-Fz*2.4+rand(-.6,.6),.55,.82,.22,.45);
+}
+/** a kart drove into the gas: the spettekaka spin */
+function gasHit(o,c){
+  c.hit.add(o);
+  if(blockHit(o))return;
+  o.spun=Math.max(o.spun,GAS.spin*o.spinResist);o.boost=0;o.drift=0;o.charge=0;o.rattle=0.5;
+  for(let p=0;p<18;p++)puff(o.x+rand(-1.3,1.3),o.y+rand(.2,1.4),o.z+rand(-1.3,1.3),.55,.85,.25,.7);
+  if(o===player){toast(hitLine(c.owner,c.lvl===3?'BRÖÖÖÖP! VILKEN STANK':'USCH! BÖNOR'));ping(300,60,.3);shake=Math.min(1,shake+.8);}
+  else if(c.owner===player){toast('TRÄFF!');ping(880,420,.12);}
 }
 function updateFarts(dt){
   for(const k of karts){
@@ -436,22 +456,48 @@ function updateFarts(dt){
     }
     if(k.fartT>0){k.fartT-=dt;if(k.fartT<=0)blast(k,3);}
   }
-  for(let n=farts.length-1;n>=0;n--){
-    const c=farts[n];c.t+=dt;
-    if(c.t>0.42){farts.splice(n,1);continue;}
-    const R=c.r*(0.2+0.8*c.t/0.42),spread=[0.6,1.9,Math.PI][c.lvl-1],back=c.yaw+Math.PI;
-    for(let p=0;p<4+c.lvl*4;p++){
-      const a=back+rand(-spread,spread),rr=R*rand(.75,1);
-      const g=rand(.7,.9);
-      puff(c.x+Math.sin(a)*rr,c.y+rand(.3,1.6),c.z+Math.cos(a)*rr,g*.9,g,g*.36,.45);
+  for(let n=gasClouds.length-1;n>=0;n--){
+    const c=gasClouds[n];c.t+=dt;
+    if(c.t>=c.end){dropGas(n);continue;}
+    if(c.emit>0){                                       /* still pouring out of the kart */
+      c.emit-=dt;c.tick-=dt;
+      for(let q=0;q<2&&c.tick<=0;q++){c.tick+=GAS.every;gasEmit(c);}   /* a slow frame puffs twice */
+      if(c.tick<0)c.tick=0;
+    }
+    const left=c.end-c.t,thin=Math.min(1,left/GAS.fade);   /* thins out at the end */
+    for(const b of c.blobs){
+      b.t+=dt;
+      const damp=Math.exp(-2.5*dt);
+      b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vx*=damp;b.vz*=damp;b.vy*=Math.exp(-1.2*dt);
+      const g=Math.min(1,b.t/GAS.grow),R=b.r*(1-(1-g)*(1-g))*(.75+.25*thin),w=Math.sin(clock*3+b.ph)*.08;
+      b.m.position.set(b.x,b.y,b.z);b.m.scale.set(R*(1+w),R*(.8-w),R*(1+w*.5));
+      b.m.rotation.y+=dt*.4;b.cur=R;
+      const cam=Math.hypot(b.x-camera.position.x,b.y-camera.position.y,b.z-camera.position.z)-R;
+      b.m.material.uniforms.uOpacity.value=GAS.opacity*thin*clamp((cam-2)/12,.12,1);   /* never a green wall over the screen */
+    }
+    if(Math.random()<.5){const b=c.blobs[Math.floor(Math.random()*c.blobs.length)];   /* wisps */
+      puff(b.x+rand(-b.cur,b.cur),b.y+rand(0,b.cur*.6),b.z+rand(-b.cur,b.cur),.6,.85,.3,.6);}
+    if(thin<.5)continue;                                /* thin enough to drive through */
+    for(const o of karts){
+      if(o===c.owner||c.hit.has(o)||o.parked||o.ghost>0)continue;
+      for(const b of c.blobs){
+        const dx=o.x-b.x,dz=o.z-b.z,R=b.cur*.85+1;
+        if(dx*dx+dz*dz<R*R&&Math.abs(o.y+.6-b.y)<b.cur+1){gasHit(o,c);break;}
+      }
     }
   }
+}
+function dropGas(n){
+  const c=gasClouds[n];
+  for(const b of c.blobs){scene.remove(b.m);b.m.material.dispose();}
+  gasClouds.splice(n,1);
 }
 function clearPowerups(){
   for(const r of rockets)scene.remove(r.holder);
   rockets.length=0;
   while(hooks.length)dropHook(hooks.length-1);
   for(const w of walls)scene.remove(w.g);
-  walls.length=0;farts.length=0;
+  walls.length=0;
+  while(gasClouds.length)dropGas(gasClouds.length-1);
   clearSigs();
 }

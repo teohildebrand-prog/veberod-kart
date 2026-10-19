@@ -25,6 +25,11 @@ pipeline {
         sh 'python3 tools/signature_test.py'
       }
     }
+    stage('Beans test') {
+      steps {
+        sh 'python3 tools/beans_test.py'
+      }
+    }
     stage('Carl test') {
       steps {
         sh 'python3 tools/svin_test.py'
@@ -47,6 +52,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png', allowEmptyArchive: true }
   }
 }
