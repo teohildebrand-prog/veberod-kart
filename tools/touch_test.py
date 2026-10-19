@@ -40,7 +40,7 @@ def main():
         page.goto(url)
         page.fill('#nameBox', 'teo', timeout=10000)
         page.keyboard.press('Enter')
-        for button in ('#btnStart', '#btnStageGo', '#btnGo'):
+        for button in ('#btnStart', '#btnStageGo', '#btnGo', '#btnGo'):   # driver, then vehicle
             page.tap(button, timeout=10000)
         page.wait_for_timeout(5500)                      # countdown
         cdp = ctx.new_cdp_session(page)

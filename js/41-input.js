@@ -13,10 +13,15 @@ addEventListener('keydown',e=>{
     const g=GRID.indexOf(charSel),mv=d=>{unpeek();     /* step over locked champions */
       let n=g;do n=(n+d+GRID.length)%GRID.length;while(n!==g&&!charOpen(GRID[n]));
       applyCharacter(GRID[n]);ping(700,980,.04);};
-    if(k==='arrowleft'||k==='a')mv(-1);
-    if(k==='arrowright'||k==='d')mv(1);
-    if(k==='arrowup'||k==='w')mv(-GRID_COLS);
-    if(k==='arrowdown'||k==='s')mv(GRID_COLS);
+    if(vsTwoStep()&&vsStep==='car'){       /* the phone's vehicle step: arrows flip through vehicles */
+      if(k==='arrowleft'||k==='a'||k==='arrowup'||k==='w')stepCar(-1);
+      if(k==='arrowright'||k==='d'||k==='arrowdown'||k==='s')stepCar(1);
+    }else{
+      if(k==='arrowleft'||k==='a')mv(-1);
+      if(k==='arrowright'||k==='d')mv(1);
+      if(k==='arrowup'||k==='w')mv(-GRID_COLS);
+      if(k==='arrowdown'||k==='s')mv(GRID_COLS);
+    }
     if(k==='q')stepCar(-1);
     if(k==='e')stepCar(1);
     if(k.length===1&&k>='1'&&k<='9')applyCar(FREECARS[+k-1]);

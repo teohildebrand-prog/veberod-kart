@@ -197,6 +197,7 @@ function portrait(ci,sil){
   document.getElementById('carPrev').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(-1);});
   document.getElementById('carNext').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(1);});
   document.getElementById('btnBack').addEventListener('click',()=>{bootAudio();
+    if(vsTwoStep()&&vsStep==='car'){ping(700,980,.05);vsShowStep('driver');return;}
     if(cupSetup){previewOn=false;unpeek();showCupSetup();}else showStages();});
   applyCharacter(0);
 })();
@@ -212,6 +213,7 @@ function showSelect(){
   document.body.classList.remove('racing');
   sheetStart.classList.add('hide');sheetDone.classList.add('hide');
   sheetPick.classList.remove('hide');
+  vsShowStep('driver');
   applyCharacter(charSel);placeOnGrid();
 }
 const sheetPaused=document.getElementById('paused');
@@ -230,6 +232,7 @@ document.getElementById('btnRestart').addEventListener('click',()=>{setPause(fal
 document.getElementById('btnQuit').addEventListener('click',()=>{setPause(false);showStages();});
 function startRace(){previewOn=false;unpeek();sheetPick.classList.add('hide');resetRace();}
 function goFromSelect(){
+  if(vsTwoStep()&&vsStep==='driver'){unpeek();ping(700,980,.05);vsShowStep('car');return;}   /* phones: driver first, then the vehicle */
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
   SAVE.cup={v:CUP_SAVE_V,cup:CUPS[cupSel].id,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),

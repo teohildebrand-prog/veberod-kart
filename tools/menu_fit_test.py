@@ -4,10 +4,10 @@
     pip install playwright && python3 tools/menu_fit_test.py
 
 Opens the name entry, main menu, how-to, settings, cup setup, picnic pass, stage select, driver
-select and pause menu on four phone screens (landscape, landscape with the
+select (both phone steps: driver, then vehicle) and pause menu on four phone screens (landscape, landscape with the
 browser toolbar showing, a small landscape phone and portrait). Fails if a
 menu's main action is off screen, the stage roster isn't one
-scrolling list with its last track reachable, the page scrolls sideways, a button's label is cut off, or a button is
+scrolling list with its last track reachable, the driver grid can't scroll to its last driver, the page scrolls sideways, a button's label is cut off, or a button is
 under 44 CSS px tall (filter chips excepted), or if pinch-zoom is
 turned off on a menu (headless Chromium can't pinch, so this reads touch-action). Set CHROMIUM to use an existing
 Chromium binary.
@@ -24,8 +24,7 @@ MEASURE = '''(id)=>{const sh=document.getElementById(id),vw=innerWidth,vh=innerH
   const shown=[...sh.querySelectorAll('button')].filter(b=>b.offsetParent&&!b.hidden);
   const small=shown.filter(b=>!b.classList.contains('tab')&&b.getBoundingClientRect().height<43.5)
     .map(b=>(b.id||b.className)+' '+Math.round(b.getBoundingClientRect().height)+'px');
-  /* driver portraits (.vcard) are rebuilt for phones in the driver-select step; checked from then on */
-  const cut=shown.filter(b=>!b.classList.contains('vcard')&&b.scrollWidth>b.clientWidth+1).map(b=>b.id||b.className);
+  const cut=shown.filter(b=>b.scrollWidth>b.clientWidth+1).map(b=>b.id||b.className);
   const go=[...sh.querySelectorAll('.go,.vs-go')].find(b=>b.offsetParent&&!b.hidden);
   const r=go&&go.getBoundingClientRect();
   return {main:go?go.textContent.trim():null,
@@ -90,7 +89,31 @@ def main():
             if not (reach['ok'] and reach['list']):
                 fails.append(f'{tag}/stages-roster')
             click('btnStageGo'); check('pick')
-            click('btnGo')
+            # phones pick the driver first (the last portrait reachable in the grid), then the vehicle
+            drv = page.evaluate('''()=>{const p=document.getElementById('pick'),g=document.getElementById('cards'),
+              c=[...g.querySelectorAll('.vcard')];g.scrollTop=1e6;const last=c[c.length-1].getBoundingClientRect(),
+              gr=g.getBoundingClientRect();
+              return {two:p.classList.contains('vsphone')&&p.dataset.step==='driver',
+                      car:!!document.getElementById('carPrev').offsetParent,
+                      reach:last.bottom<=gr.bottom+1&&last.top>=gr.top-1,go:document.getElementById('btnGoT').textContent}}''')
+            ok = drv['two'] and not drv['car'] and drv['reach'] and drv['go'] == 'NÄSTA'
+            print(('ok   ' if ok else 'FAIL ') + f'{tag:9} pick      driver step: grid scrolls to the last driver, NÄSTA {drv}')
+            if not ok:
+                fails.append(f'{tag}/pick-driver')
+            click('btnGo'); check('pick')
+            car = page.evaluate('''()=>({step:document.getElementById('pick').dataset.step,
+              grid:!!document.getElementById('cards').offsetParent,car:!!document.getElementById('carPrev').offsetParent,
+              title:document.querySelector('#pick .vs-title').textContent})''')
+            ok = car['step'] == 'car' and not car['grid'] and car['car'] and car['title'] == 'VÄLJ FORDON'
+            print(('ok   ' if ok else 'FAIL ') + f'{tag:9} pick      vehicle step {car}')
+            if not ok:
+                fails.append(f'{tag}/pick-car')
+            click('btnBack')
+            back = page.evaluate("document.getElementById('pick').dataset.step+'/'+document.getElementById('pick').classList.contains('hide')")
+            print(('ok   ' if back == 'driver/false' else 'FAIL ') + f'{tag:9} pick      TILLBAKA returns to the driver step')
+            if back != 'driver/false':
+                fails.append(f'{tag}/pick-back')
+            click('btnGo'); click('btnGo')
             page.wait_for_timeout(1500)
             page.evaluate('setPause(true)')
             check('paused')

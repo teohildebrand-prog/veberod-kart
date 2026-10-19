@@ -192,6 +192,20 @@ function unpeek(){
   if(previewChar==null)return;
   previewChar=null;showRig();
 }
+/* phones pick in two steps: the driver (portraits beside one preview), then the vehicle */
+const VS_PHONE=matchMedia('(max-width:760px),(max-height:540px)');
+let vsStep='driver';
+const vsTwoStep=()=>VS_PHONE.matches;
+function vsShowStep(step){
+  vsStep=step;
+  const el=document.getElementById('pick'),two=vsTwoStep();
+  el.classList.toggle('vsphone',two);el.dataset.step=two?step:'';
+  document.querySelector('#pick .vs-title').textContent=two&&step==='car'?'VÄLJ FORDON':'VÄLJ FÖRARE';
+  renderCombo();
+  if(document.body.classList.contains('padnav'))       /* a pad keeps its focus on something visible */
+    (document.querySelector(step==='car'&&two?'#btnGo':'#cards .vcard.sel')||document.getElementById('btnGo')).focus();
+}
+VS_PHONE.addEventListener('change',()=>vsShowStep(vsStep));
 /* the panel's three bars: the driver's own numbers scaled by the car */
 const COMBO=[['FART',(c,M)=>c.stats[0]*M.maxSpeed],['GREPP',(c,M)=>c.stats[1]*M.gripOn],['ÅKER',(c,M)=>c.stats[2]*M.offRoad]];
 function renderCombo(){
@@ -207,7 +221,7 @@ function renderCombo(){
   set('vsName',c.name);set('vsHome',c.role);set('ptag',peek?'FÖRHANDSVISNING':'');
   set('vsCar',R.name);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
-  set('btnGoT',cupSetup?'STARTA CUPEN':'VÄLJ '+CHARS[charSel].short);
+  set('btnGoT',vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);
   document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i,open=charOpen(n);
     if(el.classList.contains('locked')===open){const im=el.querySelector('img'),was=im.src;
       if(im.dataset.sil){im.src=im.dataset.sil;im.dataset.sil=was;}}   /* silhouette and portrait trade places */
