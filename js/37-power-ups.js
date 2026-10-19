@@ -4,8 +4,8 @@
    the item keeps that level until it is used, whatever hits the kart meanwhile. */
 const rockets=[], hooks=[], walls=[], farts=[];
 function useItem(k){
-  if(!k.held||k.roll>0||k.spun>0||k.fartT>0)return;         /* nothing while the slot still spins */
-  if(k.rib&&(k.held==='pie'||k.held==='rocket'||(k.held==='sig'&&SIGS[k.sig].lane===false))){            /* no room in a farm lane */
+  if(!k.held||k.roll>0||k.spun>0||k.fartT>0||k.frozen>0)return;   /* nothing while the slot still spins, or frozen */
+  if(k.rib&&(k.held==='pie'||k.held==='rocket'||(k.held==='sig'&&SIGS[k.heldSig].lane===false))){            /* no room in a farm lane */
     if(k===player)toast('FÖR TRÅNGT HÄR!');
     return;
   }
@@ -13,7 +13,7 @@ function useItem(k){
   USE[fam](k,lvl);
 }
 const USE={
-  sig(k){SIGS[k.sig].use(k);},                               /* the driver's own: 37-signature-items.js */
+  sig(k){const id=k.heldSig;k.lastSig=id;k.heldSig=null;SIGS[id].use(k);},   /* a signature item: 37-signature-items.js */
   /* Mjölk, Gräddfil, Skånsk grädde: longer first, then raw power */
   boost(k,lvl){
     k.boost=Math.max(k.boost,[1.2,2.4,3.0][lvl-1]*k.milk);k.boostLvl=Math.max(k.boostLvl,lvl);k.slow=0;
