@@ -406,6 +406,13 @@ const KIND={intro:'VID VÄGEN',route:'PÅ GENVÄGEN',master:'MÄSTARPROVET',line
 const REWARDS=[[1,'Varje stämpel: sin sida i passet och sin historia'],[3,'Alla 3 på en bana: banans vykort'],
   [6,'6 stämplar: muu-tutan för alla förare (H)'],[9,'9 stämplar: picknickkorg på taket'],
   [allStamps().length,'Alla '+allStamps().length+': Gyllene Picknickpasset och titeln Picknickmästare']];
+/** a stage's own postcard picture (postcard.draw on a 192 x 120 canvas), drawn once */
+const POSTCARDS={};
+function postcardUrl(S){
+  if(!POSTCARDS[S.id]){const c=document.createElement('canvas');c.width=192;c.height=120;
+    S.postcard.draw(c.getContext('2d'),192,120);POSTCARDS[S.id]=c.toDataURL();}
+  return POSTCARDS[S.id];
+}
 function showAlbum(back){
   albumBack=back||showMenu;
   hideSheets();state='menu';document.body.classList.remove('racing');
@@ -419,7 +426,8 @@ function renderAlbum(){
   let h;
   if(!L.length)h='<p class="soon">Kommer i nästa version.</p>';
   else{
-    h=stageStamps(S)[0]===L.length?'<div class="post">HÄLSNINGAR FRÅN '+S.name+'!<small>Banans vykort: alla tre stämplar hittade.</small></div>':'';
+    h=stageStamps(S)[0]===L.length?'<div class="post">'+(S.postcard?'<img alt="" src="'+postcardUrl(S)+'">':'')+
+      'HÄLSNINGAR FRÅN '+S.name+'!<small>'+(S.postcard?S.postcard.caption+' ':'')+'Banans vykort: alla tre stämplar hittade.</small></div>':'';
     h+='<div class="slots">'+L.map(d=>SAVE.stamps[d.id]?
       '<div class="slot own"><div class="disc">'+d.ini+'</div><b>'+d.dish+'</b><span class="kind">'+KIND[d.kind]+'</span><p>'+d.story+'</p></div>':
       '<div class="slot"><div class="disc sil">?</div><b>???</b><span class="kind">'+KIND[d.kind]+'</span><p class="hint">'+d.hint+'</p></div>').join('')+'</div>';
