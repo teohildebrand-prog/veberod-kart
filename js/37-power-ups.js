@@ -5,7 +5,7 @@
 const rockets=[], hooks=[], walls=[], farts=[];
 function useItem(k){
   if(!k.held||k.roll>0||k.spun>0||k.fartT>0)return;         /* nothing while the slot still spins */
-  if(k.rib&&(k.held==='pie'||k.held==='rocket')){            /* no room in a farm lane */
+  if(k.rib&&(k.held==='pie'||k.held==='rocket'||(k.held==='sig'&&SIGS[k.sig].lane===false))){            /* no room in a farm lane */
     if(k===player)toast('FÖR TRÅNGT HÄR!');
     return;
   }
@@ -13,6 +13,7 @@ function useItem(k){
   USE[fam](k,lvl);
 }
 const USE={
+  sig(k){SIGS[k.sig].use(k);},                               /* the driver's own: 37-signature-items.js */
   /* Mjölk, Gräddfil, Skånsk grädde: longer first, then raw power */
   boost(k,lvl){
     k.boost=Math.max(k.boost,[1.2,2.4,3.0][lvl-1]*k.milk);k.boostLvl=Math.max(k.boostLvl,lvl);k.slow=0;
@@ -139,7 +140,7 @@ function updateRockets(dt){
     }
     if(done){scene.remove(r.holder);rockets.splice(n,1);}
   }
-  updateHooks(dt);updateWalls(dt);updateFarts(dt);shieldContacts();
+  updateHooks(dt);updateWalls(dt);updateFarts(dt);shieldContacts();updateSigs(dt);
 }
 
 /* Spettigare kaka: a cake on a skewer, on a rope. Fired forward, it bites the first rival
@@ -170,7 +171,7 @@ function fireHook(k){
 }
 function dropHook(n,why){
   const h=hooks[n];
-  if(h.target)h.owner.launch=0;                       /* the surge ends with the rope */
+  if(h.target){h.owner.launch=0;h.owner.tow=0;}       /* the surge ends with the rope */
   scene.remove(h.holder);scene.remove(h.rope);h.rope.geometry.dispose();hooks.splice(n,1);
   if(why&&h.owner===player)toast(why);
 }
@@ -206,10 +207,10 @@ function updateHooks(dt){
       const step=h.speed*dt/SEG,[mb,md]=mouthAhead(h.si,SHOT_REACH,k);
       if(mb&&steerToMouth(h,mb,md,step)){openPassage(mb,k);dropHook(n);continue;}
       h.si+=step;while(h.si>=N)h.si-=N;
-      const i=Math.floor(h.si)%N,[best]=nextAhead(h.si,k,40),[bb,bd]=blockerAhead(h.si,3);
-      if(best&&!mb)h.lat+=clamp(best.lat-h.lat,-7*dt,7*dt);
+      const i=Math.floor(h.si)%N,[best]=nextAhead(h.si,k,h.tow?TOW.home:40),[bb,bd]=blockerAhead(h.si,3);
+      if(best&&!mb)h.lat+=clamp(best.lat-h.lat,-(h.tow?11:7)*dt,(h.tow?11:7)*dt);
       if(bb&&bd<2){dropHook(n,'KROKEN FASTNADE');continue;}
-      if((h.t>HOOK.reach&&!mb)||k.rib||k.rib!==h.rib||k.done){dropHook(n,'MISS!');continue;}
+      if((h.t>(h.tow?TOW.reach:HOOK.reach)&&!mb)||k.rib||k.rib!==h.rib||k.done){dropHook(n,'MISS!');continue;}
       h.holder.position.set(sx[i]+rx[i]*h.lat,sy[i]+h.lat*bank[i]+1.0,sz[i]+rz[i]*h.lat);
       h.holder.rotation.y=Math.atan2(fx[i],fz[i]);
       let gone=false;
@@ -220,8 +221,8 @@ function updateHooks(dt){
         if(blockHit(o)){if(k===player)toast('SKÖLDEN STOPPADE KROKEN');dropHook(n);gone=true;break;}
         h.target=o;h.t=0;
         for(let p=0;p<8;p++)puff(h.holder.position.x+rand(-.5,.5),h.holder.position.y+rand(-.3,.5),h.holder.position.z+rand(-.5,.5),.85,.85,.9,.35);
-        if(k===player){ping(1700,1150,.06);toast('KLONK!');}            /* the clank */
-        else if(o===player){toast(k.name+' HAR KROKAT DIG!');ping(1500,1000,.06);}
+        if(k===player){ping(1700,1150,.06);toast(h.tow?'JAG DRAR DIG HEM, POJK!':'KLONK!');}            /* the clank */
+        else if(o===player){toast(k.name+(h.tow?' BOGSERAR DIG! SLADDA LOSS':' HAR KROKAT DIG!'));ping(1500,1000,.06);}
         break;
       }
       if(gone)continue;
@@ -232,14 +233,19 @@ function updateHooks(dt){
       if(d>HOOK.maxRope||k.rib!==o.rib||ropeCut(k,o)){dropHook(n,'REPET GICK AV');continue;}
       const taut=h.t>=HOOK.tighten;
       if(taut&&!h.surge){                                 /* the rope snaps tight: go */
-        h.surge=true;k.launch=HOOK.launch;
-        if(k===player){flash('HÅLL I DIG!');ping(420,1300,.22);shake=Math.min(.5,shake+.3);}
+        h.surge=true;if(h.tow)k.tow=TOW.time;else k.launch=HOOK.launch;
+        if(k===player){flash(h.tow?'BOGSERAD!':'HÅLL I DIG!');ping(420,1300,.22);shake=Math.min(.5,shake+.3);}
+      }
+      if(h.tow){
+        o.towed=.15;                                      /* the rope drags on the one in front */
+        if(o.drift!==0&&h.t>TOW.grace){                   /* a drift shakes it off */
+          dropHook(n,'DE SLET SIG LOSS!');if(o===player){toast('LOSS!');ping(700,1100,.08);}continue;}
       }
       if(h.surge){
         if(d<HOOK.release){                               /* just short of their bumper: let go and pass */
-          k.boost=Math.max(k.boost,.45);
+          k.boost=Math.max(k.boost,h.tow?TOW.sling:.45);
           dropHook(n,'SLÄPP! KÖR OM');if(k===player)ping(900,1400,.08);continue;}
-        if(k.launch<=0){dropHook(n,'REPET SLÄPPTE');continue;}
+        if(h.tow?k.tow<=0:k.launch<=0){dropHook(n,'REPET SLÄPPTE');continue;}
         if(launchBlocked(k)){dropHook(n,'SLÄPP!');continue;}
         if(Math.random()<.8)puff(k.x-Math.sin(k.yaw)*2+rand(-.5,.5),k.y+rand(.4,1.2),k.z-Math.cos(k.yaw)*2+rand(-.5,.5),1,.9,.6,.45);
       }
@@ -447,4 +453,5 @@ function clearPowerups(){
   while(hooks.length)dropHook(hooks.length-1);
   for(const w of walls)scene.remove(w.g);
   walls.length=0;farts.length=0;
+  clearSigs();
 }

@@ -230,6 +230,7 @@ function renderCombo(){
   const more=['<p>STAPLAR: FÖRARE OCH BIL. SIFFROR: BILEN SJÄLV.'+(P?' GULT/RÖTT: MOT '+CARS[cmpCar].name+'.':'')+'</p>',
     '<p><b>BOOST</b> '+pct(M.boostMul)+' FARTTAK MED BOOST</p>',
     '<p><b>SPINN</b> '+(sr===1?'':pct(sr,true)+' · ')+spin+'</p>'];
+  if(SIGS[c.id])more.push('<p><b>★ '+SIGS[c.id].name+'</b> '+SIGS[c.id].text+'</p>');
   if(capped)more.push('<p><b>ÅKER</b> '+c.short+' NÅR REDAN TAKET: BILENS '+pct(M.offRoad)+' GER INGET MER I TERRÄNGEN.</p>');
   host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
@@ -292,6 +293,7 @@ function placeOnGrid(){
     k.mass=P?(P.mass||1):1;k.shieldMul=P?(P.shieldMul||1):1;
     k.bucket=!!P&&P.id==='anders';k.bucketLap=-1;
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
+    k.sig=sigOf(P?P.id:R.kind);k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item, twins too */
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);
