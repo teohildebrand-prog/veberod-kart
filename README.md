@@ -62,11 +62,12 @@ tools/serve.sh        local web server
 tools/smoke_test.py   headless test: start a race, fail on JS errors
 tools/cup_schedule_test.py  headless test: cup schedules, old saves, points once
 tools/shortcut_test.py      headless test: each shortcut is driveable, quicker, and opens to every forward attack
+tools/signature_test.py     headless test: box odds and the three signature items (tow, bike, planned line)
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
 docs/                 design notes and build history
-Jenkinsfile           CI: runs the audio, cup schedule, shortcut and smoke tests
+Jenkinsfile           CI: runs the audio, cup schedule, shortcut, signature and smoke tests
 ```
 
 The `js/` files are classic scripts, not ES modules. They share one global
@@ -97,4 +98,5 @@ pip install -r requirements-dev.txt && playwright install chromium
 python3 tools/smoke_test.py
 python3 tools/cup_schedule_test.py
 python3 tools/shortcut_test.py          # the original tracks' shortcuts; name stages to check others
+python3 tools/signature_test.py
 ```

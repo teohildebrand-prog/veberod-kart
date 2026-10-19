@@ -97,6 +97,7 @@ let HAZARDS=[];
 /** the äggakaka shield (or one flying pan), then Anders' bucket (once a lap), takes a hit; true if one did */
 function blockHit(k){
   if(k===player&&DBG.god)return true;     /* debug: nothing lands */
+  if(k.bike>0){if(k===player)toast('CYKELN SMET FÖRBI!');return true;}   /* Björn on his bike: nothing to hit */
   if(k.shield>0&&k.pans>1){k.pans--;if(k===player){toast('STEKPANNAN TOG DEN! '+k.pans+' KVAR');ping(1200,500,.12);}return true;}
   if(k.shield>0){k.shield=0;k.pans=0;if(k===player){toast('BLOCKERAT!');ping(700,300,.12);}return true;}
   if(k.bucket&&k.bucketLap!==k.lap){

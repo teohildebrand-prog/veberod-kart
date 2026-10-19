@@ -34,7 +34,7 @@ function drive(k,dt,ctl){
   k.surf=surf?(RT?RT.S[i]:ms):'';
   k.atPump=!RT&&!!atPumpNow(i,lat);
   if(k.atPump)k.fuel=Math.min(TANK,k.fuel+26*dt);
-  else if(!k.air)k.fuel=Math.max(0,k.fuel-(0.5+ctl.throttle*2.0+(k.boost>0?1.6:0))*k.burn*(surf?surf.fuel:1)*dt);
+  else if(!k.air&&!(k.bike>0))k.fuel=Math.max(0,k.fuel-(0.5+ctl.throttle*2.0+(k.boost>0?1.6:0))*k.burn*(surf?surf.fuel:1)*dt);   /* pedalling is free */
   const dry=k.fuel<=0;
   const thr=k.spun>0?0:(dry?ctl.throttle*0.17:ctl.throttle);   /* dry = limp, not dead */
   if(!k.ai){
@@ -104,12 +104,13 @@ function drive(k,dt,ctl){
 
   /* gräddfil and up shrug off the verge; skånsk grädde also pulls harder and goes faster */
   const cream=k.boost>0?k.boostLvl:0, offR=cream>=2?Math.max(k.offRoad,0.88):k.offRoad;
-  side*=Math.exp(-(k.air?0.35:(k.drift!==0?2.1:(k.slow>0?3.2:(onRoad?k.gripOn*(surf?surf.grip(offR):1):4.2))))*(k.slick>0?0.3:1)*dt);
-  const top=k.maxSpeed*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
+  side*=Math.exp(-(k.air?0.35:(k.drift!==0?2.1:(k.slow>0?3.2:(onRoad?k.gripOn*(surf?surf.grip(offR):1):4.2))))*(k.slick>0?0.3:1)*sigGrip(k)*dt);
+  const top=sigTop(k)*k.maxSpeed*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
   if(!k.air){
     const torque=1+0.35*clamp(1-sp/k.maxSpeed,0,1);  /* short gears down low */
     fwd+=thr*(k.boost>0?k.power+(cream>=3?34:21):k.power)*torque*(onRoad||cream>=2?1:0.6)*(k.slow>0?0.55:1)*dt;
     if(k.launch>0)fwd+=HOOK.push*dt;                 /* the hook's surge: forward along your own nose */
+    fwd+=sigPush(k,thr)*dt;                          /* tow rope, bike legs, the planned line */
     if(dry)fwd-=Math.sign(fwd)*1.6*dt;              /* coughing along on fumes */
     fwd-=ctl.brake*52*dt;
     fwd-=gslope*15*dt;                             /* climbs cost you, but not the lap */
@@ -383,7 +384,7 @@ function aiControl(k){
   const pit=!!pitS;
   const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round(12+k.lookAdd+k.speed*0.55));
   /* each AI drives one of three lines this race: inside, middle or outside */
-  const L=pit?pitS.side*(HW-1.5):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
+  const L=pit?pitS.side*(HW-1.5):T===MAIN&&k.fplan>0?planLat(t):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
                   :clamp(k.line*0.3,-(T.hw-1),T.hw-1);
   const err=wrapAng(Math.atan2(T.X[t]+T.RX[t]*L-k.x,T.Z[t]+T.RZ[t]*L-k.z)-k.yaw);
   let steer=clamp(err*(k.drift!==0?2.0:2.85),-1,1);  /* calmer hands mid-slide */
@@ -437,7 +438,7 @@ function aiControl(k){
 function separate(){
   for(let a=0;a<karts.length;a++)for(let b=a+1;b<karts.length;b++){
     const A=karts[a],B=karts[b];
-    if(A.ghost>0||B.ghost>0||A.parked||B.parked)continue;
+    if(A.ghost>0||B.ghost>0||A.parked||B.parked||A.bike>0||B.bike>0)continue;   /* a bike slips through */
     let dx=B.x-A.x,dz=B.z-A.z;
     const d=Math.hypot(dx,dz);
     if(d>2.9||d<1e-4)continue;

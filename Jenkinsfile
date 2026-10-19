@@ -20,6 +20,11 @@ pipeline {
         sh 'python3 tools/shortcut_test.py'
       }
     }
+    stage('Signature item test') {
+      steps {
+        sh 'python3 tools/signature_test.py'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
@@ -37,6 +42,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'smoke.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png', allowEmptyArchive: true }
   }
 }

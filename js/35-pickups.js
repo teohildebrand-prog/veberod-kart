@@ -41,8 +41,9 @@ function pickWeighted(keys,w){
   for(const q of keys){r-=w[q];if(r<0)return q;}
   return keys[keys.length-1];
 }
-/** what an item box hands out: [family, level 1..3] */
-function rollItem(){
+/** what an item box hands out: [family, level 1..3]; a driver with their own item first rolls for that */
+function rollItem(k){
+  if(k&&k.sig&&Math.random()<SIG_CHANCE)return ['sig',1];
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }
 /** put an item in the slot; it keeps its level until it is used */
@@ -52,7 +53,7 @@ const ITEMNAMES={boost:['MJÖLK','GRÄDDFIL','SKÅNSK GRÄDDE'],
   shield:['ÄGGAKAKA','STEKHET ÄGGAKAKA','DEN FLYGANDE STEKPANNAN'],
   pie:['ÄPPELPAJ','KAFFEREP','TÅRTMINA'],
   fart:['SKÅNSKA BÖNOR','SKÅNSK ÄRTSOPPA','BRUNA BÖNOR MED FLÄSK']};
-const itemName=(f,l)=>ITEMNAMES[f][l-1];
+const itemName=(f,l,k)=>f==='sig'?SIGS[(k||player).sig].name:ITEMNAMES[f][l-1];
 const itemLvl=k=>k.heldLvl||1;
 const ROLLT=1.5;                 /* seconds the item slot spins before the item can be used */
 const ITEMICON={
@@ -350,7 +351,7 @@ function checkPickups(){
         it.cool=11;
       }else if(it.type==='box'){
         if(k.held)continue;                              /* hands already full */
-        giveItem(k,...rollItem());k.roll=ROLLT;   /* the slot spins first */
+        giveItem(k,...rollItem(k));k.roll=ROLLT;   /* the slot spins first */
         for(let p=0;p<8;p++)puff(it.x+rand(-.7,.7),it.y+rand(.4,1.5),it.z+rand(-.7,.7),.95,.76,.2,.4);
         it.cool=6;
       }else if(it.type==='rocket'){

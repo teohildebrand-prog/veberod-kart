@@ -121,6 +121,7 @@ function aiItemLines(){
       else if(h==='pie'&&behind)useItem(k);
       else if(h==='shield'&&(lvl===3?close||behind:behind||Math.random()<0.004))useItem(k);
       else if(h==='fart'&&(lvl===1?tail:close))useItem(k);
+      else if(h==='sig'&&SIGS[k.sig].ai({ahead,near,behind,close}))useItem(k);
     }
     if(!k.wantFuel&&!k.atPump&&wantsFuel(k))k.wantFuel=true;  /* decided before the pump */
     if(k.wantFuel&&k.atPump&&k.fuel>=Math.min(96,Math.max(82,legFuel(k)))||k.fuel>=96)k.wantFuel=false;
