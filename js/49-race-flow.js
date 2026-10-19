@@ -259,6 +259,7 @@ const MEDAL=['','GULD','SILVER','BRONS'],MEDALC=['','#ffd54a','#dfe7ee','#d08a4a
 function refreshMenu(){
   const c=SAVE.cup,b=document.getElementById('btnResumeCup');
   b.hidden=!(c&&!c.done);
+  document.getElementById('btnStart').classList.toggle('sec',!b.hidden);   /* one yellow button: FORTSÄTT while a cup runs */
   if(c&&!c.done)b.textContent='FORTSÄTT '+cupDef(c).name+' · '+(c.round+1)+'/'+cupRounds(c).length;
   const h2=document.querySelector('#start h2');if(h2)h2.textContent='SKÅNE · '+STAGES.length+' BANOR · '+CHARS.length+' FÖRARE';
   document.getElementById('btnName').textContent='NAMN · '+(SAVE.name||CHARS[charSel].short);

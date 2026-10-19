@@ -258,3 +258,9 @@ Roadmap step 4, last track: every original track now has its shortcuts and stamp
 - Keyboard and controller follow the steps: Enter/A moves on, Backspace/B goes back, arrows flip vehicles on the vehicle step.
 - Fixed: the stacked one-column layout was meant for portrait but also caught small phones on their side (667x320), pushing the vehicle panel below the bottom bar.
 - `tools/menu_fit_test.py` checks both steps, that the grid scrolls to the last driver, and no longer exempts portrait names from the cut-label check.
+
+## Phone menus, step 5: glass polish (2026-10-19)
+- Teo: one main action per screen in yellow (VÄLJ/NÄSTA/STARTA); reduce decoration before text, with darker panels.
+- `.go` is now the yellow main action (the same gradient as the driver and stage screens' VÄLJ button). `.go.sec` is the dark-blue style for big choices and ways back that aren't the main action: MÄSTERSKAP, TIDSLOPP and SANDLÅDA on the main menu, and TILLBAKA, TILL MENYN and STÄNG. While a cup is running, FORTSÄTT is the yellow one and KÖR turns blue.
+- Panels, cards, secondary pills and the sticky action bar are darker navy with much less sheen; the selected cup and class cards get a yellow edge.
+- `tools/menu_fit_test.py` fails if a menu shows more than one yellow main action.
