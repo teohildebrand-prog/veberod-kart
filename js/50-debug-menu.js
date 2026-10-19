@@ -50,7 +50,7 @@ function dbgTeleport(s){
 function dbgGive(t,l){
   if(!racingNow())return;
   if(t==='turbo'){player.boost=Math.max(player.boost,3);toast('TURBO!');return;}
-  if(t==='sig'){player.sig=DBG.lastSig=l;l=1;}                  /* any driver's own item, for testing */
+  if(t==='sig'){giveItem(player,t,1,DBG.lastSig=l);player.roll=0;DBG.lastItem=t;DBG.lastLvl=1;toast(itemName(t,1)+'!');return;}
   l=+l||1;giveItem(player,t,l);player.roll=0;DBG.lastItem=t;DBG.lastLvl=l;toast(itemName(t,l)+'!');
 }
 function dbgRow(title,items){
@@ -71,7 +71,7 @@ function renderDbg(){
     ['OÄNDLIGA FÖREMÅL: '+on(DBG.items),'items',DBG.items],['SISTA VARVET','last',false,!R||FREE||TT||player.done]]);
   for(const f of FAMILIES)h+=dbgRow(f===FAMILIES[0]?'FÖREMÅL':'',[1,2,3].map(l=>[itemName(f,l),'give:'+f+':'+l,false,!R]));
   h+=dbgRow('',[['TURBO','give:turbo',false,!R]]);
-  h+=dbgRow('EGNA FÖREMÅL',Object.keys(SIGS).map(id=>['★ '+SIGS[id].name,'give:sig:'+id,false,!R]));
+  h+=dbgRow('SIGNATUR',Object.keys(SIGS).map(id=>['★ '+SIGS[id].name,'give:sig:'+id,false,!R]));
   h+=dbgRow('DATORFÖRARE',AIMODES.map(([m,n])=>[n,'ai:'+m,DBG.ai===m]));
   h+=dbgRow('VISA',[['FPS: '+on(DBG.fps),'fps',DBG.fps],['FYSIK: '+on(DBG.phys),'phys',DBG.phys]]);
   h+=dbgRow('TIDSSKALA',TIMES.map(t=>[t+'×','ts:'+t,DBG.ts===t]));
@@ -114,7 +114,7 @@ document.getElementById('btnDbg').addEventListener('click',()=>{setPause(false);
 function dbgFrame(rawDt){
   if(rawDt>0)DBG.fpsS+=(1/rawDt-DBG.fpsS)*0.05;
   if(DBG.fuel)player.fuel=TANK;
-  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow()){if(DBG.lastItem==='sig')player.sig=DBG.lastSig;giveItem(player,DBG.lastItem,DBG.lastLvl||1);}
+  if(DBG.items&&!player.held&&DBG.lastItem&&racingNow())giveItem(player,DBG.lastItem,DBG.lastLvl||1,DBG.lastSig);
   if(dbgHud.hidden)return;
   const k=player,f=v=>v.toFixed(1);
   let t=DBG.fps?Math.round(DBG.fpsS)+' FPS'+(DBG.ts!==1?' · TID '+DBG.ts+'×':'')+'\n':'';

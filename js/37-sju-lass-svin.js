@@ -104,8 +104,8 @@ function fireSvin(k){
   if(k===player){
     toast('UT MED ER, PÅGAR!');
     audioTone(820,1100,.12,.05,'sine');audioTone(900,1100,.16,.05,'sine',.16);   /* the whistle */
-    oink(.38,.08);lastHerdOink=clock+.4;
-  }else if(Math.hypot(k.x-player.x,k.z-player.z)<45){oink(0,.05);lastHerdOink=clock;}
+    grunt(.38,.08);lastHerdOink=clock+.4;
+  }else if(Math.hypot(k.x-player.x,k.z-player.z)<45){grunt(0,.05);lastHerdOink=clock;}
   return h;
 }
 /** gone: a puff of dust where each pig stood */
@@ -132,7 +132,7 @@ function svinClear(it){
 }
 function svinOink(p){
   if(clock-lastHerdOink<.7||Math.hypot(p.x-player.x,p.z-player.z)>40)return;   /* seven pigs, not seven sounds */
-  lastHerdOink=clock;oink(0,.05);
+  lastHerdOink=clock;grunt(0,.05);
 }
 const svinTo={};
 function updateSvin(dt){

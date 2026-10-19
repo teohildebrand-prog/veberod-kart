@@ -188,7 +188,7 @@ function applyCharacter(i,force){
   charSel=i;previewChar=null;showRig();
   const say=document.getElementById('vsSay');                /* a driver with a line says it when picked */
   if(fresh&&say&&say.textContent){say.classList.remove('pop');void say.offsetWidth;say.classList.add('pop');
-    if(CHARS[i].sig==='svinexpress')oink(.12,.06);}
+    if(CHARS[i].sig==='svinexpress')grunt(.12,.06);}
 }
 function peekCharacter(i){                /* hover/focus: look, don't commit */
   if(!previewOn||previewChar===i)return;
@@ -236,7 +236,7 @@ function renderCombo(){
   const more=['<p>STAPLAR: FÖRARE OCH BIL. SIFFROR: BILEN SJÄLV.'+(P?' GULT/RÖTT: MOT '+CARS[cmpCar].name+'.':'')+'</p>',
     '<p><b>BOOST</b> '+pct(M.boostMul)+' FARTTAK MED BOOST</p>',
     '<p><b>SPINN</b> '+(sr===1?'':pct(sr,true)+' · ')+spin+'</p>'];
-  if(SIGS[c.id])more.push('<p><b>★ '+SIGS[c.id].name+'</b> '+SIGS[c.id].text+'</p>');
+  if(SIGS[c.id])more.push('<p><b>★ '+SIGS[c.id].name+'</b> '+SIGS[c.id].text+' Alla kan få den ur lådan, '+c.short+' dubbelt så ofta.</p>');
   if(capped)more.push('<p><b>ÅKER</b> '+c.short+' NÅR REDAN TAKET: BILENS '+pct(M.offRoad)+' GER INGET MER I TERRÄNGEN.</p>');
   host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
@@ -299,7 +299,7 @@ function placeOnGrid(){
     k.mass=P?(P.mass||1):1;k.shieldMul=P?(P.shieldMul||1):1;
     k.bucket=!!P&&P.id==='anders';k.bucketLap=-1;
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
-    k.sig=sigOf(P?P.id:R.kind);k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item, twins too */
+    k.sig=sigOf(P?P.id:R.kind);k.heldSig=null;k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item (twins too), twice as likely from a box */
     k.chores=!!(P||CHARS.find(c=>c.id===R.kind)||{}).chores;k.svinHerd=null;
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);

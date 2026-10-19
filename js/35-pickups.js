@@ -41,19 +41,20 @@ function pickWeighted(keys,w){
   for(const q of keys){r-=w[q];if(r<0)return q;}
   return keys[keys.length-1];
 }
-/** what an item box hands out: [family, level 1..3]; a driver with their own item first rolls for that */
+/** what an item box hands out: [family, level 1..3]; first a roll for a signature item, any driver's,
+    which comes back as ['sig', 1, which] */
 function rollItem(k){
-  if(k&&k.sig&&Math.random()<SIG_CHANCE)return ['sig',1];
+  if(k&&Math.random()<SIG_CHANCE)return ['sig',1,pickSig(k)];
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }
 /** put an item in the slot; it keeps its level until it is used */
-function giveItem(k,fam,lvl){k.held=fam;k.heldLvl=lvl||1;}
+function giveItem(k,fam,lvl,sig){k.held=fam;k.heldLvl=lvl||1;k.heldSig=fam==='sig'?sig:null;}
 const ITEMNAMES={boost:['MJÖLK','GRÄDDFIL','SKÅNSK GRÄDDE'],
   rocket:['SPETTEKAKA','SPETTIGARE KAKA','SEMMELVÄGGEN'],
   shield:['ÄGGAKAKA','STEKHET ÄGGAKAKA','DEN FLYGANDE STEKPANNAN'],
   pie:['ÄPPELPAJ','KAFFEREP','TÅRTMINA'],
   fart:['SKÅNSKA BÖNOR','SKÅNSK ÄRTSOPPA','BRUNA BÖNOR MED FLÄSK']};
-const itemName=(f,l,k)=>f==='sig'?SIGS[(k||player).sig].name:ITEMNAMES[f][l-1];
+const itemName=(f,l,k)=>f==='sig'?SIGS[(k||player).heldSig].name:ITEMNAMES[f][l-1];
 const itemLvl=k=>k.heldLvl||1;
 const ROLLT=1.5;                 /* seconds the item slot spins before the item can be used */
 const ITEMICON={

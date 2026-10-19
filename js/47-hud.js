@@ -34,14 +34,14 @@ function drawHUD(dt){
   const frame=spin?Math.floor((1-(player.roll/ROLLT)**2)*14):0;   /* 0..13, the last one just before the real item */
   const fam=spin?FAMILIES[(FAMILIES.indexOf(player.held)+frame+1)%FAMILIES.length]:player.held||(player.shield>0?'shield':null);
   const lvl=spin?(itemLvl(player)+frame)%3+1:player.held?itemLvl(player):(player.shieldLvl||1);
-  const key=fam?fam+lvl+(fam==='sig'?player.sig:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
+  const key=fam?fam+lvl+(fam==='sig'?player.heldSig:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
   if(key!==lastSlot){
     if(fam){
-      const own=fam==='sig';                             /* the driver's own item: a star, no level */
-      el.slotv.innerHTML=own?SIGS[player.sig].icon:ITEMICON[fam+lvl];
+      const own=fam==='sig';                             /* a signature item: a star, no level */
+      el.slotv.innerHTML=own?SIGS[player.heldSig].icon:ITEMICON[fam+lvl];
       el.slot.title=el.slotname.textContent=itemName(fam,lvl);
       el.slot.className=el.slotname.className='plate '+(own?'sig':'lvl'+lvl)+(player.held?'':' run');
-      lvlEl.textContent=own?'★':ROMAN[lvl-1];lvlEl.className='plate '+(own?'sig':'lvl'+lvl);lvlEl.title=own?'Eget föremål':'Nivå '+lvl;
+      lvlEl.textContent=own?'★':ROMAN[lvl-1];lvlEl.className='plate '+(own?'sig':'lvl'+lvl);lvlEl.title=own?'Signaturföremål':'Nivå '+lvl;
       void el.slot.offsetWidth;el.slot.classList.add(spin?'spin':'pop');
       if(spin)ping(1500-frame*40,1100-frame*30,.03);
     }

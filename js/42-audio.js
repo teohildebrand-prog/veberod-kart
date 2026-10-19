@@ -89,7 +89,7 @@ function moo(){
   }
 }
 /** one short pig grunt: a nasal sawtooth through a band-pass, roughened by a fast wobble */
-function oink(delay,vol){
+function grunt(delay,vol){
   if(!actx||muted||document.hidden||audioVoices>=7)return;
   const t=actx.currentTime+(delay||0),dur=.17,v=vol||.09;
   const o=actx.createOscillator(),lfo=actx.createOscillator(),lg=actx.createGain(),bp=actx.createBiquadFilter(),g=actx.createGain();
@@ -120,7 +120,7 @@ function fartSound(lvl){
 }
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
-  else if(CARS[carSel].id==='svinexpress'){oink(0);oink(.2);}      /* the Svinexpress horn: two short oinks */
+  else if(CARS[carSel].id==='svinexpress'){grunt(0);grunt(.2);}      /* the Svinexpress horn: two short oinks */
   else{audioTone(330,320,.15,.07,'triangle');audioTone(330,320,.15,.07,'triangle',.19);}
 }
 function saveAudioSettings(){
