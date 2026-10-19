@@ -159,12 +159,15 @@ function drive(k,dt,ctl){
         puff(k.x+rand(-1.2,1.2),gy+rand(.1,.7),k.z+rand(-1.2,1.2),.78,.72,.56,.6);
       if(big){
         k.boost=Math.max(k.boost,.85);
-        if(k===player){toast('SNYGGT HOPP!');ping(420,900,.12);}
+        if(k===player){if(!k.jumpSaid)toast('SNYGGT HOPP!');ping(420,900,.12);}
       }
       if(k===player)shake=Math.min(1,shake+clamp(-k.vy*0.035,0,.7));
     }
-    k.y=gy;k.vy=0;k.air=false;k.airT=0;
-  }else{k.air=true;k.airT+=dt;}
+    k.y=gy;k.vy=0;k.air=false;k.airT=0;k.jumpSaid=false;
+  }else{
+    k.air=true;k.airT+=dt;
+    if(k===player&&k.airT>=.42&&k.airT-dt<.42&&state==='race')k.jumpSaid=bark('jump',4);   /* Carl: HÅLL I LASTEN! */
+  }
   k.spin+=fwd*dt/0.44;
   k.lean=lerp(k.lean,clamp(-side*0.045,-0.34,0.34),Math.min(1,dt*9));
   k.speed=Math.hypot(k.vx,k.vz);k.onRoad=onRoad;k.lat=lat;

@@ -185,6 +185,7 @@ function updateSigs(dt){
     }else k.onPlan=false;
     if(k.planG)drawPlan(k);
   }
+  updateHerds(dt);                                   /* Carl's pigs: 37-sju-lass-svin.js */
 }
 function clearSigs(){
   for(const k of karts){
@@ -192,4 +193,5 @@ function clearSigs(){
     if(k.bike>0||k.bikeG){k.bike=0;if(k.bikeG)bikeShow(k,false);}
     if(k.planG)k.planG.visible=false;
   }
+  clearHerds();
 }

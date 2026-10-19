@@ -44,8 +44,8 @@ const USE={
       if(k===player){toast('TÅRTMINA UTLAGD!');ping(500,250,.12);}
       return;
     }
-    addItem('pie',back(8),lat).temp=15;
-    if(lvl===2){addItem('coffee',back(12),clamp(lat+rand(-1.4,1.4),-HW*.8,HW*.8)).temp=15;}
+    const p=addItem('pie',back(8),lat);p.temp=15;
+    if(lvl===2){const c=addItem('coffee',back(12),clamp(lat+rand(-1.4,1.4),-HW*.8,HW*.8));c.temp=15;p.pair=c;c.pair=p;}   /* one Kafferep */
     if(k===player){toast(lvl===2?'KAFFEREP!':'ÄPPELPAJ SLÄPPT!');ping(330,150,.12);}
   },
   fart(k,lvl){

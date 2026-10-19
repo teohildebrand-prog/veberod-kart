@@ -518,7 +518,7 @@ function buildCarl(cab,skin,dark,anim){
   addc(B(.08,.34,.04),trim,0,1.38,-.31);
   addc(B(.16,.14,.04),skin,0,1.58,-.31);                                    /* the open collar */
   for(const sg of [-1,1]){
-    addc(B(.24,.08,.2),shirt,sg*.15,1.67,-.4).rotation.z=-sg*.35;
+    addc(B(.24,.08,.16),shirt,sg*.15,1.62,-.42).rotation.z=-sg*.35;
     addc(B(.3,.62,.06),vest,sg*.33,1.33,-.31);                              /* vest fronts, a gap between */
     addc(B(.18,.12,.03),vestD,sg*.33,1.2,-.275);                            /* pockets */
     addc(B(.06,.62,.56),vest,sg*.48,1.33,-.6);
@@ -559,7 +559,7 @@ function buildCarl(cab,skin,dark,anim){
   addc(B(.08,.04,.04),frame,0,y+.07,-.34);
   for(const sg of [-1,1])addc(B(.03,.04,.3),frame,sg*.27,y+.1,-.5);
   /* the pig hat: a whole pig lying on his head, snout over the brow, legs dangling by the ears */
-  const hat=new THREE.Group();hat.position.set(0,y+.26,-.6);hat.scale.setScalar(1.15);cab.add(hat);
+  const hat=new THREE.Group();hat.position.set(0,y+.31,-.6);hat.scale.setScalar(1.15);cab.add(hat);
   put(hat,B(.66,.3,.62),pig,0,.08,0);
   put(hat,B(.56,.14,.5),pig,0,.28,-.02);
   put(hat,B(.44,.36,.34),pig,0,.36,.2);                                     /* the pig's head */
