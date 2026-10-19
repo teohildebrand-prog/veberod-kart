@@ -160,7 +160,26 @@ const STAGES=[
         [ 182, 16, -20],[ 200, 18,  44],[ 182, 12, 108],[ 126,  6, 150],
         [  54,  8, 146],[  -6, 14, 112],[ -56, 16,  72],[-112, 12,  92],
         [-166,  8, 124],[-206, 12,  66],[-188, 18,   0],[-140, 22, -40],
-        [-152, 15,-100],[-188,  8,-140],[-120,  3,-172],[ -50,  0,-178]] },
+        [-152, 15,-100],[-188,  8,-140],[-120,  3,-172],[ -50,  0,-178]],
+  routes:[
+    {id:'slagg',name:'SLAGGHÖGEN',a:200,b:296,hw:4.8,side:1,lead:14,leadLat:8,
+     mid:[[0.5,-10]],surface:'road',tex:'slag',risk:0.35,hills:[[0.5,2.4,12]],
+     blurb:'Straight over the slag heap: loose black grit, a crest and a long slide down.'},
+    {id:'lager',name:'LAGERHALLEN',a:580,b:660,hw:4.6,side:1,lead:14,leadLat:8,
+     mid:[[0.5,-8]],surface:'road',tex:'concrete',risk:0.3,hidden:true,shoot:true,mouth:22,
+     blockMesh:(R,j)=>tollarpDoor(R,j),blockAnim:(B,d)=>tollarpDoorAnim(B,d),
+     blurb:'Through the old warehouse between the pallet racks. The roller door is down.'}],
+  stations:[[0.27,-1],[0.71,-1]],                 /* the default inside pump would sit on the slag heap fork */
+  stamps:[
+    {id:'tol1',dish:'Fläskpannkaka',ini:'F',kind:'intro',route:'main',i:60,lat:-7.8,
+     hint:'Ytterkanten på första långa rakan, bort mot skorstenarna.',
+     story:'Oven pancake with pork: a thick batter of eggs, milk and flour poured over crisp-fried cubes of salt pork and baked in a roasting tin until it puffs up golden. Cut in squares and eaten with lingonberries, it is the lunch the works canteen made on Thursdays when the shifts were long.'},
+    {id:'tol2',dish:'Pyttipanna',ini:'P',kind:'route',route:'lager',f:0.55,lat:0,
+     hint:'Inne i Lagerhallen, mellan pallställen. Porten är nere: en spettekaka?',
+     story:'Bits in a pan: yesterday\'s potatoes, meat and onion diced small and fried together until crisp at the edges, topped with a fried egg, pickled beetroot and a dash of HP-style brown sauce. The warehouse crew cook it on a hotplate behind the pallet racks.'},
+    {id:'tol3',dish:'Kolbulle',ini:'K',kind:'route',route:'slagg',f:0.5,lat:0,
+     hint:'Högst upp på slagghögen.',
+     story:'The charcoal burners\' pancake: a stiff batter of flour, water and salt fried in a black iron pan over an open fire, with fat salt pork in the middle. Made by the men who watched the kilns all night, it tastes of smoke and fits anywhere coal and slag pile up.'}] },
 
 /* Knightmare-athon's counterpart: no shortcut, a castle ghost */
 { id:'glimminge', name:'GLIMMINGEHUS', sub:'BORGEN I MÅNSKEN',

@@ -237,6 +237,15 @@ Roadmap step 4, second track.
 - Preview: picture beside its facts (VARV, UNDERLAG, GENVÄGAR, PICKNICKPASS, REKORD) plus the mirror toggle; tag line and route map hidden on phones. Portrait (orientation) puts the preview above the list.
 - `tools/menu_fit_test.py` also checks the roster is one list on phones and its last track scrolls fully into view above the bottom bar.
 
+
+## 2026-10-18 — Tollarp: Slagghögen and Lagerhallen
+Roadmap step 4, last track: every original track now has its shortcuts and stamps.
+- Slagghögen (200-296, open): a lane of black slag grit (new `ROADTEX.slag`) inside the long right-hander, behind the barrier, with one crest (`hills`), grit heaps along both sides and a dumper parked at the top. AI gain +1.1 s.
+- Lagerhallen (580-660, closed): a corrugated warehouse with skylights and pallet racks; a roller door at `mouth:22` rolls up when shot. AI gain +1.4 s. All three forward-attack levels open it.
+- Pumps moved to the outside (`stations:[[0.27,-1],[0.71,-1]]`): the first one would have sat on the Slagghögen fork. Sheds, drums, heaps and dead trees keep off the lanes.
+- Stamps: Fläskpannkaka (outer edge of the first long straight), Pyttipanna (inside Lagerhallen), Kolbulle (top of the slag heap).
+- Note: lanes round gentle corners gain little for the AI; tighter inside chords measured slower (the AI's lane curvature reading brakes hard).
+
 ## Phone menus, step 3: main menu (2026-10-18)
 - Teo: compact logo, four clear choices KÖR, MÄSTERSKAP, TIDSLOPP, SANDLÅDA; settings and Picknickpasset in a smaller secondary row; instructions behind SÅ SPELAR DU.
 - ENKELT LOPP is now KÖR (same id, btnStart). FORTSÄTT CUPEN, when a cup is running, sits above the four as a full-width pill. The four go in one row on wide short screens (a phone on its side), 2x2 otherwise.
