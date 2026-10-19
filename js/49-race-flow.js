@@ -434,6 +434,17 @@ document.getElementById('btnCupNext').addEventListener('click',()=>{
   applyStage(STAGES.findIndex(S=>S.id===cupRounds({cup:CUPS[cupSel].id,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel})[0]));showSelect();});
 document.getElementById('btnResumeCup').addEventListener('click',()=>{bootAudio();showBrief();});
 document.getElementById('btnAlbum').addEventListener('click',()=>{bootAudio();showAlbum(showMenu);});
+/* the menu's secondary row: how to play, and settings (the pause menu's sound panel is borrowed while it is open) */
+const audioBox=document.querySelector('#paused .audio-settings'),audioHome=audioBox.nextElementSibling;
+function openMenuSheet(id){hideSheets();document.getElementById(id).classList.remove('hide');}
+document.getElementById('btnHow').addEventListener('click',()=>{bootAudio();openMenuSheet('howto');});
+document.getElementById('btnHowBack').addEventListener('click',showMenu);
+document.getElementById('btnSettings').addEventListener('click',()=>{bootAudio();
+  document.getElementById('setAudio').append(audioBox);openMenuSheet('settings');});
+const audioBack=()=>audioHome.before(audioBox);
+document.getElementById('btnSetBack').addEventListener('click',()=>{audioBack();showMenu();});
+document.getElementById('btnName').addEventListener('click',audioBack);   /* name entry returns to the menu */
+document.getElementById('btnSetPad').addEventListener('click',()=>{bootAudio();showPadHelp();});
 document.getElementById('btnAlbumBack').addEventListener('click',()=>albumBack());
 document.getElementById('btnBriefGo').addEventListener('click',()=>{bootAudio();startCupRound();});
 document.getElementById('btnBriefAlbum').addEventListener('click',()=>showAlbum(showBrief));

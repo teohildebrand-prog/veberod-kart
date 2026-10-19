@@ -245,3 +245,10 @@ Roadmap step 4, last track: every original track now has its shortcuts and stamp
 - Pumps moved to the outside (`stations:[[0.27,-1],[0.71,-1]]`): the first one would have sat on the Slagghögen fork. Sheds, drums, heaps and dead trees keep off the lanes.
 - Stamps: Fläskpannkaka (outer edge of the first long straight), Pyttipanna (inside Lagerhallen), Kolbulle (top of the slag heap).
 - Note: lanes round gentle corners gain little for the AI; tighter inside chords measured slower (the AI's lane curvature reading brakes hard).
+
+## Phone menus, step 3: main menu (2026-10-18)
+- Teo: compact logo, four clear choices KÖR, MÄSTERSKAP, TIDSLOPP, SANDLÅDA; settings and Picknickpasset in a smaller secondary row; instructions behind SÅ SPELAR DU.
+- ENKELT LOPP is now KÖR (same id, btnStart). FORTSÄTT CUPEN, when a cup is running, sits above the four as a full-width pill. The four go in one row on wide short screens (a phone on its side), 2x2 otherwise.
+- New sheets: SÅ SPELAR DU (`#howto`, the old intro text now in Swedish plus phone, keyboard and controller lines) and INSTÄLLNINGAR (`#settings`: sound, NAMN, KONTROLLER). Settings borrows the pause menu's sound panel node and puts it back on TILLBAKA or NAMN. PADBACK has entries for both.
+- `tools/menu_fit_test.py` covers the two new sheets and now fails on cut-off button labels (driver portraits exempt until the driver-select step).
+

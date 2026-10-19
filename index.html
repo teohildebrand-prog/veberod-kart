@@ -70,23 +70,51 @@
 </div>
 
 <div class="sheet" id="start">
-  <div class="sheet-in">
+  <div class="sheet-in menu-in">
     <h1>VEBERÖD KART<i>JAKTEN</i></h1>
     <h2>SKÅNE · 19 BANOR · 9 FÖRARE</h2>
-    <p>Three laps of a closed farm road through the rapeseed. Hold a drift all the way round a bend and you come out with a boost.</p><p>Grab the milk for speed. Miss the pies. Land a long jump and the kart rewards you with a boost.</p>
-    <div class="mrow actbar">
-      <button class="go" id="btnStart">ENKELT LOPP</button>
+    <button class="go mresume" id="btnResumeCup" hidden>FORTSÄTT CUPEN</button>
+    <div class="mgrid">
+      <button class="go" id="btnStart">KÖR</button>
       <button class="go" id="btnCup">MÄSTERSKAP</button>
+      <button class="go" id="btnTT">TIDSLOPP</button>
+      <button class="go" id="btnFree">SANDLÅDA</button>
     </div>
-    <div class="mrow">
-      <button class="alt" id="btnResumeCup" hidden>FORTSÄTT CUPEN</button>
+    <div class="mrow msec">
       <button class="alt" id="btnAlbum">PICKNICKPASSET</button>
-      <button class="alt" id="btnTT">TIDSLOPP</button>
-      <button class="alt" id="btnFree">SANDLÅDA</button>
-      <button class="alt" id="btnName">NAMN</button>
+      <button class="alt" id="btnSettings">INSTÄLLNINGAR</button>
+      <button class="alt" id="btnHow">SÅ SPELAR DU</button>
     </div>
     <div id="shelf"></div>
     <p class="note" id="saveNote" hidden>Den här webbläsaren kan inte spara. Stämplar och cupen sparas inte.</p>
+  </div>
+</div>
+
+<div class="sheet hide" id="howto">
+  <div class="sheet-in">
+    <h1>SÅ SPELAR DU</h1>
+    <h2>TRE VARV · FÖRST I MÅL VINNER</h2>
+    <p>Tre varv på avstängda vägar genom Skåne. Håll en sladd hela vägen genom en kurva så kommer du ut med en boost. Landa ett långt hopp så belönar kärran dig med en boost till.</p>
+    <p>Kör över mjölken för fart och undvik pajerna. Lådorna ger föremål: använd dem för att ta dig förbi eller stoppa dem bakom dig.</p>
+    <dl class="info">
+      <dt>TELEFON</dt><dd>Vänster tumme styr på STYR, gasen är automatisk. Höger tumme: BROMS (håll för att backa), SLADD och ANVÄND.</dd>
+      <dt>TANGENTBORD</dt><dd>WASD eller pilar kör, mellanslag sladdar, E använder, Esc pausar.</dd>
+      <dt>HANDKONTROLL</dt><dd>Se KONTROLLER under Inställningar.</dd>
+    </dl>
+    <div class="mrow actbar"><button class="go" id="btnHowBack">TILLBAKA</button></div>
+  </div>
+</div>
+
+<div class="sheet hide" id="settings">
+  <div class="sheet-in">
+    <h1>INSTÄLLNINGAR</h1>
+    <h2 id="setSub">VEBERÖD KART</h2>
+    <div id="setAudio"></div>
+    <div class="mrow">
+      <button class="alt" id="btnName">NAMN</button>
+      <button class="alt" id="btnSetPad">KONTROLLER</button>
+    </div>
+    <div class="mrow actbar"><button class="go" id="btnSetBack">TILLBAKA</button></div>
   </div>
 </div>
 
