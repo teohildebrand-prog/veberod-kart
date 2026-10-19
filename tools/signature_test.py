@@ -20,7 +20,7 @@ IDS = ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'br
 # helpers put into the page: move a kart onto the main road, and line the player up behind an AI
 HELPERS = """()=>{
   window.T_put=(k,i,lat,speed)=>{i=((Math.round(i)%N)+N)%N;k.rib=0;k.plan=0;k.si=i;k.lat=lat;
-    k.ghost=0;k.spun=0;k.frozen=0;k.pulled=0;k.recoverT=0;k.air=false;if(k.ai){k.shield=0;k.pans=0;}
+    k.ghost=0;k.spun=0;k.frozen=0;k.pulled=0;k.recoverT=0;k.air=false;if(k.ai){k.shield=0;k.pans=0;k.bucketLap=k.lap;}   /* no shield, and Anders' bucket already spent */
     k.x=sx[i]+rx[i]*lat;k.z=sz[i]+rz[i]*lat;k.yaw=Math.atan2(fx[i],fz[i]);
     k.vx=fx[i]*speed;k.vz=fz[i]*speed;k.y=groundK(k,k.x,k.z);k.vy=0;k.mi=mappedIdx(k);};
   window.T_rival=()=>karts.find(k=>k.ai&&!k.parked);
@@ -69,16 +69,26 @@ def main():
                 wait(250)
             return bool(ev(js))
 
-        # the box: 15 % signature items, any of the eleven, the driver's own twice as often
+        # the box: 25 % signature items, any of the eleven, the driver's own twice as often
         odds = ev("""()=>{const k=player,was=k.sig,n=60000,c={};let s=0;k.sig='arne';
             for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s++;c[r[2]]=(c[r[2]]||0)+1;}}
             k.sig=null;let s2=0;const c2={};for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s2++;c2[r[2]]=1;}}
             k.sig=was;return {share:s/n,own:c.arne/s,other:c.billy/s,kinds:Object.keys(c).length,share2:s2/n,kinds2:Object.keys(c2).length};}""")
-        check(0.135 < odds['share'] < 0.165, f"signature share {odds['share']:.3f}")
+        check(0.235 < odds['share'] < 0.265, f"signature share {odds['share']:.3f}")
         check(0.145 < odds['own'] < 0.19 and 0.068 < odds['other'] < 0.10,
               f"own item {odds['own']:.3f}, another driver's {odds['other']:.3f}")
-        check(odds['kinds'] == 11 and odds['kinds2'] == 11 and 0.135 < odds['share2'] < 0.165,
+        check(odds['kinds'] == 11 and odds['kinds2'] == 11 and 0.235 < odds['share2'] < 0.265,
               f"all eleven turn up, also for a driver without one ({odds['kinds2']}, {odds['share2']:.3f})")
+        # the roulette shows signature items among the normal ones and still lands on the real item
+        reel = ev("""()=>{const out=[];for(const h of ['boost','sig']){giveItem(player,h,1,'arne');
+            const f=[];for(let i=0;i<=1400;i++){player.roll=ROLLT*Math.sqrt(1-i/1400*13.99/14);const s=slotFrame(player);
+              if(!f.length||f[f.length-1].frame!==s.frame)f.push(s);}
+            player.roll=0;const end=slotFrame(player);player.held=null;
+            out.push({frames:f.length,sigs:f.filter(s=>s.fam==='sig').length,ids:new Set(f.filter(s=>s.fam==='sig').map(s=>s.sid)).size,
+              fams:new Set(f.map(s=>s.fam)).size,ok:f.every(s=>s.fam==='sig'?!!SIGS[s.sid]:!!ITEMICON[s.fam+s.lvl]),
+              end:end.fam+(end.fam==='sig'?end.sid:end.lvl)});}return out;}""")
+        check(all(r['frames'] == 14 and r['sigs'] >= 4 and r['ids'] >= 4 and r['fams'] == 6 and r['ok'] for r in reel)
+              and reel[0]['end'] == 'boost1' and reel[1]['end'] == 'sigarne', f'box roulette spins past signature items {reel}')
         own = ev("()=>CHARS.filter(c=>!c.boss).map(c=>sigOf(c.id))")
         check(own == ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl'],
               f'every starting driver has their own item: {own}')
