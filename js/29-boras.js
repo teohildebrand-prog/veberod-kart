@@ -26,6 +26,22 @@ GROUND.boras={cell:26,stripe:0.95,verge:0x77756f,
 
 /* the canal (Viskan, more or less) runs east to west north of the canal road; the roundabout's
    island is a circle inside the big U at the east end */
+/** the west-coast tracks' loudspeaker: one line in a box under the top of the screen for a few
+    seconds. vastPA() with no text hides it (each track's hazards call that when the race is laid). */
+let vastPAel=null,vastPAt=0;
+function vastPA(text){
+  if(!vastPAel){
+    vastPAel=document.createElement('div');vastPAel.id='vastPA';
+    vastPAel.style.cssText='position:fixed;top:64px;left:50%;transform:translateX(-50%);max-width:min(560px,86vw);z-index:30;'+
+      'padding:8px 16px;border-radius:12px;background:rgba(20,26,34,.72);color:#f4efe2;font-size:13px;line-height:1.35;'+
+      'text-align:center;pointer-events:none;opacity:0;transition:opacity .3s;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+    document.body.appendChild(vastPAel);
+  }
+  clearTimeout(vastPAt);
+  if(!text){vastPAel.style.opacity='0';return;}
+  vastPAel.innerHTML='<b style="letter-spacing:.08em">📢 SPEAKERN</b><br>'+text;vastPAel.style.opacity='1';
+  vastPAt=setTimeout(()=>{vastPAel.style.opacity='0';},5500);
+}
 const BORAS_CANAL={z:-40,w:9,x0:-44};
 const BORAS_ISLE={x:126,z:44,r:32};
 function borasCanal(x,z){
