@@ -181,7 +181,7 @@ function dressTwins(tw){
 const bossLockText=ci=>'Låst: vinn '+cupDef({cup:CHARS[ci].boss}).name+' för att köra som '+CHARS[ci].short+'.';
 function applyCharacter(i,force){
   if(!force&&!charOpen(i)){peekCharacter(i);ping(220,160,.06);return;}   /* a look, and the lock text */
-  if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;}   /* a new driver starts in their own vehicle */
+  if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;cmpCar=null;}   /* a new driver starts in their own vehicle */
   charSel=i;previewChar=null;showRig();
 }
 function peekCharacter(i){                /* hover/focus: look, don't commit */
@@ -206,20 +206,36 @@ function vsShowStep(step){
     (document.querySelector(step==='car'&&two?'#btnGo':'#cards .vcard.sel')||document.getElementById('btnGo')).focus();
 }
 VS_PHONE.addEventListener('change',()=>vsShowStep(vsStep));
-/* the panel's three bars: the driver's own numbers scaled by the car */
-const COMBO=[['FART',(c,M)=>c.stats[0]*M.maxSpeed],['GREPP',(c,M)=>c.stats[1]*M.gripOn],['ÅKER',(c,M)=>c.stats[2]*M.offRoad]];
+/* the panel's five bars: what the driver races with in this vehicle (effStats, the same numbers as
+   physics) on one fixed scale for everyone. [label, stat, worst, best]; fuel burn runs backwards */
+const COMBO=[['FART','maxSpeed',34,48],['ACCELERATION','power',22,37],['GREPP','gripOn',7,13.2],
+  ['ÅKER','offRoad',.35,.95],['BRÄNSLESNÅLHET','burn',1.6,.7]];
+const barCells=(E,f)=>Math.max(1,Math.round(clamp((E[f[1]]-f[2])/(f[3]-f[2]),0,1)*10));
+/** a vehicle's own effect, better positive: +5 %, −8 % */
+function pct(x,inv){const v=Math.round((inv?1-x:x-1)*100);return v?(v>0?'+':'−')+Math.abs(v)+' %':'±0';}
+let cmpCar=null;                          /* the vehicle shown before this one, for gained/lost cells */
 function renderCombo(){
   const host=document.getElementById('combo');if(!host)return;
   const ci=previewChar==null?charSel:previewChar,c=CHARS[ci],ri=carFor(ci),R=CARS[ri],M=R.mul;
-  host.innerHTML=COMBO.map(([k,f])=>{
-    const v=clamp(f(c,M),0.05,1),n=Math.round(v*10);
-    let cells='';for(let q=0;q<10;q++)cells+='<b'+(q<n?' class="on"':'')+'></b>';
-    return '<div class="vbar"><span>'+k+'</span><i>'+cells+'</i><em>'+Math.round(v*100)+'%</em></div>';
+  const E=effStats(c,ri),P=ci===charSel&&cmpCar!=null&&cmpCar!==ri?effStats(c,cmpCar):null;
+  const capped=c.offRoad*M.offRoad>OFFROAD_CAP&&M.offRoad>1;
+  host.innerHTML=COMBO.map(f=>{
+    const n=barCells(E,f),was=P?barCells(P,f):n,inv=f[1]==='burn';
+    let cells='';for(let q=0;q<10;q++)cells+='<b class="'+(q<n?(q>=was?'on gain':'on'):(q<was?'lost':''))+'"></b>';
+    const top=f[1]==='offRoad'&&capped,m=pct(M[f[1]],inv);
+    return '<div class="vbar"><span>'+f[0]+'</span><i>'+cells+'</i><em class="'+(top?'cap':m[0]==='+'?'up':m[0]==='−'?'down':'')+
+      '">'+(top?'TAK':m)+'</em></div>';
   }).join('');
+  const sr=M.spinResist,spin=sr<1?'KORTARE SPINN VID VISSA TRÄFFAR':sr>1?'LÄNGRE SPINN VID VISSA TRÄFFAR':'VANLIGA SPINN';
+  const more=['<p>STAPLAR: FÖRARE OCH BIL. SIFFROR: BILEN SJÄLV.'+(P?' GULT/RÖTT: MOT '+CARS[cmpCar].name+'.':'')+'</p>',
+    '<p><b>BOOST</b> '+pct(M.boostMul)+' FARTTAK MED BOOST</p>',
+    '<p><b>SPINN</b> '+(sr===1?'':pct(sr,true)+' · ')+spin+'</p>'];
+  if(capped)more.push('<p><b>ÅKER</b> '+c.short+' NÅR REDAN TAKET: BILENS '+pct(M.offRoad)+' GER INGET MER I TERRÄNGEN.</p>');
+  host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
   set('vsName',c.name);set('vsHome',c.role);set('ptag',peek?'FÖRHANDSVISNING':'');
-  set('vsCar',R.name);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
+  set('vsCar',R.name);set('vsRole',R.role);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
   set('btnGoT',vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);
   document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i,open=charOpen(n);
@@ -231,6 +247,7 @@ function renderCombo(){
 }
 function applyCar(i){
   if(!CARS[i])return;
+  if(i!==carSel)cmpCar=carSel;
   carSel=i;showRig();
 }
 function stepCar(d){
@@ -263,19 +280,12 @@ function placeOnGrid(){
     k.line=k.ai?rand(-R.lineSpread,R.lineSpread):0;
     k.fuel=TANK;k.atPump=false;k.warned=0;k.held=null;k.heldLvl=0;k.roll=0;k.shield=0;k.spun=0;
     k.boostLvl=0;k.shieldLvl=0;k.pans=0;k.panHit={};k.trapAt=-9;k.slick=0;k.launch=0;k.rattle=0;k.fartT=0;
-    k.burn=1;k.spinResist=1;
-    if(k.ai){
-      k.maxSpeed=R.maxSpeed*C.speed*(CUP&&CUP.mirror&&CUP.rival===i&&cupChamp()?1.02:1);k.power=R.power;k.offRoad=R.offRoad;
-      k.boostMul=R.boostMul;k.gripOn=R.gripOn;
+    /* driver times vehicle, every stat set fresh each race so no old car lingers */
+    Object.assign(k,k.ai?effStats(R,carIndex(R.car)):effStats(CHARS[charSel],carSel));
+    if(k.ai){                                    /* class and rival tweaks on top, kept apart */
+      k.maxSpeed*=C.speed*(CUP&&CUP.mirror&&CUP.rival===i&&cupChamp()?1.02:1);
       k.caution=R.caution*C.caution;k.lookAdd=R.lookAdd;
       k.bandMax=C.band;k.rival=!!CUP&&CUP.rival===i;
-    }
-    else{
-      const c=CHARS[charSel], M=CARS[carSel].mul;
-      k.maxSpeed=c.maxSpeed*M.maxSpeed;k.power=c.power*M.power;
-      k.offRoad=Math.min(.95,c.offRoad*M.offRoad);
-      k.boostMul=c.boostMul*M.boostMul;k.gripOn=c.gripOn*M.gripOn;
-      k.burn=M.burn*(c.burn||1);k.spinResist=M.spinResist||1;
     }
     const P=k.ai?null:CHARS[charSel];
     k.milk=P?(P.milk||1):1;

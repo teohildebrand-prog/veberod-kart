@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Veberöd Kart">
 <meta name="theme-color" content="#0e5a93">
 <title>Veberöd Kart - Jakten</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Titillium+Web:ital,wght@0,300;0,400;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
@@ -248,7 +249,11 @@
         <button class="vs-arrow" id="carNext" aria-label="Nästa bil">▶</button>
       </div>
       <div class="vs-stats">
-        <div id="combo"></div>
+        <div class="vs-bars">
+          <div class="vs-role" id="vsRole"></div>
+          <div id="combo"></div>
+          <details class="vs-more"><summary>FLER EGENSKAPER</summary><div id="vsMore"></div></details>
+        </div>
         <div class="vs-quirk"><b id="vsQuirk"></b><span id="vsQuirkT"></span></div>
       </div>
       <p class="vs-blurb" id="cblurb"></p>

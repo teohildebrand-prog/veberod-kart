@@ -9,11 +9,10 @@ function ghostSample(k,buf){
 /** Arne drives two laps in the plain kart, alone, no rubber band; the flying lap is his ghost */
 function recordArne(st){
   if(ARNE_GHOST[st.id])return ARNE_GHOST[st.id];
-  const was=state,rt=raceTime,k=karts[1],c=CHARS[0],M=CARS[0].mul;
+  const was=state,rt=raceTime,k=karts[1];
   placeOnGrid();
   const s=10;k.x=sx[s];k.z=sz[s];k.si=s;k.mi=s;k.yaw=Math.atan2(fx[s],fz[s]);k.y=groundAt(k.x,k.z,s);
-  k.maxSpeed=c.maxSpeed*M.maxSpeed;k.power=c.power*M.power;k.offRoad=Math.min(.95,c.offRoad*M.offRoad);
-  k.gripOn=c.gripOn*M.gripOn;k.boostMul=c.boostMul;k.caution=2.6;k.lookAdd=2;k.line=0;k.lineVar=0;
+  Object.assign(k,effStats(CHARS[0],0));k.caution=2.6;k.lookAdd=2;k.line=0;k.lineVar=0;
   k.noBand=true;k.parked=false;k.ghostBuf=[];k.ai=true;
   state='race';raceTime=0;
   let steps=0,buf=null;
