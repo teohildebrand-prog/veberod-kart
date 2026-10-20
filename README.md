@@ -74,6 +74,7 @@ tools/shortcut_test.py      headless test: each shortcut is driveable, quicker, 
 tools/signature_test.py     headless test: box odds and all eleven signature items
 tools/svin_test.py          headless test: Grisabonden Carl, his select line, rival guest and SJU LASS SVIN
 tools/beans_test.py         headless test: the beans' green gas cloud, the spin it gives, the AI and clean-up
+tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTBLANDAREN and STÄMPLA IN
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
@@ -111,6 +112,7 @@ python3 tools/cup_schedule_test.py
 python3 tools/shortcut_test.py          # shortcuts of the tracks that have been tuned; name stages to check others
 python3 tools/signature_test.py
 python3 tools/west_items_test.py        # the six west-coast signature items and the drivers' quirks
+python3 tools/weiron_test.py            # Weiron i ottan: driver select, CEMENTBLANDAREN, his quirk and horn
 python3 tools/vastgota_test.py          # the six west tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py

@@ -212,7 +212,8 @@ function applyCharacter(i,force){
   charSel=i;previewChar=null;showRig();
   const say=document.getElementById('vsSay');                /* a driver with a line says it when picked */
   if(fresh&&say&&say.textContent){say.classList.remove('pop');void say.offsetWidth;say.classList.add('pop');
-    if(CHARS[i].sig==='svinexpress')grunt(.12,.06);}
+    if(CHARS[i].sig==='svinexpress')grunt(.12,.06);
+    else if(CHARS[i].sig==='skiftsex')shiftWhistle(.6);}
 }
 function peekCharacter(i){                /* hover/focus: look, don't commit */
   if(!previewOn||previewChar===i)return;
@@ -328,6 +329,7 @@ function placeOnGrid(){
     k.wet=!!P&&P.id==='regnmolnet';k.glide=!!P&&P.id==='kaptenmas';     /* the west's quirks: 37-west-items.js */
     k.shy=!!P&&P.id==='aspenmonstret';k.shyT=0;k.ref=!!P&&P.id==='domaren';
     k.rain=0;k.offside=0;k.dive=0;
+    k.stamp=!!P&&P.id==='weiron';k.stampSeen=k.usedAt;              /* Stämpla in: 37-cementblandaren.js */
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);

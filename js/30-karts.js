@@ -100,7 +100,12 @@ const CARS=[
   {id:'burgarbus',name:'SIBYLLA BURGARBUS', sub:'HAMBURGARE PÅ HJUL',
    blurb:'A low racing chassis built like a giant hamburger: sesame bun, lettuce round the cockpit, cheese over the sides and a pickle for a steering wheel. Quick away and kind in the corners, but nothing special flat out. The bun is tall; the kart is not.',
    role:'SNABB IGÅNG · FÖRLÅTANDE GREPP · BLYGSAM TOPPFART',
-   mul:{maxSpeed:0.96,power:1.08,gripOn:1.07,offRoad:0.97,boostMul:1,burn:1,spinResist:0.95}}
+   mul:{maxSpeed:0.96,power:1.08,gripOn:1.07,offRoad:0.97,boostMul:1,burn:1,spinResist:0.95}},
+  /* Weiron i ottan's (js/30-weiron.js) */
+  {id:'skiftsex',name:'HISINGEN SKIFTSEX', sub:'VERKSTADENS GAFFELTRUCK',sig:'weiron',
+   blurb:'Verkstadens gaffeltruck, anmäld som den stod: industrigul, svart motvikt, skyddstak med roterande varningsljus, verktygslådan fastspänd på motvikten och matlådan på en liten pall på gafflarna. Drar starkt, håller vägen och är snabbt igång efter en snurr. Rakt fram är den fortfarande en truck, och batterierna dricker.',
+   role:'STARK IGÅNG · BRA GREPP · KORTA SPINN · LÅG TOPPFART · TÖRSTIG',
+   mul:{maxSpeed:0.96,power:1.09,gripOn:1.07,offRoad:1.0,boostMul:1,burn:1.15,spinResist:0.75}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 const OFFROAD_CAP=.95;
@@ -855,6 +860,8 @@ function buildKart(color,kind,car,opt){
     buildVictor(cab,skin,dark,anim);
   }else if(kind==='carl'){
     buildCarl(cab,skin,dark,anim);
+  }else if(kind==='weiron'){
+    buildWeiron(cab,skin,dark,anim);
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
@@ -1024,9 +1031,19 @@ const CHARS=[
    color:0x2a2e34,maxSpeed:41.8,power:27.5,offRoad:0.62,boostMul:1.38,gripOn:10.2,
    quirk:['TILLÄGGSTID','Lite högre toppfart på sista varvet.'],
    say:{start:'Spela rent nu.',home:'Min plan. Mina regler.',hit:'DET DÄR ÄR GULT KORT!'},
-   blurb:'Har dömt varenda match på Ullevi och tänker döma det här loppet också. Följer reglerna, kör jämnt och hittar alltid lite tilläggstid på slutet.'}
+   blurb:'Har dömt varenda match på Ullevi och tänker döma det här loppet också. Följer reglerna, kör jämnt och hittar alltid lite tilläggstid på slutet.'},
+  /* from the harbour workshop on Hisingen (js/30-weiron.js, item and quirk in js/37-cementblandaren.js) */
+  {id:'weiron',short:'WEIRON',name:'WEIRON I OTTAN',role:'HISINGEN',sig:'skiftsex',home:'hisingen',
+   color:0xe0a81a,maxSpeed:41.6,power:27.5,offRoad:0.62,boostMul:1.36,gripOn:10.4,
+   quirk:['STÄMPLA IN','Varje sak han använder stämplar ett kort: en liten fartknuff.'],
+   say:{pick:'Jag har lossat snabbare båtar än den där.',start:'Vem har planerat det här jobbet?',
+        home:'Hisingen. Här jobbar folk.',hit:'VEM HAR INTE SÄKRAT LASTEN?!',hitTeo:'Det där står inte på arbetsordern.',
+        pass:'Flytta på dig. Jag har ett skift att avsluta.',mud:'Vem har skottat här?',jump:'SÄKRA LASTEN!',
+        win:'Klart. Och kaffet är fortfarande varmt.',lose:'Det var inte jag som planerade det här.',idle:'Rasten är slut.'},
+   homeSay:{shortcut:'Genom verkstan. Torka av fötterna.'},
+   blurb:'Weiron jobbar i en verkstad i hamnen. Någon lånade hans verkstadsvagn, satte dit en transponder och skrev MOTORSPORT på övertidslappen. Nu tänker han vinna, lämna tillbaka grejerna och vara klar innan kaffet kallnar. Han klagar på allt, men han kan sitt jobb.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','weiron','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
 const GRID_COLS=Math.max(Math.ceil(Math.sqrt(GRID.length)),Math.ceil(GRID.length/3));   /* 3x3 for nine, then wider: never past three rows */
 const kindOf=c=>c.kind||c.id;
 /** a champion is playable once their cup is won; everyone else always is */

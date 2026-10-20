@@ -133,7 +133,7 @@ def main():
         # the burger kart
         bus = ev("""()=>{const c=CARS.findIndex(r=>r.id==='burgarbus'),C=CARS[c];if(c<0)return null;
             const v=buildKart(0x1f4fb4,'teo','burgarbus');let n=0;v.root.traverse(o=>{if(o.isMesh)n++;});
-            return {last:c===CARS.length-1,n,mul:C.mul,free:!C.sig}}""")
+            return {last:c>CARS.findIndex(r=>r.id==='domarvagn'),n,mul:C.mul,free:!C.sig}}   /* appended: saves keep their indices */""")
         check(bool(bus) and bus['last'] and bus['n'] > 60 and bus['free'],
               f'the Burgarbus is in the car list for everyone and builds {bus and bus["n"]} meshes')
         m = bus['mul'] if bus else {}

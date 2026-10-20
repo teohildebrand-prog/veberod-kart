@@ -118,10 +118,15 @@ function fartSound(lvl){
   o.onended=()=>{o.disconnect();lfo.disconnect();lg.disconnect();lp.disconnect();g.disconnect();audioVoices-=2;};
   o.start(t);lfo.start(t);o.stop(t+dur+.03);lfo.stop(t+dur+.03);
 }
+/** a short factory shift whistle: three tones that sag a little at the end */
+function shiftWhistle(v){
+  audioTone(523,512,.5,.05*v,'square');audioTone(659,646,.5,.04*v,'triangle');audioTone(784,768,.5,.03*v,'sine');
+}
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
   else if(CARS[carSel].id==='svinexpress'){grunt(0);grunt(.2);}      /* the Svinexpress horn: two short oinks */
   else if(CARS[carSel].id==='burgarbus')sibBell(1.2);                /* the Burgarbus horn: the order bell */
+  else if(CARS[carSel].id==='skiftsex')shiftWhistle(1);               /* the Skiftsex horn */
   else{audioTone(330,320,.15,.07,'triangle');audioTone(330,320,.15,.07,'triangle',.19);}
 }
 function saveAudioSettings(){
