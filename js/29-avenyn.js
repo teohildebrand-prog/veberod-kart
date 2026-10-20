@@ -1,6 +1,6 @@
 "use strict";
 /* ───────── Avenyn ───────── */
-/* Avenyruset: Kapten Mås's home track, round two of Västgötacupen. A fictional Göteborg boulevard
+/* Avenyruset: Kapten Mås's home track, round one of Göteborgscupen. A fictional Göteborg boulevard
    in the early-evening sun: down the broad avenue toward the cultural square and its fountain,
    along the café street, down the parallel street to the tram plaza and round the far boulevard
    turnaround, then home along the second boulevard. Tram wires overhead, long shadows, gulls. */
@@ -25,7 +25,7 @@ STAGES.push({ id:'avenyn', group:'goteborg', name:'AVENYN', sub:'AVENYRUSET',
   view:{i:690,lat:-4,h:3.4,to:{i:60,lat:2,h:5},fov:60},
   hw:8.6,
   bars:[0.85,0.6,0.65], laps:3, bankGain:0.14, bankMax:0.18,     /* city streets: hardly banked */
-  blurb:'Kapten Mås\'s home track, round two of Västgötacupen: three laps of a fictional Göteborg boulevard in the early-evening sun, with tram wires overhead and long shadows across the road. Launch down the broad avenue toward the cultural square and its sweeping fountain, thread the kinks past the café terraces, brake hard for the square corner and run down the parallel street to the tram plaza, where a slow tram crosses the outside line on its timetable while the inside stays open. Round the far boulevard turnaround and come home along the second boulevard over a small event ramp. Behind the café terraces is a narrow paved alley; the concert loading lane cuts the plaza with two tight turns.',
+  blurb:'Kapten Mås\'s home track, round one of Göteborgscupen: three laps of a fictional Göteborg boulevard in the early-evening sun, with tram wires overhead and long shadows across the road. Launch down the broad avenue toward the cultural square and its sweeping fountain, thread the kinks past the café terraces, brake hard for the square corner and run down the parallel street to the tram plaza, where a slow tram crosses the outside line on its timetable while the inside stays open. Round the far boulevard turnaround and come home along the second boulevard over a small event ramp. Behind the café terraces is a narrow paved alley; the concert loading lane cuts the plaza with two tight turns.',
   role:'Breda boulevarder i kvällssol, kafékurvor, en fontän och en spårvagn som inte väntar på någon.',
   sky:[0xf6bc86,0x4a6eb0], fog:[0xeec09a,90,380], amb:0x6e6476, dif:0xffd4a0,
   road:'avenyn', verge:'avenyn', edge:'avenyn', ground:'avenyn',

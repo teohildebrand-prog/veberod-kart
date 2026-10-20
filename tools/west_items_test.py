@@ -86,7 +86,7 @@ def main():
             player.wet=true;updateWest(0.016);const dry=!e.classList.contains('on')&&westGrip(player)===1;
             player.wet=false;player.rain=0;updateWest(0.016);return {on,dry,off:!e.classList.contains('on')};}""")
         check(ov['on'] and ov['dry'] and ov['off'], f'player sees rain and wipers, Regnmolnet does not mind {ov}')
-        check(until(f"()=>karts[{a}].rain===0&&!karts[{a}].cloudG.visible", 7000), 'the cloud moves on')
+        check(until(f"()=>karts[{a}].rain===0&&!karts[{a}].cloudG?.visible", 7000), 'the cloud moves on')
 
         # Containern: shadow first, then a wall that bounces you back, with a gap round it
         a = ev("()=>T_behind(14)")
@@ -131,7 +131,7 @@ def main():
             hidden:player.v.root.children.filter(c=>c!==player.bikeG).every(c=>!c.visible)})""")
         page.screenshot(path=str(ROOT / 'west-dive.png'))
         check(all(d.values()), f'dives under the road, untouchable {d}')
-        check(until("()=>player.dive===0&&!player.diveG.visible&&player.v.lean.visible", 6000), 'comes up again')
+        check(until("()=>player.dive===0&&!player.diveG?.visible&&player.v.lean.visible", 6000), 'comes up again')
 
         # Räkmackan: the gull takes the item from the kart ahead and brings it back
         # (the victim's AI is switched off for this, or it would just use its boost before the gull gets there)
@@ -153,13 +153,13 @@ def main():
         ev("()=>{player.held=null;}")
 
         # Offside: the leader gets the yellow card and slows
-        o = ev("""()=>{order();const t=herdTarget(player);t.shield=0;t.pans=0;T_use('domaren');
+        o = ev("""()=>{order();const t=herdTarget(player);t.shield=0;t.pans=0;t.bike=0;t.bucketLap=t.lap;T_use('domaren');
             return {who:t.idx,off:t.offside,top:sigTop(t),card:!!t.cardG&&t.cardG.visible}}""")
         wait(200)
-        o['card'] = ev(f"()=>karts[{o['who']}].cardG.visible")
+        o['card'] = ev(f"()=>!!karts[{o['who']}].cardG?.visible")
         page.screenshot(path=str(ROOT / 'west-card.png'))
         check(o['off'] > 2.5 and o['top'] < 0.8 and o['card'], f'yellow card for the leader {o}')
-        check(until(f"()=>karts[{o['who']}].offside===0&&!karts[{o['who']}].cardG.visible", 6000), 'back to normal')
+        check(until(f"()=>karts[{o['who']}].offside===0&&!karts[{o['who']}].cardG?.visible", 6000), 'back to normal')
 
         # the AI plays each of them when it makes sense
         played = []

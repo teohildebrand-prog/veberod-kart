@@ -25,7 +25,7 @@ START = IDS + WEST[2:]    # the champions' are theirs once they are beaten
 # helpers put into the page: move a kart onto the main road, and line the player up behind an AI
 HELPERS = """()=>{
   window.T_put=(k,i,lat,speed)=>{i=((Math.round(i)%N)+N)%N;k.rib=0;k.plan=0;k.si=i;k.lat=lat;
-    k.ghost=0;k.spun=0;k.frozen=0;k.pulled=0;k.recoverT=0;k.air=false;if(k.ai){k.shield=0;k.pans=0;k.bucketLap=k.lap;}   /* no shield, and Anders' bucket already spent */
+    k.ghost=0;k.spun=0;k.frozen=0;k.pulled=0;k.recoverT=0;k.air=false;if(k.ai){k.shield=0;k.pans=0;k.bucketLap=k.lap;k.bike=0;}   /* no shield, no bike, and Anders' bucket already spent */
     k.x=sx[i]+rx[i]*lat;k.z=sz[i]+rz[i]*lat;k.yaw=Math.atan2(fx[i],fz[i]);
     k.vx=fx[i]*speed;k.vz=fz[i]*speed;k.y=groundK(k,k.x,k.z);k.vy=0;k.mi=mappedIdx(k);};
   window.T_rival=()=>karts.find(k=>k.ai&&!k.parked);
