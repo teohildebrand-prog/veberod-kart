@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Headless check of the first eleven signature items (Carl's SJU LASS SVIN has its own svin_test.py, the six
-west-coast ones west_items_test.py), and that any driver can get any of the seventeen.
+west-coast ones west_items_test.py, Weiron's CEMENTBLANDAREN weiron_test.py), and that any driver can get any of the eighteen.
 
     CHROMIUM=/path/to/chrome python3 tools/signature_test.py
 
@@ -18,9 +18,10 @@ from smoke_test import serve
 ROOT = Path(__file__).resolve().parent.parent
 IDS = ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl']
 WEST = ['regnmolnet', 'hamnkranen', 'slusstrollet', 'aspenmonstret', 'kaptenmas', 'domaren']
-ALL = IDS + WEST
+LATER = ['weiron']
+ALL = IDS + WEST + LATER
 N = len(ALL)
-START = IDS + WEST[2:]    # the champions' are theirs once they are beaten
+START = IDS + WEST[2:] + LATER    # the champions' are theirs once they are beaten
 
 # helpers put into the page: move a kart onto the main road, and line the player up behind an AI
 HELPERS = """()=>{
@@ -74,7 +75,7 @@ def main():
                 wait(250)
             return bool(ev(js))
 
-        # the box: 25 % signature items, any of the seventeen, the driver's own twice as often
+        # the box: 25 % signature items, any of the eighteen, the driver's own twice as often
         odds = ev("""()=>{const k=player,was=k.sig,n=60000,c={};let s=0;k.sig='arne';
             for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s++;c[r[2]]=(c[r[2]]||0)+1;}}
             k.sig=null;let s2=0;const c2={};for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s2++;c2[r[2]]=1;}}
