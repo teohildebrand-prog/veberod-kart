@@ -342,7 +342,7 @@ function checkPickups(){
     const r2=trap?4.4:6.25;
     for(const k of karts){
       const dx=k.x-it.x,dz=k.z-it.z;
-      if(dx*dx+dz*dz>r2)continue;
+      if(dx*dx+dz*dz>(k.nose&&it.type==='box'?NOSE.r2:r2))continue;   /* Godisnosen: 37-brak-och-trak.js */
       if(Math.abs(k.y-it.y)>3.4)continue;    /* sailing over it does not count */
       if(trap&&raceTime-k.trapAt<1.2)continue;           /* one trap at a time, then a moment to recover */
       if(it.type==='fuel'){

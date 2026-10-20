@@ -75,6 +75,7 @@ tools/signature_test.py     headless test: box odds and all eleven signature ite
 tools/svin_test.py          headless test: Grisabonden Carl, his select line, rival guest and SJU LASS SVIN
 tools/beans_test.py         headless test: the beans' green gas cloud, the spin it gives, the AI and clean-up
 tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTBLANDAREN and STÄMPLA IN
+tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
@@ -114,6 +115,7 @@ python3 tools/shortcut_test.py          # shortcuts of the tracks that have been
 python3 tools/signature_test.py
 python3 tools/west_items_test.py        # the six west-coast signature items and the drivers' quirks
 python3 tools/weiron_test.py            # Weiron i ottan: driver select, CEMENTBLANDAREN, his quirk and horn
+python3 tools/bodil_test.py             # Bodil: driver select, the tackle and its counterplay, her quirk and horn
 python3 tools/vastgota_test.py          # the six west tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py

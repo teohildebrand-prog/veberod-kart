@@ -52,11 +52,11 @@ def main():
         # the roster: his item, his place on the grid, his own vehicle, everything builds
         check(ev("()=>!!SIGS.weiron&&!!SIGS.weiron.icon&&sigOf('weiron')==='weiron'&&SIGS.weiron.name==='CEMENTBLANDAREN'"),
               'CEMENTBLANDAREN registered as his signature item')
-        check(ev("()=>{const i=CHARS.findIndex(c=>c.id==='weiron');return i===CHARS.length-1&&GRID.includes(i)&&"
+        check(ev("()=>{const i=CHARS.findIndex(c=>c.id==='weiron');return i>CHARS.findIndex(c=>c.id==='domaren')&&GRID.includes(i)&&"
                  "GRID.length===CHARS.length&&GRID.every(g=>g>=0)&&charOpen(i)}"),
               'on the driver grid, open from the start, last in the save order')
         check(ev("()=>{const c=CHARS.find(d=>d.id==='weiron'),r=CARS[carIndex(c.sig)];return r.id==='skiftsex'&&r.sig==='weiron'&&"
-                 "CARS.indexOf(r)===CARS.length-1&&!/kenta/i.test(JSON.stringify(c)+JSON.stringify(r))}"),
+                 "CARS.indexOf(r)>CARS.findIndex(c=>c.id==='burgarbus')&&!/kenta/i.test(JSON.stringify(c)+JSON.stringify(r))}"),
               'HISINGEN SKIFTSEX is his own vehicle, last in the save order, and no Kenta anywhere')
         m = ev("""()=>{const r=CARS.find(c=>c.id==='skiftsex').mul;return r;}""")
         check(m['power'] > 1.05 and m['gripOn'] > 1.04 and m['maxSpeed'] < 1 and m['offRoad'] == 1
