@@ -25,7 +25,7 @@ from smoke_test import serve  # noqa: E402
 
 MIN_GAIN = 0.3        # seconds, averaged over the AI karts
 # the original tracks' shortcuts (roadmap: finish shortcuts and picnic stamps); name others to check them too
-DEFAULT_STAGES = ['lund', 'bron', 'ahus', 'tollarp', 'lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi', 'sibylla']
+DEFAULT_STAGES = ['lund', 'bron', 'ahus', 'tollarp', 'lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi', 'sibylla', 'promenad']
 
 SETUP = """(id) => {
   CUP = null; TT = false; FREE = false; mirrorSel = false;

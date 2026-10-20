@@ -60,6 +60,11 @@ pipeline {
         sh 'python3 tools/bodil_test.py'
       }
     }
+    stage('Bodils promenad test') {
+      steps {
+        sh 'python3 tools/promenad_test.py'
+      }
+    }
     stage('West and bonus tracks test') {
       steps {
         sh 'python3 tools/vastgota_test.py'

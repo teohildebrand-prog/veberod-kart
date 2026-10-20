@@ -433,7 +433,7 @@ function renderAlbum(){
       '<div class="slot own"><div class="disc">'+d.ini+'</div><b>'+d.dish+'</b><span class="kind">'+KIND[d.kind]+'</span><p>'+d.story+'</p></div>':
       '<div class="slot"><div class="disc sil">?</div><b>???</b><span class="kind">'+KIND[d.kind]+'</span><p class="hint">'+d.hint+'</p></div>').join('')+'</div>';
   }
-  document.getElementById('apage').innerHTML=h;
+  const ap=document.getElementById('apage');ap.innerHTML=h;ap.className=S.album||'';   /* a stage can theme its page: Bodil's is a dog's */
   const n=stampCount(),full=STAGES.some(T=>{const [g,o]=stageStamps(T);return o&&g===o;});
   document.getElementById('arewards').innerHTML=REWARDS.map(r=>{
     const got=r[0]===3?full:n>=r[0];

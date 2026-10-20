@@ -167,7 +167,7 @@ function renderPage(){
 const fmtOr=t=>t!=null&&isFinite(t)?fmt(t):'—';
 function ssInfoRows(S){
   const m=ssMode(),rows=[],mir=m!=='tt'&&m!=='cup'&&mirrorSel&&!!SAVE.unlock['mirror_'+S.id];
-  if(S.bonus)rows.push(['BONUSBANA','Ingen cup. Eget föremål i lådorna'+(SIGS.extraallt&&SIGS.extraallt.event===S.id?': Extra Allt':'')]);
+  if(S.bonus)rows.push(['BONUSBANA',S.bonusNote||'Ingen cup. Eget föremål i lådorna'+(SIGS.extraallt&&SIGS.extraallt.event===S.id?': Extra Allt':'')]);
   if(m==='race'||m==='cup')rows.push(['VARV',String(S.laps||3)]);
   if(m==='tt')rows.push(['VARV','1 + 3 flygande']);
   const known=knownRoutes(S);

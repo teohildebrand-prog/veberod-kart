@@ -151,7 +151,13 @@ function bodilSleep(D,u,t){
 function buildBodil(cab,skin,dark,anim){
   const D=bodilDog();D.g.position.set(0,.9,-.62);D.g.name='bodil';cab.add(D.g);
   const ease=u=>{u=clamp(u,0,1);return u*u*(3-2*u);};
-  const st={t:0,last:-9};
+  const st={t:0,last:-9,won:null};
+  /* the trophy she wins: it rides in the dog bed beside her, which is where she naps */
+  const cup=new THREE.Group();cup.name='bodilCup';cup.position.set(.46,1.08,-.98);cup.visible=false;cab.add(cup);
+  {const gold=psMat({color:0xe8c040}),put=(geo,y)=>{const m=new THREE.Mesh(flat(geo),gold);m.position.y=y;cup.add(m);};
+    put(new THREE.BoxGeometry(.24,.06,.24),.03);put(new THREE.CylinderGeometry(.04,.05,.18,6),.15);
+    put(new THREE.CylinderGeometry(.15,.07,.22,8),.35);
+    for(const s of [-1,1]){const h=new THREE.Mesh(flat(new THREE.TorusGeometry(.07,.02,4,8)),gold);h.position.set(s*.16,.37,0);h.rotation.y=Math.PI/2;cup.add(h);}}
   const rest=()=>{
     D.body.rotation.set(0,0,0);D.body.position.set(0,0,0);D.body.scale.set(1,1,1);D.head.rotation.set(0,0,0);
     for(const L of D.legs)L.rotation.set(-1.05,0,0);
@@ -180,6 +186,21 @@ function buildBodil(cab,skin,dark,anim){
     if(k.dogWarn>0){                                                   /* the leap coming: down on the haunches */
       const u=1-k.dogWarn/.38;D.body.position.y=-.14*ease(u*2);D.body.rotation.x=.3*ease(u*2);
       focused(1);perk=1;for(const L of D.legs)L.rotation.x=-.6;
+    }
+    /* Bodils promenad: the cartoon dog on the TV in the window. Her ears go up and her head turns;
+       the steering is left alone */
+    const T=stage&&stage.id==='promenad'&&PROM.dogOnTV&&PROM.tv;
+    if(!preview&&T&&(T.x-k.x)**2+(T.z-k.z)**2<2500){
+      focused(.6);D.head.rotation.y=clamp(wrapAng(Math.atan2(T.x-k.x,T.z-k.z)-k.yaw),-1.1,1.1);D.head.rotation.x=-.1;perk=1;
+      D.tail.rotation.y=Math.sin(clock*14)*.6;
+    }
+    /* she won: the trophy goes in the dog bed beside her and she falls asleep next to it, belly up */
+    const won=!preview&&k.done&&k.place===1&&(state==='race'||state==='over');
+    if(won&&st.won==null)st.won=clock;else if(!won)st.won=null;
+    cup.visible=won;
+    if(won){const u=(clock-st.won-.8)/1.1;
+      if(u>0){bodilSleep(D,u,clock);earX=-.9*ease(u);earZ=0;perk=0;}
+      else{innocent(1);D.head.rotation.y=.5;}                         /* a look at the trophy first */
     }
     if(perk){earX=Math.min(earX,-.1);earZ*=.5;}
     if(preview){                                                       /* the turntable */

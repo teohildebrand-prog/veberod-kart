@@ -13,11 +13,14 @@ parallel tour open from the start: Västgötacupen (Lerum, Borås, Trollhättan)
 against Regnmolnet, then Göteborgscupen (Avenyn, Hisingen, Ullevi) against
 Hamnkranen. Finalen still needs only the three Skåne championships.
 
-One bonus track outside the cups, marked BONUSBANA in the stage picker:
+Two bonus tracks outside the cups, marked BONUSBANA in the stage picker:
 Sibylla, Extra Allt Grand Prix (two laps from a Sibylla car park through the
 drive-through and a giant kitchen). Its boxes also hand out EXTRA ALLT, an
 item found only there, and it brings the SIBYLLA BURGARBUS, a burger-shaped
-vehicle every driver can pick.
+vehicle every driver can pick. And Bodils promenad, Bara en liten runda
+(three laps of Bodil's walk: out of the door, up through the woods, round the
+shrub every dog stops at, an agility event on the lawn, and home past the
+sofa in the window to NU VILAR VI).
 
 ## Play
 
@@ -76,6 +79,7 @@ tools/svin_test.py          headless test: Grisabonden Carl, his select line, ri
 tools/beans_test.py         headless test: the beans' green gas cloud, the spin it gives, the AI and clean-up
 tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTBLANDAREN and STÄMPLA IN
 tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
+tools/promenad_test.py      headless test: Bodils promenad, its hazards, the TV, Bodil's nap and her passport page
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
@@ -116,7 +120,8 @@ python3 tools/signature_test.py
 python3 tools/west_items_test.py        # the six west-coast signature items and the drivers' quirks
 python3 tools/weiron_test.py            # Weiron i ottan: driver select, CEMENTBLANDAREN, his quirk and horn
 python3 tools/bodil_test.py             # Bodil: driver select, the tackle and its counterplay, her quirk and horn
-python3 tools/vastgota_test.py          # the six west tracks: layout, fuel stops, stamps, full AI races
+python3 tools/promenad_test.py          # Bodils promenad: launcher, sprinkler, TV, the victory nap, the dog page
+python3 tools/vastgota_test.py          # the west and bonus tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
 ```

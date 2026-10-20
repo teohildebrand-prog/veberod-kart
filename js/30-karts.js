@@ -1050,13 +1050,14 @@ const CHARS=[
    homeSay:{shortcut:'Genom verkstan. Torka av fötterna.'},
    blurb:'Weiron jobbar i en verkstad i hamnen. Någon lånade hans verkstadsvagn, satte dit en transponder och skrev MOTORSPORT på övertidslappen. Nu tänker han vinna, lämna tillbaka grejerna och vara klar innan kaffet kallnar. Han klagar på allt, men han kan sitt jobb.'},
   /* Teo's dog (js/30-bodil.js, item and quirk in js/37-brak-och-trak.js). Her portrait stays serious */
-  {id:'bodil',short:'BODIL',name:'BODIL',role:'GODISINSPEKTÖREN',sig:'grisorat',home:'tollarp',
+  {id:'bodil',short:'BODIL',name:'BODIL',role:'GODISINSPEKTÖREN',sig:'grisorat',home:'promenad',
    color:0x2f8f9d,maxSpeed:41.4,power:28.5,offRoad:0.66,boostMul:1.42,gripOn:10.4,
    quirk:['GODISNOSEN','Känner lukten av en sakbox på långt håll: tar lådor lite längre ut från sidan.'],
    say:{pick:'(Någon öppnade en påse.)',start:'(Sitter helt stilla. Helt oskyldig.)',
         home:'(Hemma. Här luktar allt bekant.)',hit:'VOFF?!',hitTeo:'(Tittar på Teo. Länge.)',
         pass:'(Ser inte ens åt dig.)',mud:'(Det här blir ett bad sen.)',jump:'(Öronen först!)',
-        win:'(Förväntar sig godis nu.)',lose:'(Det var nog någon annans fel.)',idle:'(Någonstans prasslar en påse.)'},
+        win:'(Bär pokalen till soffan. Somnar bredvid den.)',lose:'(Det var nog någon annans fel.)',idle:'(Någonstans prasslar en påse.)'},
+   homeSay:{shortcut:'(Den här vägen går hon varje dag. Bakom busken.)',win:'(Hem till soffan. Pokalen får ligga bredvid.)'},
    blurb:'Bodil är en cockerspaniel med fräknig brunvit päls, en vit strimma ner över nosen och enorma öron. Hon hör inte \'kom\'. Hon hör en påse öppnas. Hon kör med tassarna på ratten, ser helt oskyldig ut vid startljuset och tycker att flygande tacklingar är helt vanlig racing.'}
 ];
 const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','weiron','bodil','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
