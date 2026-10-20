@@ -549,7 +549,7 @@ function hazardsUllevi(H){
         if(!live)lastHop=-1;
         this.p={x:ball.position.x,y:q.y,z:ball.position.z};this.low=live&&h<2.4;
       },
-      hit(k){if(k.rib||k.air||!this.low||(typeof TT!=='undefined'&&TT))return false;      /* time trial: the ball is only for show */const dx=k.x-this.p.x,dz=k.z-this.p.z;return dx*dx+dz*dz<(R+1.1)*(R+1.1)&&Math.abs(k.y-this.p.y)<2.6;},
+      hit(k){if(k.rib||k.air||!this.low)return false;const dx=k.x-this.p.x,dz=k.z-this.p.z;return dx*dx+dz*dz<(R+1.1)*(R+1.1)&&Math.abs(k.y-this.p.y)<2.6;},
       effect(k){
         k.slow=Math.max(k.slow,.5);k.vx*=.8;k.vz*=.8;k.spun=Math.max(k.spun,.45*k.spinResist);k.boost=0;k.drift=0;k.charge=0;
         for(let p=0;p<14;p++){const c=[[.95,.78,.1],[.18,.38,.78],[.95,.95,.92]][p%3];puff(k.x+rand(-1.4,1.4),k.y+rand(.4,2),k.z+rand(-1.4,1.4),c[0],c[1],c[2],.8);}
