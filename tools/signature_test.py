@@ -138,7 +138,7 @@ def main():
         check(until(f"()=>karts[{a}].pulled===0&&!karts[{a}].licG.visible", 5000), 'pulled-over kart drives on')
         kept = ev("""()=>{const ai=karts.filter(k=>k.ai);ai.forEach(k=>k._p=k.parked);ai.forEach(k=>k.parked=true);
             T_use('billy');const r=[player.held,player.heldSig];ai.forEach(k=>k.parked=k._p);player.held=null;player.heldSig=null;return r;}""")
-        check(kept == ['sig', 'billy'], f'nobody to stop: the item stays in the slot {kept}')
+        check(kept == [None, None], f'nobody to stop: the siren goes and the item is spent {kept}')
 
         # Kreatursöverfarten: cows cross in front of the leader, and knock a kart aside
         ev("()=>T_use('cow')")

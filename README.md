@@ -75,6 +75,7 @@ tools/signature_test.py     headless test: box odds and all eleven signature ite
 tools/svin_test.py          headless test: Grisabonden Carl, his select line, rival guest and SJU LASS SVIN
 tools/beans_test.py         headless test: the beans' green gas cloud, the spin it gives, the AI and clean-up
 tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTBLANDAREN and STÄMPLA IN
+tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js

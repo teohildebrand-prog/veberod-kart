@@ -17,9 +17,9 @@ function pickSig(k){
   return pickWeighted(ids,w);
 }
 const sigWrap=d=>d>N/2?d-N:(d<-N/2?d+N:d);       /* samples between two points on the loop, signed */
-/** k's item came to nothing: back in the slot, ready again */
-function sigKeep(k,why){
-  k.held='sig';k.heldLvl=1;k.heldSig=k.lastSig;
+/** k's item went off with nobody to hit: it is spent all the same, so a leader is never stuck
+    holding it and the slot is free for the next box */
+function sigMiss(k,why){
   if(k===player){toast(why);ping(300,240,.08);}
 }
 
@@ -324,9 +324,9 @@ const licenceParts=(function(){
 })();
 function pullOver(k){
   const o=licTarget(k);
-  if(!o){sigKeep(k,'INGEN ATT STOPPA');return;}
   k.siren=LIC.siren;
   if(k===player){toast('VISA KÖRKORTET!');ping(960,720,.18);setTimeout(()=>ping(960,720,.18),220);}
+  if(!o){sigMiss(k,'BLÅLJUS PÅ TOM VÄG');return;}
   if(blockHit(o)){if(k===player)toast('SKÖLDEN VÄGRADE STANNA');return;}
   o.pulled=LIC.time;o.boost=0;o.drift=0;o.charge=0;o.launch=0;
   if(o===player){flash('STOPP!');toast(k.name+': VISA KÖRKORTET!');ping(960,720,.18);shake=Math.min(1,shake+.35);}
@@ -355,8 +355,7 @@ function herdTarget(k){
   return best;
 }
 function sendHerd(k){
-  const o=herdTarget(k);
-  if(!o){sigKeep(k,'INGEN ATT STÄLLA SIG FRAMFÖR');return;}
+  const o=herdTarget(k)||k;                               /* nobody else racing: across your own road, Majros is let past */
   let si=(Math.round(o.mi)+Math.round(HERD.ahead/SEG))%N;
   for(let tries=0;tries<12;tries++){                      /* never in a jump's landing or a fork's mouth */
     let bad=!clearOfForks(si,3);
@@ -368,7 +367,7 @@ function sendHerd(k){
   herds.push({owner:k,si,dir,t:0,cows,hit:new Set([k]),
     from:-dir*(HW+3),speed:(2*HW+6+HERD.space*(HERD.n-1))/HERD.walk});
   if(k===player){toast('KREATURSÖVERFARTEN! MUUU');moo();}
-  else if(o===player)setTimeout(()=>{if(state==='race')toast('KOR PÅ VÄGEN!');},500);
+  else if(o===player&&o!==k)setTimeout(()=>{if(state==='race')toast('KOR PÅ VÄGEN!');},500);
 }
 function updateHerds(dt){
   for(let n=herds.length-1;n>=0;n--){
@@ -490,7 +489,6 @@ const scarfParts=(function(){
 const tifoEl=document.getElementById('tifo');
 function raiseTifo(k){
   const ts=tifoTargets(k);
-  if(!ts.length){sigKeep(k,'INGEN FRAMFÖR DIG');return;}
   k.tifo=TIFO.time;
   if(!k.tifoG)k.tifoG=scarfParts(true);
   for(let p=0;p<24;p++){const gr=Math.random()<.5;
@@ -562,7 +560,6 @@ const watchParts=(function(){
 const rings=[];
 function freezeTime(k){
   const ts=freezeTargets(k);
-  if(!ts.length){sigKeep(k,'INGEN I NÄRHETEN');return;}
   k.watch=1.0;if(!k.watchG)k.watchG=watchParts();
   const m=new THREE.Mesh(ringGeo,ringMat);m.position.set(k.x,k.y+.3,k.z);scene.add(m);rings.push({m,t:0});
   if(k===player){flash('RÄTTELSE!');ping(1800,900,.12);setTimeout(()=>ping(1800,900,.12),180);}
@@ -575,6 +572,7 @@ function freezeTime(k){
     if(o===player){toast('TIDTAGNINGSRÄTTELSE! DU STÅR STILL');shake=Math.min(1,shake+.3);}
   }
   if(k===player&&hits)setTimeout(()=>toast(hits>1?hits+' FRUSNA I TIDEN':'FRUSEN I TIDEN'),600);
+  else if(!ts.length)sigMiss(k,'INGEN I NÄRHETEN');
 }
 
 /* ── shared: what physics reads, the timers, the drawing, the clean-up ── */

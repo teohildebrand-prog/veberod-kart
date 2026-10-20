@@ -45,6 +45,11 @@ pipeline {
         sh 'python3 tools/extra_allt_test.py'
       }
     }
+    stage('Targetless item test') {
+      steps {
+        sh 'python3 tools/targetless_test.py'
+      }
+    }
     stage('Weiron test') {
       steps {
         sh 'python3 tools/weiron_test.py'

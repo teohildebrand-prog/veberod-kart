@@ -160,8 +160,8 @@ const cloudParts=(function(){
 const skyEl=document.getElementById('skyfall');
 function castRain(k){
   const o=rainTarget(k);
-  if(!o){sigKeep(k,'INGEN ATT REGNA PÅ');return;}
   if(k===player){toast('SKYFALLET! DET BLIR REGN IDAG');ping(300,180,.25);}
+  if(!o){sigMiss(k,'MOLNET REGNADE BORT');return;}
   if(blockHit(o)){if(k===player)toast('PARAPLYET HÖLL');return;}
   o.rain=RAIN.time;
   if(!o.cloudG)o.cloudG=cloudParts();
@@ -205,8 +205,7 @@ const containerParts=(function(){
     g.userData={box,sh,mat:shadowMat};scene.add(g);return g;};
 })();
 function dropContainer(k){
-  const o=boxTarget(k);
-  if(!o){sigKeep(k,'INGEN ATT SLÄPPA FRAMFÖR');return;}
+  const o=boxTarget(k)||k;                               /* nobody ahead: it lands in front of you, you pass your own */
   const ahead=Math.round((o.speed*BOX.warn+BOX.lead)/SEG);
   const si=clearRoadAt((Math.round(o.mi)+ahead)%N,2);
   const lim=HW-BOX.len/2-.4,lat=clamp(o.lat,-lim,lim);
@@ -216,7 +215,7 @@ function dropContainer(k){
   roadPt(si,lat,0,g.position);w.x=g.position.x;w.z=g.position.z;
   wallPos(w,0);g.userData.box.position.y=30;sigWalls.push(w);
   if(k===player){toast('CONTAINERN! LAST KOMMER');ping(200,120,.3);}
-  if(o===player)toast('RÖD SKUGGA! FLYTTA DIG');
+  if(o===player&&o!==k)toast('RÖD SKUGGA! FLYTTA DIG');
 }
 function updateContainer(w,dt){
   const U=w.g.userData,T=BOX.warn+BOX.stay;
@@ -335,7 +334,7 @@ const gullParts=(function(){
 })();
 function sendGull(k){
   const o=gullTarget(k);
-  if(!o){sigKeep(k,'INGEN ATT STJÄLA FRÅN');return;}
+  if(!o){sigMiss(k,'MÅSEN HITTADE INGET ATT STJÄLA');return;}
   const g=gullParts();g.position.set(k.x,k.y+4,k.z);
   gulls.push({owner:k,target:o,t:0,g,loot:null,back:false});
   if(k===player){toast('RÄKMACKAN! DET DÄR ÄR MITT');ping(1400,900,.12);}
@@ -378,9 +377,9 @@ const cardParts=(function(){
 })();
 function callOffside(k){
   const o=herdTarget(k);
-  if(!o){sigKeep(k,'INGEN I OFFSIDE');return;}
   if(k===player){flash('OFFSIDE!');}
   ping(2600,2400,.2);setTimeout(()=>ping(2600,2400,.35),180);           /* the whistle */
+  if(!o){sigMiss(k,'INGEN I OFFSIDE');return;}
   if(blockHit(o)){if(k===player)toast(o.name+' SNACKADE SIG UR DET');return;}
   o.offside=OFFSIDE.time;o.boost=0;o.drift=0;o.charge=0;
   if(!o.cardG)o.cardG=cardParts();

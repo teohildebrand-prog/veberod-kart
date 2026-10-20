@@ -306,7 +306,7 @@ function placeOnGrid(){
     k.drift=0;k.charge=0;k.dstage=0;k.boost=0;k.slow=0;k.itemBias=0;k.lean=0;k.spin=0;k.speed=0;
     k.lapStart=0;k.best=null;k.total=null;k.done=false;
     k.lineVar=k.ai?((Math.random()*3)|0)-1:0;k.wantFuel=false;k.rtp=false;k.offT=0;k.curse=0;k.hazAt=-9;
-    k.lapTimes=[];k.ghostBuf=TT&&!k.ai?[]:null;k.noBand=false;
+    k.lapTimes=[];k.ghostBuf=TT&&!k.ai?[]:null;k.noBand=false;k.marks=[];k.pace=1;
     k.parked=(TT||FREE)&&k.ai;k.v.root.visible=!k.parked;k.blob.visible=!k.parked;
     const R=k.cfg;
     k.line=k.ai?rand(-R.lineSpread,R.lineSpread):0;
