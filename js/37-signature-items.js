@@ -8,9 +8,11 @@
 const SIG_CHANCE=0.25, SIG_OWN=2;
 const SIG_ALIAS={granny:'britta'};                 /* AI kinds that are a driver under another id */
 const sigOf=id=>SIGS[id]?id:(SIG_ALIAS[id]||null);
+/** the drivers' items; an event's own item (SIGS[id].event) only comes out of its own boxes */
+const sigPool=()=>Object.keys(SIGS).filter(id=>!SIGS[id].event);
 /** which signature item a box hands k */
 function pickSig(k){
-  const ids=Object.keys(SIGS),w={};
+  const ids=sigPool(),w={};
   for(const id of ids)w[id]=id===k.sig?SIG_OWN:1;
   return pickWeighted(ids,w);
 }
@@ -598,7 +600,7 @@ function updateSigs(dt){
     }else k.onPlan=false;
     if(k.planG)drawPlan(k);
   }
-  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);
+  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);updateExtra(dt);
   for(let n=rings.length-1;n>=0;n--){
     const r=rings[n];r.t+=dt;
     if(r.t>.5){scene.remove(r.m);rings.splice(n,1);continue;}
@@ -663,5 +665,5 @@ function clearSigs(){
   for(const r of rings)scene.remove(r.m);
   herds.length=0;muck.length=0;yarns.length=0;rings.length=0;
   if(tifoEl)tifoEl.classList.remove('on');
-  clearSvin();clearWest();
+  clearSvin();clearWest();clearExtra();
 }

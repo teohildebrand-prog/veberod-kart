@@ -121,6 +121,7 @@ function fartSound(lvl){
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
   else if(CARS[carSel].id==='svinexpress'){grunt(0);grunt(.2);}      /* the Svinexpress horn: two short oinks */
+  else if(CARS[carSel].id==='burgarbus')sibBell(1.2);                /* the Burgarbus horn: the order bell */
   else{audioTone(330,320,.15,.07,'triangle');audioTone(330,320,.15,.07,'triangle',.19);}
 }
 function saveAudioSettings(){

@@ -23,7 +23,7 @@ from playwright.sync_api import sync_playwright
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from smoke_test import serve  # noqa: E402
 
-DEFAULT_STAGES = ['lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi']
+DEFAULT_STAGES = ['lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi', 'sibylla']
 
 LAYOUT = """(id) => {
   CUP = null; TT = false; FREE = false; mirrorSel = false;

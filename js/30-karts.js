@@ -95,7 +95,12 @@ const CARS=[
   {id:'domarvagn',name:'PLANVAGNEN', sub:'MED KRITMASKIN', sig:'domaren',
    blurb:'The groundsman\'s buggy under a striped canopy, corner flags on the back and a chalk liner that marks every metre it drives. By the book, and quick off the line.',
    role:'BALANSERAD · BRA BOOST',
-   mul:{maxSpeed:1.0,power:1.03,gripOn:1.02,offRoad:0.95,boostMul:1.03,burn:1,spinResist:1}}
+   mul:{maxSpeed:1.0,power:1.03,gripOn:1.02,offRoad:0.95,boostMul:1.03,burn:1,spinResist:1}},
+  /* the Sibylla bonus track's prize (js/30-burgarbus.js): nobody's own, open to every driver */
+  {id:'burgarbus',name:'SIBYLLA BURGARBUS', sub:'HAMBURGARE PÅ HJUL',
+   blurb:'A low racing chassis built like a giant hamburger: sesame bun, lettuce round the cockpit, cheese over the sides and a pickle for a steering wheel. Quick away and kind in the corners, but nothing special flat out. The bun is tall; the kart is not.',
+   role:'SNABB IGÅNG · FÖRLÅTANDE GREPP · BLYGSAM TOPPFART',
+   mul:{maxSpeed:0.96,power:1.08,gripOn:1.07,offRoad:0.97,boostMul:1,burn:1,spinResist:0.95}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 const OFFROAD_CAP=.95;

@@ -44,6 +44,7 @@ function pickWeighted(keys,w){
 /** what an item box hands out: [family, level 1..3]; first a roll for a signature item, any driver's,
     which comes back as ['sig', 1, which] */
 function rollItem(k){
+  const ev=k&&eventSig(k);if(ev)return ['sig',1,ev];                /* an event's own item first: js/37-extra-allt.js */
   if(k&&Math.random()<SIG_CHANCE)return ['sig',1,pickSig(k)];
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }

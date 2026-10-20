@@ -393,7 +393,8 @@ function aiControl(k){
   /* pulling in for fuel: aim close, or a forecourt on a bend gets cut past */
   const pitS=k.wantFuel&&!k.rib?stations.find(S=>{let d=S.at-k.si;if(d>N/2)d-=N;else if(d<-N/2)d+=N;return d>-S.len&&d<34;}):null;
   const pit=!!pitS;
-  const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round(12+k.lookAdd+k.speed*0.55));
+  /* a stage with long samples can shorten the aim (stage.aiLook), or the AI chords its bends */
+  const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round((12+k.lookAdd+k.speed*0.55)*(stage.aiLook||1)));
   /* each AI drives one of three lines this race: inside, middle or outside */
   const L=pit?pitS.side*(HW-1.5):T===MAIN&&k.fplan>0?planLat(t):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
                   :clamp(k.line*0.3,-(T.hw-1),T.hw-1);
