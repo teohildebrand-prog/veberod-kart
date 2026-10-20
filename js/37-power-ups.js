@@ -10,7 +10,7 @@ function useItem(k){
     return;
   }
   const fam=k.held,lvl=itemLvl(k);k.held=null;k.heldLvl=0;k.usedAt=clock;
-  USE[fam](k,lvl);
+  USE[fam](k,lvl);k.heldAt=raceTime;   /* a bag that stays in the slot starts the AI's patience over */
 }
 const USE={
   sig(k){const id=k.heldSig;k.lastSig=id;k.heldSig=null;SIGS[id].use(k);},   /* a signature item: 37-signature-items.js */

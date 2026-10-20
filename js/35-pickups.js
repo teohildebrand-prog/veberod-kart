@@ -49,7 +49,7 @@ function rollItem(k){
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }
 /** put an item in the slot; it keeps its level until it is used */
-function giveItem(k,fam,lvl,sig){k.held=fam;k.heldLvl=lvl||1;k.heldSig=fam==='sig'?sig:null;}
+function giveItem(k,fam,lvl,sig){k.held=fam;k.heldLvl=lvl||1;k.heldSig=fam==='sig'?sig:null;k.heldAt=raceTime;}
 const ITEMNAMES={boost:['MJÖLK','GRÄDDFIL','SKÅNSK GRÄDDE'],
   rocket:['SPETTEKAKA','SPETTIGARE KAKA','SEMMELVÄGGEN'],
   shield:['ÄGGAKAKA','STEKHET ÄGGAKAKA','DEN FLYGANDE STEKPANNAN'],

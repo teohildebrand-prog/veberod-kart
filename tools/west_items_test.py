@@ -149,8 +149,8 @@ def main():
         check(until("()=>!gulls.some(G=>G.owner===player)", 5000) and ev(f"()=>karts[{a}].held==='pie'&&player.held!=='pie'"),
               'a shield shoos the gull away')
         ev(f"()=>{{karts[{a}].held=null;karts[{a}].shield=0;karts[{a}].ai=true;for(const it of items)it.cool=Math.min(it.cool,.01);}}")
-        ev("()=>{player.held=null;for(const k of karts)if(k!==player){k.held=null;k.roll=0;}T_use('kaptenmas');}")
-        check(ev("()=>player.held==='sig'&&player.heldSig==='kaptenmas'"), 'nothing to steal: the item stays in the slot')
+        spent = ev("()=>{player.held=null;for(const k of karts)if(k!==player){k.held=null;k.roll=0;}T_use('kaptenmas');return [player.held,gulls.length];}")
+        check(spent == [None, 0], f'nothing to steal: the gull stays home and the item is spent {spent}')
         ev("()=>{player.held=null;}")
 
         # Offside: the leader gets the yellow card and slows

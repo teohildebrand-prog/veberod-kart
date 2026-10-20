@@ -110,7 +110,7 @@ function drive(k,dt,ctl){
   /* gräddfil and up shrug off the verge; skånsk grädde also pulls harder and goes faster */
   const cream=k.boost>0?k.boostLvl:0, offR=cream>=2?Math.max(k.offRoad,0.88):k.offRoad;
   side*=Math.exp(-(k.air?0.35:(k.drift!==0?2.1:(k.slow>0?3.2:(onRoad?k.gripOn*(surf?surf.grip(offR):1):4.2))))*(k.slick>0?0.3:1)*sigGrip(k)*dt);
-  const top=sigTop(k)*k.maxSpeed*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
+  const top=sigTop(k)*k.maxSpeed*(k.pace||1)*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
   if(!k.air){
     const torque=1+0.35*clamp(1-sp/k.maxSpeed,0,1);  /* short gears down low */
     fwd+=thr*(k.boost>0?k.power+(cream>=3?34:21):k.power)*torque*(onRoad||cream>=2?1:0.6)*(k.slow>0?0.55:1)*dt;
@@ -184,6 +184,7 @@ function drive(k,dt,ctl){
   const m0=k.mi;k.mi=mappedIdx(k);
   passGates(k,m0);
   k.progress=gateProgress(k);
+  if(k.marks&&state==='race')while(k.marks.length*MARK<=k.progress)k.marks.push(raceTime);   /* for gapTo */
   if(k.ghostBuf&&k.lap>=1&&!k.done)ghostSample(k,k.ghostBuf);
 
   if(k.drift!==0&&k.speed>12){
@@ -386,7 +387,27 @@ function askRecover(k){
   if(k===player)toast('TILLBAKA PÅ BANAN…');
 }
 
+/* Catch-up. Each AI's pace follows its gap to the player in seconds along the race (shortcuts
+   map onto the same progress), not its place: within the dead zone it races as it is, further
+   ahead it eases off, further behind it pushes, a little more with every second up to the cap.
+   It scales top speed and corner speed together, and blends in slowly. Tune it in PACE. */
+const PACE={dead:2.5,ramp:10,ahead:0.04,behind:0.05,blend:0.6},MARK=4;
+/** seconds k is behind the player (negative: ahead), from when each passed the same point */
+function gapTo(k){
+  const a=player.marks,b=k.marks;
+  if(!a||!b)return 0;
+  if(player.progress>=k.progress){const t=a[Math.floor(k.progress/MARK)];return t===undefined?0:raceTime-t;}
+  const t=b[Math.floor(player.progress/MARK)];return t===undefined?0:t-raceTime;
+}
+function paceTarget(k){
+  if(k.noBand||state!=='race'||player.done||k===player)return 1;
+  const g=gapTo(k),over=clamp((Math.abs(g)-PACE.dead)/PACE.ramp,0,1);
+  let p=g>0?1+PACE.behind*over*(k.bandMax-1)/0.16:1-PACE.ahead*over;    /* the class sets how hard they chase */
+  if(typeof CUP!=='undefined'&&CUP&&!k.rival&&p>1)p=1+(p-1)*0.7;  /* only the rival chases hard */
+  return p;
+}
 function aiControl(k){
+  k.pace=k.noBand?1:lerp(k.pace||1,paceTarget(k),Math.min(1,FIXED*PACE.blend));
   planRoutes(k);
   /* a farm lane is too twisty to aim far ahead: look closer while in one */
   const inLane=k.rib||(k.plan&&((ALTS[k.plan-1].a-k.si)%N+N)%N<8);
@@ -414,8 +435,7 @@ function aiControl(k){
   const sg=T===MAIN?(MAINS[t]?SURF[MAINS[t]].grip(k.offRoad):1):SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
   const hold=AI_G*(k.gripOn*sg/9.5)*(2.7/k.caution)*(k.drift!==0?1.18:1);
   const limit=Math.min(k.maxSpeed,Math.sqrt(hold*R));
-  let band=k.noBand?1:clamp(1+((player.progress-k.progress)/N)*0.095,0.95,k.bandMax);
-  if(typeof CUP!=='undefined'&&CUP&&!k.rival)band=1+(band-1)*0.7;  /* only the rival chases hard */
+  const band=k.pace;
   let throttle=1,brake=0;
   if(k.atPump&&k.wantFuel){throttle=0;brake=k.speed>14?1:0;}   /* fill up */
   else if(k.wantFuel&&!k.rib)for(const S of stations){        /* slow in time to stop on it */

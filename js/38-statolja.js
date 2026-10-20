@@ -84,6 +84,7 @@ function legFuel(k){
   let gap=N;for(const T of stations)if(T!==S){const d=((T.at-S.at)%N+N)%N;if(d<gap)gap=d;}
   return gap*SEG/(k.maxSpeed*0.7)*2.6*k.burn+14;
 }
+const AI_HOLD=8;                  /* seconds an AI keeps an item it has no use for before spending it anyway */
 function aiItemLines(){
   for(const k of karts){
     if(!k.ai||k.parked)continue;
@@ -129,7 +130,11 @@ function aiItemLines(){
         if(g<12)close=true;
       }
       const lvl=itemLvl(k),h=k.held;
-      if(h==='boost')useItem(k);
+      /* held too long with nothing to aim at: spend it anyway, so a leader keeps picking up boxes.
+         A forward shot with a closed passage up the road goes for the passage. */
+      const stale=raceTime-(k.heldAt||0)>AI_HOLD+k.roll, mouth=h==='rocket'&&!k.rib&&!!mouthAhead(k.mi,40,k)[0];
+      if(stale||mouth)useItem(k);
+      else if(h==='boost')useItem(k);
       else if(h==='rocket'&&(lvl===2?near:ahead))useItem(k);
       else if(h==='pie'&&behind)useItem(k);
       else if(h==='shield'&&(lvl===3?close||behind:behind||Math.random()<0.004))useItem(k);

@@ -109,7 +109,7 @@ def main():
         check(abs(r['hit'] - 1.5 * r['sr']) < 0.01 and r['boost'] == 0, f'a hit is the spettekaka spin, boost gone {r}')
         check(r['again'] == 0, 'one spin per cloud, however long you sit in it')
         check(r['own'] == 0, 'whoever ate the beans drives through their own gas')
-        check(r['shield'] == [0, 0], 'äggakaka takes the hit instead')
+        check(r['shield'] == [0, 0], f'äggakaka takes the hit instead {r["shield"]}')
         ev("()=>{DBG.god=false;}")
         pl = ev("""()=>{const c=gasClouds[gasClouds.length-1];player.spun=0;player.shield=0;player.pans=0;player.bucket=0;
             T_inBlob(player,c);updateFarts(.001);const s=player.spun;player.spun=0;return s;}""")
