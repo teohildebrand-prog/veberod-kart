@@ -13,6 +13,12 @@ parallel tour open from the start: Västgötacupen (Lerum, Borås, Trollhättan)
 against Regnmolnet, then Göteborgscupen (Avenyn, Hisingen, Ullevi) against
 Hamnkranen. Finalen still needs only the three Skåne championships.
 
+One bonus track outside the cups, marked BONUSBANA in the stage picker:
+Sibylla, Extra Allt Grand Prix (two laps from a Sibylla car park through the
+drive-through and a giant kitchen). Its boxes also hand out EXTRA ALLT, an
+item found only there, and it brings the SIBYLLA BURGARBUS, a burger-shaped
+vehicle every driver can pick.
+
 ## Play
 
 Open `index.html` in a browser, or serve the folder:

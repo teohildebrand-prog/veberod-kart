@@ -31,7 +31,7 @@ function slotFrame(k){
   }
   const frame=Math.floor((1-(k.roll/ROLLT)**2)*14);     /* 0..13, the last one just before the real item */
   const at=k.held==='sig'?2:REEL.indexOf(k.held), fam=REEL[(at+frame+1)%REEL.length];
-  const ids=Object.keys(SIGS), sid=ids[(ids.indexOf(k.heldSig)+1+frame*3+ids.length)%ids.length];
+  const ids=sigPool().concat(k.heldSig&&SIGS[k.heldSig].event?[k.heldSig]:[]), sid=ids[(ids.indexOf(k.heldSig)+1+frame*3+ids.length)%ids.length];
   return {spin,frame,fam,lvl:(itemLvl(k)+frame)%3+1,sid};
 }
 function drawHUD(dt){
@@ -44,7 +44,7 @@ function drawHUD(dt){
   el.spd.className=player.slow>0?'sour':'';
   el.fill.style.width=((player.boost>0?1:clamp(player.charge/1.45,0,1))*100)+'%';
   const {spin,frame,fam,lvl,sid}=slotFrame(player);
-  const key=fam?fam+lvl+(fam==='sig'?sid:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
+  const key=fam?fam+lvl+(fam==='sig'?sid+SIGS[sid].name:'')+(player.held?'':'!')+(spin?'~'+frame:''):'';
   if(key!==lastSlot){
     if(fam){
       const own=fam==='sig';                             /* a signature item: a star, no level */

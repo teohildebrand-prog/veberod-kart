@@ -494,6 +494,8 @@
   .sc-mir svg{width:11px;height:11px;color:#9fd0ff}
   .sc-cup{position:absolute;left:0;top:0;padding:2px 7px;font:italic 900 12px/1.2 "Titillium Web",sans-serif;
     letter-spacing:.06em;color:#10276b;background:#9fb6e6}
+  .sc-bonus{position:absolute;left:0;top:0;padding:2px 7px;font:italic 900 12px/1.2 "Titillium Web",sans-serif;
+    letter-spacing:.06em;color:#fff;background:#d5202a}
   .scard.cup-next .sc-cup{background:#ffd54a}
   .scard.cup-done .sc-cup{background:#5fd14a}
   .scard.cup-done .sc-img img{filter:saturate(.55) brightness(.8)}
@@ -983,7 +985,7 @@ body.touch .ss-mir{min-height:44px}
   padding:4px 8px;font-size:14px;background:none;overflow-wrap:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #stages.sslist .scard.sel .sc-name{background:none}
 #stages.sslist .sc-badges{position:static;flex:none;margin-right:6px}
-#stages.sslist .sc-cup{left:auto;right:0;top:auto;bottom:0;font-size:10px;padding:1px 5px}
+#stages.sslist .sc-cup,#stages.sslist .sc-bonus{left:auto;right:0;top:auto;bottom:0;font-size:10px;padding:1px 5px}
 #stages.sslist .sc-why{left:76px;right:auto;top:auto;bottom:2px;padding:0 8px;background:none;font-size:10px;color:#ffb0a0}
 #stages.sslist .ss-prev{display:grid;grid-template-columns:42% 1fr;align-items:start;gap:8px;min-height:0;
   overflow-y:auto;overscroll-behavior:contain}

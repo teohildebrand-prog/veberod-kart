@@ -40,7 +40,12 @@ pipeline {
         sh 'python3 tools/west_items_test.py'
       }
     }
-    stage('West tracks test') {
+    stage('Extra Allt test') {
+      steps {
+        sh 'python3 tools/extra_allt_test.py'
+      }
+    }
+    stage('West and bonus tracks test') {
       steps {
         sh 'python3 tools/vastgota_test.py'
       }
