@@ -452,7 +452,7 @@ function updateFarts(dt){
     if(k.rattle>0)k.rattle=Math.max(0,k.rattle-dt);
     if(k.roll>0){                                       /* the item slot lands */
       k.roll=k.held?Math.max(0,k.roll-dt):0;
-      if(!k.roll&&k===player){toast(itemName(k.held,itemLvl(k))+'!');ping(620,980,.10);}
+      if(!k.roll&&k.held&&k===player){toast(itemName(k.held,itemLvl(k))+'!');ping(620,980,.10);}
     }
     if(k.fartT>0){k.fartT-=dt;if(k.fartT<=0)blast(k,3);}
   }

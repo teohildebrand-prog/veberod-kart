@@ -76,8 +76,9 @@ def main():
         wait(4500)
 
         # Skyfallet: the kart ahead gets a cloud and slides; on the player, rain and wipers on screen
-        a = ev("()=>T_behind(14)")
-        ev("()=>T_use('regnmolnet')")
+        # everyone else well behind, in the same frame, so the cloud can only pick that kart
+        a = ev("""()=>{const i=T_behind(14);for(const k of karts)if(k.ai&&k!==karts[i])T_put(k,player.si-30-k.idx*4,0,k.speed);
+            T_use('regnmolnet');return i;}""")
         wait(300)
         r = ev(f"()=>({{rain:karts[{a}].rain,cloud:!!karts[{a}].cloudG&&karts[{a}].cloudG.visible,grip:sigGrip(karts[{a}])}})")
         page.screenshot(path=str(ROOT / 'west-rain.png'))
