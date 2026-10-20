@@ -518,7 +518,7 @@ function hazardsHisingen(H){
         this.l=l;this.on=v>.02;
       },
       hit(k){
-        if(TT||!this.on||k.rib||k.air||hitThis.has(k))return false;
+        if(!this.on||k.rib||k.air||hitThis.has(k))return false;
         const dx=k.x-sx[i],dz=k.z-sz[i],f=dx*fx[i]+dz*fz[i],lt=dx*rx[i]+dz*rz[i];
         return Math.abs(f)<BW+1.1&&Math.abs(lt-this.l)<BL+1.1&&Math.abs(k.y-sy[i])<2.6;
       },
