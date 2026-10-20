@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Headless check of all eleven signature items (Carl's SJU LASS SVIN has its own svin_test.py), and that any driver can get any of them.
+"""Headless check of the first eleven signature items (Carl's SJU LASS SVIN has its own svin_test.py, the six
+west-coast ones west_items_test.py), and that any driver can get any of the seventeen.
 
     CHROMIUM=/path/to/chrome python3 tools/signature_test.py
 
@@ -16,6 +17,10 @@ from smoke_test import serve
 
 ROOT = Path(__file__).resolve().parent.parent
 IDS = ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl']
+WEST = ['regnmolnet', 'hamnkranen', 'slusstrollet', 'aspenmonstret', 'kaptenmas', 'domaren']
+ALL = IDS + WEST
+N = len(ALL)
+START = IDS + WEST[2:]    # the champions' are theirs once they are beaten
 
 # helpers put into the page: move a kart onto the main road, and line the player up behind an AI
 HELPERS = """()=>{
@@ -69,16 +74,16 @@ def main():
                 wait(250)
             return bool(ev(js))
 
-        # the box: 25 % signature items, any of the eleven, the driver's own twice as often
+        # the box: 25 % signature items, any of the seventeen, the driver's own twice as often
         odds = ev("""()=>{const k=player,was=k.sig,n=60000,c={};let s=0;k.sig='arne';
             for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s++;c[r[2]]=(c[r[2]]||0)+1;}}
             k.sig=null;let s2=0;const c2={};for(let i=0;i<n;i++){const r=rollItem(k);if(r[0]==='sig'){s2++;c2[r[2]]=1;}}
             k.sig=was;return {share:s/n,own:c.arne/s,other:c.billy/s,kinds:Object.keys(c).length,share2:s2/n,kinds2:Object.keys(c2).length};}""")
         check(0.235 < odds['share'] < 0.265, f"signature share {odds['share']:.3f}")
-        check(0.145 < odds['own'] < 0.19 and 0.068 < odds['other'] < 0.10,
+        check(abs(odds['own'] - 2 / (N + 1)) < 0.015 and abs(odds['other'] - 1 / (N + 1)) < 0.01,
               f"own item {odds['own']:.3f}, another driver's {odds['other']:.3f}")
-        check(odds['kinds'] == 11 and odds['kinds2'] == 11 and 0.235 < odds['share2'] < 0.265,
-              f"all eleven turn up, also for a driver without one ({odds['kinds2']}, {odds['share2']:.3f})")
+        check(odds['kinds'] == N and odds['kinds2'] == N and 0.235 < odds['share2'] < 0.265,
+              f"all {N} turn up, also for a driver without one ({odds['kinds2']}, {odds['share2']:.3f})")
         # the roulette shows signature items among the normal ones and still lands on the real item
         reel = ev("""()=>{const out=[];for(const h of ['boost','sig']){giveItem(player,h,1,'arne');
             const f=[];for(let i=0;i<=1400;i++){player.roll=ROLLT*Math.sqrt(1-i/1400*13.99/14);const s=slotFrame(player);
@@ -90,15 +95,15 @@ def main():
         check(all(r['frames'] == 14 and r['sigs'] >= 4 and r['ids'] >= 4 and r['fams'] == 6 and r['ok'] for r in reel)
               and reel[0]['end'] == 'boost1' and reel[1]['end'] == 'sigarne', f'box roulette spins past signature items {reel}')
         own = ev("()=>CHARS.filter(c=>!c.boss).map(c=>sigOf(c.id))")
-        check(own == ['arne', 'billy', 'cow', 'bjorn', 'mehmet', 'anders', 'teo', 'amanda', 'britta', 'victor', 'carl'],
+        check(own == START,
               f'every starting driver has their own item: {own}')
         check(ev("()=>sigOf('granny')==='britta'&&karts.filter(k=>k.ai).every(k=>k.cfg.kind==='generic'||k.sig)"),
               'AI drivers (Britta too) know their own item')
-        names = ev(f"()=>{IDS}.map(id=>{{giveItem(player,'sig',1,id);const n=itemName('sig',1);player.held=null;return n;}})")
-        check(len(set(names)) == 11, f'eleven HUD names {names}')
+        names = ev(f"()=>{ALL}.map(id=>{{giveItem(player,'sig',1,id);const n=itemName('sig',1);player.held=null;return n;}})")
+        check(len(set(names)) == N, f'{N} HUD names {names}')
         check(ev("()=>{DBG.open=true;renderDbg();const n=document.querySelectorAll('#dbg [data-a^=\"give:sig:\"]').length;"
-                 "DBG.open=false;return n||document.getElementById('dbg').innerHTML.split('give:sig:').length-1;}") >= 11,
-              'debug menu hands out all eleven')
+                 "DBG.open=false;return n||document.getElementById('dbg').innerHTML.split('give:sig:').length-1;}") >= N,
+              f'debug menu hands out all {N}')
 
         page.keyboard.down('w')
         wait(4500)

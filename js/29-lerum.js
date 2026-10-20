@@ -489,7 +489,7 @@ function hazardsLerum(H){
         tick+=dt;const near=Math.hypot(player.x-S.x,player.z-S.z)<60;
         if(tick>.18){tick=0;if(near&&state==='race')ping(2400,2200,.015);}         /* tick tick tick */
       },
-      hit(k){const S=LERUM.spr;if(!S||k.rib)return false;
+      hit(k){const S=LERUM.spr;if(!S||k.rib||k.wet)return false;   /* Regnmolnet is wet already */
         const dx=k.x-S.x,dz=k.z-S.z,d=Math.hypot(dx,dz);if(d>R)return false;
         return Math.abs(wrapAng(Math.atan2(dx,dz)-this.a))<.5;},
       effect(k){

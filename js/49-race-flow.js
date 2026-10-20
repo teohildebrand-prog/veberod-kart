@@ -136,7 +136,7 @@ function commitRound(){
         SAVE.unlock['win_'+C.id]=true;
         const P=PAINTS.find(q=>q.unlock==='win_'+C.id),Q=PARTS.find(q=>q.unlock==='win_'+C.id);
         c.unlocked.push(P.name+'-LACK',Q.name);
-        if(C.id!=='final'&&cupOpen(cupDef({cup:'final'})))c.unlocked.push('FINALEN MOT RAKET-RUNE');
+        if(FINAL_CUPS.includes(C.id)&&cupOpen(cupDef({cup:'final'})))c.unlocked.push('FINALEN MOT RAKET-RUNE');
         if(C.id!=='final')c.unlocked.push(C.name+' SPEGELVÄND');
         const B=CHARS.find(d=>d.boss===C.id);if(B)c.newDriver=B.id;        /* the champion joins the drivers */
       }

@@ -149,13 +149,14 @@ function drive(k,dt,ctl){
       if(Math.abs(d)<2.2)k.yaw+=d*Math.min(1,dt*2.5);}
   }
   if(BLOCKERS.length)bumpBlockers(k);
+  if(sigWalls.length)bumpSigWalls(k);              /* Containern, Slussporten */
   if(routeSwitch(k,lat)){
     const T2=k.rib?ALTS[k.rib-1]:MAIN,s2=k.si;
     lat=(k.x-T2.X[s2])*T2.RX[s2]+(k.z-T2.Z[s2])*T2.RZ[s2];
   }
 
   const gy=groundK(k,k.x,k.z);
-  k.vy-=34*dt;
+  k.vy-=(k.glide&&k.vy<0?GLIDE:34)*dt;              /* Kapten Mås glides down */
   k.y+=k.vy*dt;
   if(k.y<=gy){
     if(k.air&&k.vy<-8){                              /* touchdown */
