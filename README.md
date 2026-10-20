@@ -3,14 +3,15 @@
 A silly PS1-style kart racer through the Skåne countryside. Three.js r128,
 plain JavaScript, no build step.
 
-21 tracks and six cups of at most four rounds. Two home cups without a
+27 tracks and eight cups of at most four rounds. Two home cups without a
 champion: Skånecupen (Veberöd, Lund, Tollarp, Hörby) and Sommarcupen (Åhus,
 Glimmingehus, Ales stenar, the bridge). Then championships built on LEGO
 Racers' cup shape (ideas only): Österlencupen, Kustcupen and Vildmarkscupen
 (four tracks and a champion each, then mirrored and in reverse once won) and
-Finalen against Raket-Rune (Rosengård, then Raket-Runes runda). Lerum,
-Amanda's guest track outside Skåne, is in single race, time trial and the
-sandbox until its Västgöta cup exists.
+Finalen against Raket-Rune (Rosengård, then Raket-Runes runda). Out west, a
+parallel tour open from the start: Västgötacupen (Lerum, Borås, Trollhättan)
+against Regnmolnet, then Göteborgscupen (Avenyn, Hisingen, Ullevi) against
+Hamnkranen. Finalen still needs only the three Skåne championships.
 
 ## Play
 
@@ -101,8 +102,10 @@ when the highlight rests on it.
 pip install -r requirements-dev.txt && playwright install chromium
 python3 tools/smoke_test.py
 python3 tools/cup_schedule_test.py
-python3 tools/shortcut_test.py          # the original tracks' shortcuts; name stages to check others
+python3 tools/shortcut_test.py          # shortcuts of the tracks that have been tuned; name stages to check others
 python3 tools/signature_test.py
+python3 tools/west_items_test.py        # the six west-coast signature items and the drivers' quirks
+python3 tools/vastgota_test.py          # the six west tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
 ```
