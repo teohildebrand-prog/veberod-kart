@@ -74,7 +74,28 @@ const CARS=[
   {id:'svinexpress',name:'HÖRBY SVINEXPRESS', sub:'HEMBYGGD DJURTRANSPORT', sig:'carl',
    blurb:'A short homemade livestock transporter: faded green, a pig-snout grille, oversized muddy tyres and a wooden crate behind the seat. Victor says it is unbalanced. Carl says the load is alive.',
    role:'STARK IGÅNG · GRUS OCH LERA · LÅG TOPPFART · TÖRSTIG',
-   mul:{maxSpeed:0.95,power:1.09,gripOn:1.01,offRoad:1.18,boostMul:1,burn:1.15,spinResist:0.95}}
+   mul:{maxSpeed:0.95,power:1.09,gripOn:1.01,offRoad:1.18,boostMul:1,burn:1.15,spinResist:0.95}},
+  /* the west coast (js/30-west-crew.js): the two champions' own, then the four new drivers' */
+  {id:'molnvagn',name:'BORÅS MOLNVAGN', sub:'ÅSKMOLN PÅ HJUL', sig:'regnmolnet', npc:true,blurb:'',role:'GREPP I REGN · SNÅL · SEG IGÅNG',
+   mul:{maxSpeed:0.99,power:0.96,gripOn:1.08,offRoad:1.0,boostMul:1.01,burn:0.94,spinResist:0.95}},
+  {id:'kranbil',name:'HISINGE KRANBIL', sub:'MOBILKRAN MED LAST', sig:'hamnkranen', npc:true,blurb:'',role:'TUNG · KORTA SPINN · STARK BOOST · TÖRSTIG',
+   mul:{maxSpeed:1.0,power:0.95,gripOn:1.04,offRoad:0.96,boostMul:1.04,burn:1.18,spinResist:0.75}},
+  {id:'stenkart',name:'TROLLHÄTTE STENKÄRRA', sub:'HUGGEN UR SLUSSMUREN', sig:'slusstrollet',
+   blurb:'Hewn out of the old lock wall, moss and all, with the lock wheel bolted on the back. Slow to wind up flat out, but nothing spins it for long and it climbs like a lock filling up.',
+   role:'TÅL SPINN · BACKAR OCH GRUS · LÅG TOPPFART',
+   mul:{maxSpeed:0.96,power:1.07,gripOn:1.03,offRoad:1.1,boostMul:0.99,burn:1.06,spinResist:0.75}},
+  {id:'ekan',name:'ASPENEKAN', sub:'ROEKA PÅ HJUL',sig:'aspenmonstret',
+   blurb:'A wooden rowing boat from the lake, put on wheels and rowed along the road. Light on the grass and frugal, and it rows twice as hard in a boost.',
+   role:'LÄTT I GRÄSET · SNÅL',
+   mul:{maxSpeed:0.99,power:1.0,gripOn:0.98,offRoad:1.14,boostMul:1.01,burn:0.9,spinResist:1}},
+  {id:'rakbat',name:'RÄKBÅTEN', sub:'TRÅLARE PÅ HJUL', sig:'kaptenmas',
+   blurb:'A little shrimp trawler on wheels: wheelhouse, life ring, the net up on its boom and a giant shrimp on the roof. Quick on a long straight, a handful in a corner.',
+   role:'FART PÅ RAKORNA · LÖST I KURVOR',
+   mul:{maxSpeed:1.03,power:1.0,gripOn:0.95,offRoad:0.94,boostMul:1.02,burn:1.06,spinResist:1.05}},
+  {id:'domarvagn',name:'PLANVAGNEN', sub:'MED KRITMASKIN', sig:'domaren',
+   blurb:'The groundsman\'s buggy under a striped canopy, corner flags on the back and a chalk liner that marks every metre it drives. By the book, and quick off the line.',
+   role:'BALANSERAD · BRA BOOST',
+   mul:{maxSpeed:1.0,power:1.03,gripOn:1.02,offRoad:0.95,boostMul:1.03,burn:1,spinResist:1}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 const OFFROAD_CAP=.95;
@@ -833,6 +854,8 @@ function buildKart(color,kind,car,opt){
     buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
     buildChampion(kind,addc,add,skin,dark,car);
+  }else if(WEST_KINDS.includes(kind)){
+    buildWestDriver(kind,addc,add,skin,dark,car);
   }else{
     addc(new THREE.BoxGeometry(.78,.78,.5),dark,0,1.22,-.62);
     addc(new THREE.BoxGeometry(.22,.2,.88),skin,-.34,1.12,.02);
@@ -965,9 +988,40 @@ const CHARS=[
         pass:'Du får fila lite till på originalet.',hitTeo:'Det där var väl också en bugg?',
         mud:'Äntligen lite ordentligt underlag.',jump:'HÅLL I LASTEN!',
         win:'Levererat.',lose:'Jag hade faktiskt last.',idle:'Det var sju när vi åkte.'},
-   blurb:'Carl från Hörby skulle bara leverera sju lass svin. Nu har han hamnat i Skånecupen, tappat fraktsedeln och kört om sin bror. Victor säger att bilen är obalanserad. Carl säger att lasten lever.'}
+   blurb:'Carl från Hörby skulle bara leverera sju lass svin. Nu har han hamnat i Skånecupen, tappat fraktsedeln och kört om sin bror. Victor säger att bilen är obalanserad. Carl säger att lasten lever.'},
+  /* the west coast (js/30-west-crew.js, items in js/37-west-items.js): two champions, then four drivers */
+  {id:'regnmolnet',boss:'vastgota',short:'MOLNET',name:'REGNMOLNET',role:'BORÅS',sig:'molnvagn',home:'boras',
+   color:0x7c8794,maxSpeed:42.4,power:27,offRoad:0.50,boostMul:1.40,gripOn:10.6,
+   quirk:['ALLTID BLÖTT','Vattenpölar, stuprännor, spridare och regn biter inte på ett moln.'],
+   say:{start:'Det blir regn idag. Det blir alltid regn.',home:'Välkommen hem. Ta på dig stövlarna.',hit:'...TYPISKT.'},
+   blurb:'Har följt med varje lopp i Västergötland och regnat på samtliga. Inte snabbast, men greppet håller när alla andra glider.'},
+  {id:'hamnkranen',boss:'goteborg',short:'KRANEN',name:'HAMNKRANEN',role:'HISINGEN',sig:'kranbil',home:'hisingen',
+   color:0xf08a1c,maxSpeed:43.0,power:23,offRoad:0.70,boostMul:1.42,gripOn:10.0,mass:2.6,
+   quirk:['TUNGLAST','Tyngst i fältet: knuffar undan alla och rubbas knappt själv.'],
+   say:{start:'Last kommer!',home:'Fel sida älven? Rätt sida, för mig.',hit:'VEM FLYTTADE MIN CONTAINER?!'},
+   blurb:'Har lyft containrar i hamnen i fyrtio år och tänker inte flytta på sig för en gokart. Seg ur startblocken, tung som en lastpall och svår att knuffa.'},
+  {id:'slusstrollet',short:'TROLLET',name:'SLUSSTROLLET',role:'TROLLHÄTTAN',sig:'stenkart',home:'trollhattan',
+   color:0x8a8f96,maxSpeed:39.8,power:28,offRoad:0.88,boostMul:1.32,gripOn:10.6,mass:1.9,spinResist:0.75,
+   quirk:['STENHÅRD','Tung som en sten: spinner kortare och knuffar undan andra.'],
+   say:{start:'Vänta på din tur.',home:'Mina slussar. Mitt vatten.',hit:'STEN SLÅR... AJ.'},
+   blurb:'Bor under slussarna och släpper bara igenom den som väntar på sin tur. Långsam rakt fram, men nästan omöjlig att snurra och knuffa.'},
+  {id:'aspenmonstret',short:'ASPEN',name:'ASPENMONSTRET',role:'LERUM',sig:'ekan',home:'lerum',
+   color:0x8a5a32,maxSpeed:41.6,power:27,offRoad:0.82,boostMul:1.36,gripOn:9.8,
+   quirk:['BLYG','Hoppar till med en liten fartknuff när någon kommer för nära.'],
+   say:{start:'...blubb?',home:'Hemma i sjön.',hit:'BLUBB!'},
+   blurb:'Ingen i Lerum har sett det ordentligt, men alla har en kusin som har det. Blygt, snällt och snabbare än man tror när någon kommer för nära.'},
+  {id:'kaptenmas',short:'MÅSEN',name:'KAPTEN MÅS',role:'AVENYN',sig:'rakbat',home:'avenyn',
+   color:0x2a4a8a,maxSpeed:42.4,power:26,offRoad:0.58,boostMul:1.40,gripOn:9.4,
+   quirk:['GLIDFLYGARE','Glider längre i luften över varje hopp.'],
+   say:{start:'Det där är mitt.',home:'Avenyn är min matsal.',hit:'MIN RÄKMACKA!'},
+   blurb:'Kaptenen på Avenyn. Har aldrig betalat för en räkmacka och tänker inte börja nu. Snabb på raksträckorna och svävar över hoppen.'},
+  {id:'domaren',short:'DOMAREN',name:'DOMAREN',role:'ULLEVI',sig:'domarvagn',home:'ullevi',
+   color:0x2a2e34,maxSpeed:41.8,power:27.5,offRoad:0.62,boostMul:1.38,gripOn:10.2,
+   quirk:['TILLÄGGSTID','Lite högre toppfart på sista varvet.'],
+   say:{start:'Spela rent nu.',home:'Min plan. Mina regler.',hit:'DET DÄR ÄR GULT KORT!'},
+   blurb:'Har dömt varenda match på Ullevi och tänker döma det här loppet också. Följer reglerna, kör jämnt och hittar alltid lite tilläggstid på slutet.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','spoket','viking','gubbe','rune'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
 const GRID_COLS=Math.max(Math.ceil(Math.sqrt(GRID.length)),Math.ceil(GRID.length/3));   /* 3x3 for nine, then wider: never past three rows */
 const kindOf=c=>c.kind||c.id;
 /** a champion is playable once their cup is won; everyone else always is */
@@ -1014,7 +1068,15 @@ const CHAMPS={
   rune:{name:'RAKET-RUNE',full:'RAKET-RUNE',color:0xd82a2a,ai:true,kind:'rune',car:'overljud',
    maxSpeed:44.2,power:31,offRoad:.70,boostMul:1.55,gripOn:11.0,
    lineSpread:0.8,caution:2.4,lookAdd:5,driftLove:1.2,lean:{risk:1.3},
-   say:'Ingen slår Raket-Rune på hans egen runda!'}};
+   say:'Ingen slår Raket-Rune på hans egen runda!'},
+  regnmolnet:{name:'REGNMOLNET',full:'REGNMOLNET',color:0x7c8794,ai:true,kind:'regnmolnet',car:'molnvagn',
+   maxSpeed:43.4,power:28,offRoad:.62,boostMul:1.44,gripOn:10.8,
+   lineSpread:0.9,caution:2.6,lookAdd:4,driftLove:1.0,lean:{risk:1.2},
+   say:'Det blir regn idag. Det blir alltid regn.'},
+  hamnkranen:{name:'HAMNKRANEN',full:'HAMNKRANEN',color:0xf08a1c,ai:true,kind:'hamnkranen',car:'kranbil',
+   maxSpeed:44.0,power:27,offRoad:.74,boostMul:1.46,gripOn:10.4,
+   lineSpread:1.6,caution:2.3,lookAdd:3,driftLove:1.1,lean:{traffic:1.5},
+   say:'Last kommer! Ingen kör förbi hamnen.'}};
 /* Carl and Victor each insist the other has an unfair advantage, so whichever one you drive
    brings the other along: the guest takes Nisse's slot (unless Nisse is this cup's rival) */
 const GUEST_SLOT=4;

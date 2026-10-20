@@ -61,11 +61,11 @@ def main():
         # driver select: Carl in the grid, his own vehicle, his line
         page.click('#cards .vcard[aria-label="GRISABONDEN CARL"]', timeout=10000)
         sel = ev("""()=>({name:document.getElementById('vsName').textContent,say:document.getElementById('vsSay').textContent,
-            car:CARS[carSel].id,last:CARS[CARS.length-1].id,victorAt:CARS.findIndex(c=>c.id==='original'),
+            car:CARS[carSel].id,svinAt:CARS.findIndex(c=>c.id==='svinexpress'),victorAt:CARS.findIndex(c=>c.id==='original'),
             open:charOpen(charSel),inGrid:GRID.includes(charSel)})""")
         check(sel['name'] == 'GRISABONDEN CARL' and sel['say'] == '”Carl. Hörby. Sju lass.”', f'select panel {sel}')
-        check(sel['car'] == 'svinexpress' and sel['last'] == 'svinexpress' and sel['victorAt'] == 18,
-              'Hörby Svinexpress picked, added at the end, earlier vehicles keep their places')
+        check(sel['car'] == 'svinexpress' and sel['svinAt'] == 19 and sel['victorAt'] == 18,
+              'Hörby Svinexpress picked, added after Victor, earlier vehicles keep their places')
         check(sel['open'] and sel['inGrid'], 'Carl is open from the start and on the grid')
         for t, name in ((900, 'count'), (1900, 'climb'), (1100, 'hat')):
             page.wait_for_timeout(t)

@@ -114,6 +114,7 @@ function aiItemLines(){
       }
       bias+=push*.9;
     }
+    if(sigWalls.length)bias+=sigWallAvoid(k)*1.2;              /* round a container or a shut lock gate */
     if(k.held){                                            /* play what they picked up */
       let ahead=false,near=false,behind=false,tail=false,close=false;
       for(const o of karts){

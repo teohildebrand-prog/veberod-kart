@@ -3,7 +3,7 @@ pipeline {
   agent {
     docker { image 'mcr.microsoft.com/playwright/python:v1.49.0-noble' }
   }
-  options { timeout(time: 10, unit: 'MINUTES') }
+  options { timeout(time: 30, unit: 'MINUTES') }   // six west tracks raced twice each
   stages {
     stage('Audio test') {
       steps {
@@ -35,6 +35,16 @@ pipeline {
         sh 'python3 tools/svin_test.py'
       }
     }
+    stage('West items test') {
+      steps {
+        sh 'python3 tools/west_items_test.py'
+      }
+    }
+    stage('West tracks test') {
+      steps {
+        sh 'python3 tools/vastgota_test.py'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
@@ -52,6 +62,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png,west-*.png', allowEmptyArchive: true }
   }
 }

@@ -163,6 +163,33 @@ def new_sommar(page):
     home_cup(page, 'sommar', 'Sommarcupen', ['ahus', 'glimminge', 'ales', 'bron'], 'sommar_normal')
 
 
+def west_cups(page):
+    # a fresh save: Västgötacupen is open from the start, Göteborgscupen after a podium in it
+    expect(page.evaluate("cupOpen(cupDef({cup:'vastgota'}))&&!cupOpen(cupDef({cup:'goteborg'}))"),
+           'Västgötacupen open from the start, Göteborgscupen locked')
+    for cup, rounds, champ, nxt in (('vastgota', ['lerum', 'boras', 'trollhattan'], 'regnmolnet', 'goteborg'),
+                                    ('goteborg', ['avenyn', 'hisingen', 'ullevi'], 'hamnkranen', None)):
+        start_cup(page, cup)
+        s = page.evaluate(STATE)
+        expect(s['rounds'] == rounds and s['list'] == rounds, f'{cup}: {", ".join(rounds)} in menu and stage select')
+        expect('RUNDA 1 AV 3' in s['brief'] and s['resume'].endswith('1/3'), f'{cup} briefing and resume')
+        expect(page.evaluate(f"CHAMPS['{champ}'].name") in page.evaluate("document.getElementById('briefBody').textContent").upper(),
+               f'{champ} is the champion from round 1')
+        for n in range(3):
+            r = page.evaluate(RACE)
+            expect(r['gained'] == 10 and r['round'] == n + 1, f'round {n + 1} scores once')
+        u = page.evaluate("SAVE.cup.unlocked")
+        expect(r['done'] and page.evaluate(f"!!SAVE.unlock.win_{cup}") and page.evaluate('SAVE.cup.newDriver') == champ,
+               f'winning {cup} unlocks {champ}: {u}')
+        expect(page.evaluate(f"charOpen(CHARS.findIndex(c=>c.id==='{champ}'))"), f'{champ} is playable')
+        expect(not any('FINALEN' in x for x in u), 'the west does not invite you to Finalen')
+        if nxt:
+            expect(page.evaluate(f"cupOpen(cupDef({{cup:'{nxt}'}}))") and any('ÖPPNAD' in x for x in u), f'{nxt} opens')
+    expect(not page.evaluate("cupOpen(cupDef({cup:'final'}))"), 'Finalen still needs the three Skåne championships')
+    expect(page.evaluate("PAINTS.filter(p=>p.unlock==='win_vastgota'||p.unlock==='win_goteborg').every(p=>SAVE.unlock[p.unlock])"),
+           'both west paints unlocked')
+
+
 def every_cup(page):
     longest = page.evaluate('Math.max(...CUPS.map(C => C.rounds.length))')
     expect(longest <= 4, f'no cup has more than four rounds (longest {longest})')
@@ -183,6 +210,7 @@ def main():
         run(browser, url, save(None, WON), new_skane)
         run(browser, url, save(None, WON), new_sommar)
         run(browser, url, save(None, WON), every_cup)
+        run(browser, url, save(None, {}), west_cups)
         browser.close()
     httpd.shutdown()
     if expect.failed:

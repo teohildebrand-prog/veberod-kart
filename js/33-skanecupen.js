@@ -3,7 +3,10 @@
 const CUP_ROUNDS=['veberod','lund','tollarp','horby'];
 const CUP_ROLE={veberod:'Blandat underlag och de första genvägarna.',lund:'Precision och kurvtagning.',
   tollarp:'Långa raksträckor och fart.',horby:'Torgkurvor, grus och gyttja, och grisar på vägen.',ahus:'Hopp och jämn kontroll.',bron:'Två varv fullt ut, under press.',
-  glimminge:'Ren racing i månsken, utan genvägar.',ales:'Fart på sanden och två hemliga passager.'};
+  glimminge:'Ren racing i månsken, utan genvägar.',ales:'Fart på sanden och två hemliga passager.',
+  lerum:'Rena utgångar och balanserad styrning.',boras:'Förutsägbart grepp och rätt vägval i regnet.',
+  trollhattan:'Motorkraft, backar och bränsleplanering.',avenyn:'Fart på raksträckorna och disciplin vid inbromsning.',
+  hisingen:'Grov mark och kontroll i sladden.',ullevi:'Start, kurvor och omkörningar, allt på en gång.'};
 /* No cup runs longer than four rounds. Skånecupen and Sommarcupen are the home cups, no champion.
    LEGO Racers' shape: three cups of four with a champion each, the same three mirrored and
    in reverse order once won, then Finalen: Rosengård, then Raket-Rune's own circuit. */
@@ -19,7 +22,14 @@ const CUPS=[
   {id:'vild',name:'VILDMARKSCUPEN',short:'VILDMARKEN',rounds:['angelholm','hoor','romele','kalmar'],champ:'gubbe',need:'kust',
    blurb:'A UFO forest, the elk woods, a snowstorm and a joust. The Green Man from the forest is waiting.'},
   {id:'final',name:'FINALEN',short:'FINALEN',rounds:['rosengard','rune'],champ:'rune',
-   blurb:'Rosengård, then Raket-Rune\'s own circuit in Malmö harbour. Win all three championships to be invited.'}];
+   blurb:'Rosengård, then Raket-Rune\'s own circuit in Malmö harbour. Win all three championships to be invited.'},
+  /* the west: a parallel tour, open from the start; it neither needs nor opens Finalen */
+  {id:'vastgota',name:'VÄSTGÖTACUPEN',short:'VÄSTGÖTA',rounds:['lerum','boras','trollhattan'],champ:'regnmolnet',
+   blurb:'Lerum, rainy Borås and the locks of Trollhättan. Regnmolnet has followed every race here, and it has rained on all of them.'},
+  {id:'goteborg',name:'GÖTEBORGSCUPEN',short:'GÖTEBORG',rounds:['avenyn','hisingen','ullevi'],champ:'hamnkranen',need:'vastgota',
+   blurb:'The Avenue, the docks on the wrong side of the river and a stadium final. Hamnkranen guards the harbour and drops containers.'}];
+/* the three championships that invite you to Finalen */
+const FINAL_CUPS=['osterlen','kust','vild'];
 const cupDef=c=>CUPS.find(C=>C.id===((c&&c.cup)||'skane'))||CUPS[0];
 /* a saved championship carries its own schedule (cup save v2), so a cup started before a schedule
    changed finishes on the rounds it started with. v1 saves stored none: they get the schedule v1 raced. */
@@ -35,7 +45,7 @@ if(migrateCup(SAVE.cup))writeSave();
     a won championship can be raced again mirrored, rounds in reverse */
 function cupRounds(c){const C=cupDef(c),r=((c&&c.rounds)||C.rounds).slice();if(c&&c.mirror&&C.champ)r.reverse();return r;}
 function cupOpen(C){
-  if(C.id==='final')return CUPS.every(D=>!D.champ||D.id==='final'||SAVE.unlock['win_'+D.id]);
+  if(C.id==='final')return FINAL_CUPS.every(id=>SAVE.unlock['win_'+id]);
   return !C.need||!!SAVE.unlock['cup_'+C.need];
 }
 function mirrorOpen(C){return !C.champ?!!SAVE.unlock.cup:(C.id!=='final'&&!!SAVE.unlock['win_'+C.id]);}
@@ -86,13 +96,17 @@ const PAINTS=[{id:null,name:'ORIGINAL'},
   {id:'c1',name:'SPÖKVIT',color:0xcfe0ea,unlock:'win_osterlen'},
   {id:'c2',name:'VIKINGABRUN',color:0x7a4a2a,unlock:'win_kust'},
   {id:'c3',name:'UFO-GRÖN',color:0x4fd04a,unlock:'win_vild'},
-  {id:'c4',name:'RAKETRÖD',color:0xd82a2a,unlock:'win_final'}];
+  {id:'c4',name:'RAKETRÖD',color:0xd82a2a,unlock:'win_final'},
+  {id:'c5',name:'ASFALTSBLÅ',color:0x4a5a70,unlock:'win_vastgota'},
+  {id:'c6',name:'KRANORANGE',color:0xf08a1c,unlock:'win_goteborg'}];
 /* beating a champion also gives one piece of their kart, cosmetic only */
 const PARTS=[{id:null,name:'INGEN'},
   {id:'lantern',name:'SPÖKLYKTAN',unlock:'win_osterlen'},
   {id:'horns',name:'VIKINGAHORNEN',unlock:'win_kust'},
   {id:'antenna',name:'UFO-ANTENNEN',unlock:'win_vild'},
-  {id:'fins',name:'RAKETFENORNA',unlock:'win_final'}];
+  {id:'fins',name:'RAKETFENORNA',unlock:'win_final'},
+  {id:'paraply',name:'PARAPLYET',unlock:'win_vastgota'},
+  {id:'krok',name:'KRANKROKEN',unlock:'win_goteborg'}];
 const partOn=()=>{const P=PARTS.find(q=>q.id&&q.id===SAVE.part&&SAVE.unlock[q.unlock]);return P?P.id:null;};
 function addPart(v,id){
   const add=(g,m,x,y,z)=>{const e=new THREE.Mesh(flat(g),m);e.position.set(x,y,z);v.lean.add(e);return e;};
@@ -112,6 +126,16 @@ function addPart(v,id){
     for(const sg of [-1,1]){const f=new THREE.Mesh(flat(tri.clone()),psMat({color:0xd82a2a,side:THREE.DoubleSide}));
       f.position.set(sg*.7,.8,-1.2);f.rotation.z=sg*.5;v.lean.add(f);}
     const c=add(new THREE.ConeGeometry(.22,.5,8),psMat({color:0xffa83a,unlit:true}),0,.75,-2.0);c.rotation.x=-Math.PI/2;
+  }else if(id==='paraply'){                 /* Regnmolnet's umbrella on a pole, for the rain that follows */
+    add(new THREE.CylinderGeometry(.03,.03,1.7,4),psMat({color:0x3a3e46}),-.58,1.65,-1.2);
+    add(new THREE.ConeGeometry(.75,.36,8),psMat({color:0x2a4a8a}),-.58,2.62,-1.2);
+    add(new THREE.SphereGeometry(.05,4,3),psMat({color:0xd8dde2}),-.58,2.82,-1.2);
+  }else if(id==='krok'){                    /* a crane hook swinging from a little jib */
+    const m=psMat({color:0xf08a1c}),st=psMat({color:0x4a4e56});
+    add(new THREE.BoxGeometry(.12,1.3,.12),m,-.6,1.5,-1.25);
+    add(new THREE.BoxGeometry(.1,.1,1.0),m,-.6,2.12,-.85);
+    add(new THREE.CylinderGeometry(.015,.015,.6,3),st,-.6,1.8,-.4);
+    const h=add(new THREE.TorusGeometry(.12,.035,4,8,Math.PI*1.4),st,-.6,1.45,-.4);h.rotation.z=2.4;
   }
 }
 let paintSel=SAVE.paint;
@@ -301,6 +325,9 @@ function placeOnGrid(){
     k.kvart=!!P&&P.id==='bjorn';k.kvartCue=false;k.suck=0;k.wheelie=!!P&&P.id==='mehmet';
     k.sig=sigOf(P?P.id:R.kind);k.heldSig=null;k.tow=0;k.towed=0;k.bike=0;k.fplan=0;   /* the driver's own item (twins too), twice as likely from a box */
     k.chores=!!(P||CHARS.find(c=>c.id===R.kind)||{}).chores;k.svinHerd=null;
+    k.wet=!!P&&P.id==='regnmolnet';k.glide=!!P&&P.id==='kaptenmas';     /* the west's quirks: 37-west-items.js */
+    k.shy=!!P&&P.id==='aspenmonstret';k.shyT=0;k.ref=!!P&&P.id==='domaren';
+    k.rain=0;k.offside=0;k.dive=0;
     k.orig=!!P&&!!P.orig;k.clean=false;k.teoGap=0;k.idleT=0;k.idleDone=false;
     k.y=groundAt(k.x,k.z,s);
     k.v.root.position.set(k.x,k.y,k.z);
