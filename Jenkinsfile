@@ -55,6 +55,11 @@ pipeline {
         sh 'python3 tools/weiron_test.py'
       }
     }
+    stage('Bodil test') {
+      steps {
+        sh 'python3 tools/bodil_test.py'
+      }
+    }
     stage('West and bonus tracks test') {
       steps {
         sh 'python3 tools/vastgota_test.py'
@@ -77,6 +82,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
   }
 }

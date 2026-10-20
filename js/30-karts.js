@@ -105,7 +105,12 @@ const CARS=[
   {id:'skiftsex',name:'HISINGEN SKIFTSEX', sub:'VERKSTADENS GAFFELTRUCK',sig:'weiron',
    blurb:'Verkstadens gaffeltruck, anmäld som den stod: industrigul, svart motvikt, skyddstak med roterande varningsljus, verktygslådan fastspänd på motvikten och matlådan på en liten pall på gafflarna. Drar starkt, håller vägen och är snabbt igång efter en snurr. Rakt fram är den fortfarande en truck, och batterierna dricker.',
    role:'STARK IGÅNG · BRA GREPP · KORTA SPINN · LÅG TOPPFART · TÖRSTIG',
-   mul:{maxSpeed:0.96,power:1.09,gripOn:1.07,offRoad:1.0,boostMul:1,burn:1.15,spinResist:0.75}}
+   mul:{maxSpeed:0.96,power:1.09,gripOn:1.07,offRoad:1.0,boostMul:1,burn:1.15,spinResist:0.75}},
+  /* Bodil's (js/30-bodil.js) */
+  {id:'grisorat',name:'GRISÖRAT', sub:'EN TUGGBEN-RACER',sig:'bodil',
+   blurb:'En liten racingmaskin formad som ett ihoprullat grisöra: vadderad cockpit som en hundbädd, rejäla hjul och en godisburk som skramlar där bak. Kvick igång och lätt i kurvorna, och i en boost studsar den rullade nosen. Rakt fram är den fortfarande ett tuggben.',
+   role:'KVICK IGÅNG · LÄTT I KURVORNA · LITE LÄGRE TOPPFART',
+   mul:{maxSpeed:0.97,power:1.06,gripOn:1.04,offRoad:1.02,boostMul:1.02,burn:0.95,spinResist:0.9}}
 ];
 const FREECARS=CARS.map((c,i)=>i);                  /* every vehicle is open to every driver */
 const OFFROAD_CAP=.95;
@@ -862,6 +867,8 @@ function buildKart(color,kind,car,opt){
     buildCarl(cab,skin,dark,anim);
   }else if(kind==='weiron'){
     buildWeiron(cab,skin,dark,anim);
+  }else if(kind==='bodil'){
+    buildBodil(cab,skin,dark,anim);
   }else if(kind==='bjorn'||kind==='mehmet'||kind==='anders'||kind==='granny'||kind==='teo'||kind==='amanda'){
     buildDriver(kind,addc,add,skin,dark,car);
   }else if(kind==='ghost'||kind==='viking'||kind==='gubbe'||kind==='rune'){
@@ -1041,9 +1048,18 @@ const CHARS=[
         pass:'Flytta på dig. Jag har ett skift att avsluta.',mud:'Vem har skottat här?',jump:'SÄKRA LASTEN!',
         win:'Klart. Och kaffet är fortfarande varmt.',lose:'Det var inte jag som planerade det här.',idle:'Rasten är slut.'},
    homeSay:{shortcut:'Genom verkstan. Torka av fötterna.'},
-   blurb:'Weiron jobbar i en verkstad i hamnen. Någon lånade hans verkstadsvagn, satte dit en transponder och skrev MOTORSPORT på övertidslappen. Nu tänker han vinna, lämna tillbaka grejerna och vara klar innan kaffet kallnar. Han klagar på allt, men han kan sitt jobb.'}
+   blurb:'Weiron jobbar i en verkstad i hamnen. Någon lånade hans verkstadsvagn, satte dit en transponder och skrev MOTORSPORT på övertidslappen. Nu tänker han vinna, lämna tillbaka grejerna och vara klar innan kaffet kallnar. Han klagar på allt, men han kan sitt jobb.'},
+  /* Teo's dog (js/30-bodil.js, item and quirk in js/37-brak-och-trak.js). Her portrait stays serious */
+  {id:'bodil',short:'BODIL',name:'BODIL',role:'GODISINSPEKTÖREN',sig:'grisorat',home:'tollarp',
+   color:0x2f8f9d,maxSpeed:41.4,power:28.5,offRoad:0.66,boostMul:1.42,gripOn:10.4,
+   quirk:['GODISNOSEN','Känner lukten av en sakbox på långt håll: tar lådor lite längre ut från sidan.'],
+   say:{pick:'(Någon öppnade en påse.)',start:'(Sitter helt stilla. Helt oskyldig.)',
+        home:'(Hemma. Här luktar allt bekant.)',hit:'VOFF?!',hitTeo:'(Tittar på Teo. Länge.)',
+        pass:'(Ser inte ens åt dig.)',mud:'(Det här blir ett bad sen.)',jump:'(Öronen först!)',
+        win:'(Förväntar sig godis nu.)',lose:'(Det var nog någon annans fel.)',idle:'(Någonstans prasslar en påse.)'},
+   blurb:'Bodil är en cockerspaniel med fräknig brunvit päls, en vit strimma ner över nosen och enorma öron. Hon hör inte \'kom\'. Hon hör en påse öppnas. Hon kör med tassarna på ratten, ser helt oskyldig ut vid startljuset och tycker att flygande tacklingar är helt vanlig racing.'}
 ];
-const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','weiron','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
+const GRID=['arne','billy','bjorn','mehmet','anders','cow','teo','victor','carl','amanda','britta','slusstrollet','aspenmonstret','kaptenmas','domaren','weiron','bodil','spoket','viking','gubbe','rune','regnmolnet','hamnkranen'].map(id=>CHARS.findIndex(c=>c.id===id));
 const GRID_COLS=Math.max(Math.ceil(Math.sqrt(GRID.length)),Math.ceil(GRID.length/3));   /* 3x3 for nine, then wider: never past three rows */
 const kindOf=c=>c.kind||c.id;
 /** a champion is playable once their cup is won; everyone else always is */

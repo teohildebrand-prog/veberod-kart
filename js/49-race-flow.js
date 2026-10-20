@@ -171,7 +171,8 @@ function portrait(ci,sil){
   ps.add(v.root);if(sil)ps.overrideMaterial=SILHOUETTE;
   const cam=new THREE.PerspectiveCamera(30,1,.1,50);
   const hy=kindOf(c)==='cow'?1.92:kindOf(c)==='carl'?1.98:1.86;
-  cam.position.set(.7,hy+.32,1.55);cam.lookAt(0,hy-.12,-.6);
+  if(kindOf(c)==='bodil'){cam.position.set(.5,2.2,1.25);cam.lookAt(0,1.98,-.45);}   /* the ears need the room */
+  else{cam.position.set(.7,hy+.32,1.55);cam.lookAt(0,hy-.12,-.6);}
   const keep=RES.clone(),cc=new THREE.Color();renderer.getClearColor(cc);const ca=renderer.getClearAlpha();
   RES.set(72,72);renderer.setSize(72,72,false);renderer.setClearColor(0x3d86dc,1);
   renderer.render(ps,cam);

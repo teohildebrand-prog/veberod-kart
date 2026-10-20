@@ -122,11 +122,18 @@ function fartSound(lvl){
 function shiftWhistle(v){
   audioTone(523,512,.5,.05*v,'square');audioTone(659,646,.5,.04*v,'triangle');audioTone(784,768,.5,.03*v,'sine');
 }
+/** a short sharp spaniel bark; v is the loudness */
+function woof(v,delay){
+  v=v==null?1:v;delay=delay||0;
+  audioTone(640,290,.09,.07*v,'square',delay);audioTone(1050,480,.07,.03*v,'sawtooth',delay);
+  audioTone(420,230,.06,.04*v,'triangle',delay+.05);
+}
 function honk(){
   if(CHARS[charSel].id==='cow'||stampCount()>=6){moo();toast('MUUUU!');}
   else if(CARS[carSel].id==='svinexpress'){grunt(0);grunt(.2);}      /* the Svinexpress horn: two short oinks */
   else if(CARS[carSel].id==='burgarbus')sibBell(1.2);                /* the Burgarbus horn: the order bell */
   else if(CARS[carSel].id==='skiftsex')shiftWhistle(1);               /* the Skiftsex horn */
+  else if(CARS[carSel].id==='grisorat'){woof(1);woof(.8,.2);}         /* the Grisörat horn: Bodil, twice */
   else{audioTone(330,320,.15,.07,'triangle');audioTone(330,320,.15,.07,'triangle',.19);}
 }
 function saveAudioSettings(){
