@@ -311,7 +311,7 @@ function placeOnGrid(){
     k.parked=(TT||FREE)&&k.ai;k.v.root.visible=!k.parked;k.blob.visible=!k.parked;
     const R=k.cfg;
     k.line=k.ai?rand(-R.lineSpread,R.lineSpread):0;
-    k.fuel=TANK;k.atPump=false;k.warned=0;k.held=null;k.heldLvl=0;k.roll=0;k.shield=0;k.spun=0;
+    k.fuel=TANK;k.atPump=false;k.warned=0;k.fuelUsed=0;k.fuelIn=0;k.stops=0;k.filling=false;k.fillEnd=-9;k.pumpMiss=0;k.lockWant=false;k.court=false;k.fuelLock=null;k.fuelChk=0;k.fpAt=null;k.held=null;k.heldLvl=0;k.roll=0;k.shield=0;k.spun=0;
     k.boostLvl=0;k.shieldLvl=0;k.pans=0;k.panHit={};k.trapAt=-9;k.slick=0;k.launch=0;k.rattle=0;k.fartT=0;
     /* driver times vehicle, every stat set fresh each race so no old car lingers */
     Object.assign(k,k.ai?effStats(R,carIndex(R.car)):effStats(CHARS[charSel],carSel));

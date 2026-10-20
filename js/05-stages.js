@@ -47,6 +47,7 @@ const STAGES=[
   view:{i:398,lat:4,h:4,to:{i:458,lat:0,h:5},fov:50},
   hw:8.2,
   bars:[0.75,0.60,0.90], laps:3,
+  stations:[[0.36,1],[0.71,-1]],                  /* the default pump sat on the gravel lane's merge */
   blurb:'Rapeseed, spruce and a barn you drive straight through. Thirty-two metres of elevation and three ramps through the fields.',
   sky:[0xdde4e9,0x2f7fd6], fog:[0xc2d0d9,70,340], amb:0x62707f, dif:0xfff0d4,
   road:'asphalt', verge:'gravel', edge:'fence', ground:'fields',
@@ -133,7 +134,7 @@ const STAGES=[
      mid:[[0.5,-4]],surface:'road',tex:'concrete',risk:0.3,hidden:true,shoot:true,mouth:22,
      blockMesh:(R,j)=>ahusDoors(R,j),blockAnim:(B,d)=>ahusDoorsAnim(B,d),
      blurb:'Through the ghost house, past the skeletons. The doors are shut.'}],
-  stations:[[0.27,-1],[0.71,-1]],                 /* the default inside pump would sit on the coaster fork */
+  stations:[[0.22,-1],[0.65,1]],                  /* clear of the coaster fork and of the landing off the second ramp */
   stamps:[
     {id:'ahu1',dish:'Våffla med sylt',ini:'V',kind:'intro',route:'main',i:160,lat:-7.4,
      hint:'Ytterkanten före berg-och-dalbanan, med pariserhjulet i sikte.',
