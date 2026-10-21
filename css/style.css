@@ -134,6 +134,27 @@
   .meter.fuelm.warn i{background:linear-gradient(180deg,#fff0b8,#ffd54a 46%,#f0b418 54%,#d99400)}
   .meter.fuelm.dry i{background:linear-gradient(180deg,#ffc2b2,#ff6a5a 46%,#e8381f 54%,#b4220d)}
   .meter.fuelm.warn{animation:pulse 1s ease-in-out infinite}
+  .meter.fuelm.low i{background:linear-gradient(180deg,#ffc2b2,#ff6a5a 46%,#e8381f 54%,#b4220d)}
+  .meter.fuelm.low{animation:pulse .55s ease-in-out infinite}
+  /* filling at the pumps: stripes run along the gauge */
+  .meter.fuelm.filling{animation:none}
+  .meter.fuelm.filling i{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.45) 0 4px,transparent 4px 9px),
+    linear-gradient(180deg,#dcf7b0,#9ad73f 46%,#6fb524 54%,#4e8f16);background-size:18px 100%,auto;
+    animation:fillrun .45s linear infinite}
+  @keyframes fillrun{to{background-position:18px 0,0 0}}
+  /* fuel words over the speedo: the state of the tank and the next station, never colour alone */
+  #fuelChips{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;pointer-events:none}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+    font-size:10px;font-weight:700;letter-spacing:.1em;color:#fff;
+    background:rgba(0,22,44,.78);border:1px solid rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,12,28,.45)}
+  .chip svg{width:13px;height:13px;flex:none}
+  .chip.off{display:none}
+  .chip.cue{border-color:#3fc8f5;color:#d8f4ff}
+  .chip.warn{border-color:#ffd54a;color:#fff0b8}
+  .chip.low,.chip.dry{border-color:#ff6a5a;color:#ffd0c8;background:rgba(70,8,0,.8)}
+  .chip.fill{border-color:#9ad73f;color:#e4ffc0}
+  .chip.brake{border-color:#ffd54a;color:#fff0b8}
   @keyframes pulse{50%{opacity:.5}}
 
   /* Tifot: a green-and-black scarf over the top of the screen, never over the road just ahead */
@@ -653,7 +674,7 @@
     #flash span.pop{animation-duration:.01ms}
     #bub{display:none!important}
     #slot.pop,#slot.lvl3,#slotname.lvl3,#slot.spin #slotv{animation:none}
-    .meter.fuelm.warn{animation:none}
+    .meter.fuelm.warn,.meter.fuelm.low,.meter.fuelm.filling i{animation:none}
     .card:hover{transform:none}
   }
   @media(max-width:470px){
@@ -930,6 +951,10 @@ body.touch #spd{font-size:26px}
 body.touch #speedo .meter{margin-top:4px;height:8px}
 body.touch #speedo .fl{display:none}
 body.touch #speedo .meter.fuelm{height:7px;margin-top:3px}
+body.touch #fuelChips{margin-bottom:4px}
+body.touch .chip{font-size:9px;padding:3px 8px;letter-spacing:.06em}
+/* auto-gas sits just above the speedo, so the chips go above it */
+body.autogas #fuelChips{margin-bottom:calc(clamp(.8px,.2564vmin,1.3px)*80 - 44px)}
 body.touch #toast{bottom:auto;top:calc(56px + env(safe-area-inset-top,0px));font-size:12px;padding:5px 14px}
 
 /* ── phone menus: fit the visible screen, keep the main action in reach ──

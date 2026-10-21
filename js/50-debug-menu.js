@@ -124,7 +124,7 @@ function dbgFrame(rawDt){
     'SPÅR  si '+k.si+'  mi '+Math.round(k.mi)+'  rutt '+(k.rib?(ALTS[k.rib-1].name||'genväg '+k.rib):'huvudväg')+'  '+(k.surf||k.sfx||'')+'\n'+
     'VARV  '+k.lap+'/'+(FREE?'∞':LAPS)+'  grind '+k.gate+'  kp '+(k.cp+1)+'  plats '+k.place+'\n'+
     'LUFT  '+(k.air?'ja '+f(k.airT)+' s':'nej')+'  SLADD '+f(k.charge)+'  TURBO '+f(k.boost)+'\n'+
-    'BENSIN '+Math.round(k.fuel)+'  ITEM '+(k.held?itemName(k.held,itemLvl(k)):'-')+'\n'+
+    'BENSIN '+Math.round(k.fuel)+(k.wantFuel?' TANKAR':'')+'  ITEM '+(k.held?itemName(k.held,itemLvl(k)):'-')+'\n'+
     'LÄGE  '+state+'  tid '+f(raceTime)+'  aktiva '+karts.filter(q=>!q.parked).length;
   dbgHud.textContent=t;
 }

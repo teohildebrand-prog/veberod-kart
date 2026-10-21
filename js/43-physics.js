@@ -37,17 +37,11 @@ function drive(k,dt,ctl){
   const ms=!RT&&MAINS[i]&&Math.abs(lat)<HW+1.3?MAINS[i]:'';
   const surf=RT&&Math.abs(lat)<RT.hw+0.8?SURF[RT.S[i]]:(ms?SURF[ms]:null);
   k.surf=surf?(RT?RT.S[i]:ms):'';
-  k.atPump=!RT&&!!atPumpNow(i,lat);
-  if(k.atPump)k.fuel=Math.min(TANK,k.fuel+26*dt);
-  else if(!k.air&&!(k.bike>0))k.fuel=Math.max(0,k.fuel-(0.5+ctl.throttle*2.0+(k.boost>0?1.6:0))*k.burn*(surf?surf.fuel:1)*dt);   /* pedalling is free */
+  pumpStep(k,dt,ctl,!RT&&atPumpNow(i,lat),surf);
   const dry=k.fuel<=0;
   const thr=k.spun>0?0:(dry?ctl.throttle*0.17:ctl.throttle);   /* dry = limp, not dead */
-  if(!k.ai){
-    if(dry&&k.warned<2){k.warned=2;toast('SOPPA-TORSK!');ping(260,70,.28);}
-    else if(!dry&&k.fuel<26&&k.warned<1){k.warned=1;toast('BENSIN LÅGT');ping(500,320,.14);}
-    else if(k.fuel>40)k.warned=0;
-  }
-  const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.atPump;
+  if(!k.ai&&!TT&&!FREE)fuelWarn(k);
+  const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.court;
   if(TT||FREE)k.fuel=TANK;                                /* nothing to manage in a time trial */
   {const sf=RT?(surf?RT.S[i]:'grass'):ms?(SFX[ms]?ms:'road'):(onRoad||stage.ground==='sea'?(stage.sfxRoad||(stage.road==='cobble'?'cobble':(stage.road==='sand'?'sand':'road'))):
       (stage.sfxOff||(stage.ground==='dunes'?'sand':'grass')));
@@ -158,7 +152,7 @@ function drive(k,dt,ctl){
   const gy=groundK(k,k.x,k.z);
   k.vy-=(k.glide&&k.vy<0?GLIDE:34)*dt;              /* Kapten Mås glides down */
   k.y+=k.vy*dt;
-  if(k.y<=gy){
+  if(k.y<=gy||(k.court&&k.y-gy<0.6&&k.vy<=0)){           /* a forecourt is flat concrete: no hopping past the pumps */
     if(k.air&&k.vy<-8){                              /* touchdown */
       const big=k.airT>0.42;
       for(let p=0;p<(big?14:6);p++)
@@ -313,21 +307,23 @@ function walkPt(k,s){
 }
 /** rough seconds to drive n samples of a route, from this kart's own grip and speed */
 function routeCost(k,T,i0,n){
-  let t=0;const G=AI_G*(2.7/k.caution);
-  for(let q=0;q<n;q++){
-    const i=T===MAIN?(i0+q)%N:i0+q, s=T===MAIN?(MAINS[i]?SURF[MAINS[i]]:null):SURF[T.S[i]];
-    const top=k.maxSpeed*(s?s.top(k.offRoad):1);
-    const v=Math.min(top,Math.sqrt(G*(k.gripOn*(s?s.grip(k.offRoad):1)/9.5)*14*SEG/Math.max(T.CURV[i],1e-4)));
-    t+=SEG/Math.max(v,4);
-  }
+  let t=0;
+  for(let q=0;q<n;q++)t+=sampleSecs(k,T,T===MAIN?(i0+q)%N:i0+q);
   return t;
+}
+/** rough seconds for this kart to cross one sample of a route */
+function sampleSecs(k,T,i){
+  const s=T===MAIN?(MAINS[i]?SURF[MAINS[i]]:null):SURF[T.S[i]], G=AI_G*(2.7/k.caution);
+  const top=k.maxSpeed*(s?s.top(k.offRoad):1);
+  const v=Math.min(top,Math.sqrt(G*(k.gripOn*(s?s.grip(k.offRoad):1)/9.5)*14*SEG/Math.max(T.CURV[i],1e-4)));
+  return SEG/Math.max(v,4);
 }
 /** at a fork: score every legal route and take the cheapest. Personality moves
     the weights, never the physics. */
 function chooseRoute(k,R){
   if(k.lap===0)return false;                           /* lap 1 stays readable */
   const span=((R.b-R.a)%N+N)%N;
-  if(k.fuel<64&&stations.some(S=>{const d=((S.at-R.a)%N+N)%N;return d>0&&d<span;}))return false;
+  if(!laneFuelOk(k,R))return false;                    /* skips a pump it can not do without */
   const ln=k.cfg.lean||{};
   if(ln.defend&&k.place===1)return false;              /* Britta holds the lead on tarmac */
   const near=(o,onAlt)=>o!==k&&(onAlt?(o.rib===R.idx||o.plan===R.idx):(!o.rib&&o.plan!==R.idx))&&
@@ -412,7 +408,7 @@ function aiControl(k){
   /* a farm lane is too twisty to aim far ahead: look closer while in one */
   const inLane=k.rib||(k.plan&&((ALTS[k.plan-1].a-k.si)%N+N)%N<8);
   /* pulling in for fuel: aim close, or a forecourt on a bend gets cut past */
-  const pitS=k.wantFuel&&!k.rib?stations.find(S=>{let d=S.at-k.si;if(d>N/2)d-=N;else if(d<-N/2)d+=N;return d>-S.len&&d<34;}):null;
+  const pitS=k.wantFuel&&!k.rib?stations.find(S=>{let d=S.at-k.si;if(d>N/2)d-=N;else if(d<-N/2)d+=N;return d>-S.len&&d*SEG<FUEL.commit+20;}):null;
   const pit=!!pitS;
   /* a stage with long samples can shorten the aim (stage.aiLook), or the AI chords its bends */
   const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round((12+k.lookAdd+k.speed*0.55)*(stage.aiLook||1)));
@@ -436,25 +432,30 @@ function aiControl(k){
   const hold=AI_G*(k.gripOn*sg/9.5)*(2.7/k.caution)*(k.drift!==0?1.18:1);
   const limit=Math.min(k.maxSpeed,Math.sqrt(hold*R));
   const band=k.pace;
-  let throttle=1,brake=0;
-  if(k.atPump&&k.wantFuel){throttle=0;brake=k.speed>14?1:0;}   /* fill up */
+  let throttle=1,brake=0,pitStop=false;
+  if(k.court&&k.wantFuel)pitStop=true;                       /* stop on the forecourt and fill */
   else if(k.wantFuel&&!k.rib)for(const S of stations){        /* slow in time to stop on it */
     let d=S.at-k.mi;if(d>N/2)d-=N;else if(d<-N/2)d+=N;
-    if(d<0||d>45)continue;
-    if(k.speed>Math.sqrt(400+2*34*d*SEG)){throttle=0;brake=1;}
+    if(d<0||d*SEG>FUEL.commit+20)continue;
+    if(k.speed>Math.min(FUEL.pitLane,Math.sqrt((FUEL.slow-4)**2+2*12*d*SEG)))pitStop=true;   /* a pit-lane limit, then gently down */
   }
   if(k.speed>limit*band){throttle=0;brake=k.speed>limit*band*1.16?1:0;}
-  if(Math.abs(k.lat)>(k.rib?ALTS[k.rib-1].hw:HW))throttle=1;
+  if(Math.abs(k.lat)>(k.rib?ALTS[k.rib-1].hw:HW)&&!k.court)throttle=1;
+  if(pitStop){                                               /* roll a few metres in, then stand on it */
+    const into=pitS?((k.mi-pitS.at)%N+N)%N:9;
+    throttle=into<4&&k.speed<3?0.4:0;brake=k.speed>(into<4?5:0.5)?1:0;
+  }
   /* stuck against something: back out for a second, then call the tractor */
   /* judged on progress, not speed: a kart bouncing off a barrier still reads as moving */
-  if(state==='race'&&!k.atPump&&!k.done&&k.recoverT<=0&&!(k.frozen>0)){   /* frozen in time is not stuck */
+  if(state==='race'&&!k.court&&!k.done&&k.recoverT<=0&&!(k.frozen>0)){   /* frozen in time is not stuck */
     if(k.progress>k.stuckP+6/SEG){k.stuckP=k.progress;k.stuckT=0;}else k.stuckT+=FIXED;   /* 6 m */
   }
   /* return to path: stuck, or crawling off the road, first drive back to a point about
      a second up the route. Arne's tractor only if that has not worked within 3 s. */
   const hwR=k.rib?ALTS[k.rib-1].hw:HW;
-  k.offT=Math.abs(k.lat)>hwR+2.5&&k.speed<12&&!k.atPump?k.offT+FIXED:0;
+  k.offT=Math.abs(k.lat)>hwR+2.5&&k.speed<12&&!k.court?k.offT+FIXED:0;
   if(!k.rtp&&state==='race'&&!k.done&&k.recoverT<=0&&(k.stuckT>1.2||k.offT>1)){k.rtp=true;k.rtpT=0;}
+  if(pitStop&&k.court)k.rtp=false;                         /* standing at the pumps is not being stuck */
   if(k.rtp){
     k.rtpT+=FIXED;
     const [T2,t2]=walkPt(k,Math.round(Math.max(10,k.speed)/SEG)+3);

@@ -3,7 +3,7 @@ pipeline {
   agent {
     docker { image 'mcr.microsoft.com/playwright/python:v1.49.0-noble' }
   }
-  options { timeout(time: 30, unit: 'MINUTES') }   // six west tracks raced twice each
+  options { timeout(time: 60, unit: 'MINUTES') }   // six west tracks raced twice each, every stage's fuel audited
   stages {
     stage('Audio test') {
       steps {
@@ -70,6 +70,11 @@ pipeline {
         sh 'python3 tools/vastgota_test.py'
       }
     }
+    stage('Fuel audit') {
+      steps {
+        sh 'python3 tools/fuel_audit.py --json fuel-audit.json'
+      }
+    }
     stage('Smoke test') {
       steps {
         sh 'python3 tools/smoke_test.py'
@@ -87,6 +92,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
   }
 }
