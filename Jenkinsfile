@@ -25,6 +25,11 @@ pipeline {
         sh 'python3 tools/signature_test.py'
       }
     }
+    stage('Signature mode test') {
+      steps {
+        sh 'python3 tools/sigmode_test.py'
+      }
+    }
     stage('Beans test') {
       steps {
         sh 'python3 tools/beans_test.py'

@@ -17,6 +17,7 @@ function resetRace(){
   if(TT)recordArne(stage);
   placeOnGrid();
   setMirror(CUP?!!CUP.mirror:(!TT&&mirrorSel&&!!SAVE.unlock['mirror_'+stage.id]));
+  sigMode=!TT&&(CUP?!!CUP.sig:sigModeSel);
   previewOn=false;setPause(false);
   raceTime=0;countdown=FREE?0.6:3.6;lastBeep=-1;camInit=false;shake=0;state='grid';
   hideSheets();document.body.classList.toggle('free',FREE);
@@ -30,6 +31,7 @@ function resetRace(){
   for(const k of karts){k.dome.visible=false;if(k.panG)k.panG.visible=false;}
   dbgOnReset();
   if(FREE)toast('SANDLÅDA · F1 FÖR DEBUG');
+  else if(sigMode)toast('SIGNATURLÄGE · BARA SIGNATURFÖREMÅL');
 }
 let lastWord='';
 function finish(){
@@ -207,7 +209,7 @@ function showSelect(){
   hideSheets();
   previewOn=true;
   document.getElementById('vsMode').textContent=(cupSetup?CUPS[cupSel].name+' · '+CLASSES[classSel].name:TT?'TIDSLOPP':FREE?'SANDLÅDA':'ENKELLOPP')+
-    ' · '+STAGES[stageSel].name;
+    ' · '+STAGES[stageSel].name+((cupSetup?cupSigSel:!TT&&sigModeSel)?' · SIGNATURLÄGE':'');
   renderPaints();
   sheetStages.classList.add('hide');
   state='select';camInit=false;
@@ -237,7 +239,7 @@ function goFromSelect(){
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
   SAVE.cup={v:CUP_SAVE_V,cup:CUPS[cupSel].id,cls:CLASSES[classSel].id,char:charSel,car:carSel,rival:1+((Math.random()*5)|0),
-    rounds:CUPS[cupSel].rounds.slice(),round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel};
+    rounds:CUPS[cupSel].rounds.slice(),round:0,pts:[0,0,0,0,0,0],res:[],applied:[],done:false,mirror:mirrorOpen(CUPS[cupSel])&&cupMirrorSel,sig:cupSigSel};
   writeSave();                             /* autosave after setup */
   showBrief();
 }
@@ -293,7 +295,7 @@ function pickClass(i){
   document.querySelectorAll('#classcards .card').forEach((el,n)=>el.classList.toggle('sel',n===i));
   document.getElementById('classblurb').textContent=CLASSES[i].blurb;
 }
-let cupMirrorSel=false,cupSel=0;
+let cupMirrorSel=false,cupSigSel=false,cupSel=0;
 function bestMedal(C){
   let b=0;for(const k in SAVE.trophies)if(C.id==='skane'?!/_/.test(k.replace(/_m$/,'')):k.indexOf(C.id+'_')===0)
     b=b?Math.min(b,SAVE.trophies[k]):SAVE.trophies[k];
@@ -316,8 +318,10 @@ function pickCup(i){
 }
 function renderCupMirror(){
   const C=CUPS[cupSel],host=document.getElementById('cupMirror'),open=mirrorOpen(C);
-  host.innerHTML=open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">'+(!C.champ?'SPEGELCUPEN':'SPEGELVÄND OCH BAKLÄNGES')+': '+(cupMirrorSel?'PÅ':'AV')+'</button>':'';
+  host.innerHTML=(open?'<button class="tab'+(cupMirrorSel?' sel':'')+'" id="btnCupMirror">'+(!C.champ?'SPEGELCUPEN':'SPEGELVÄND OCH BAKLÄNGES')+': '+(cupMirrorSel?'PÅ':'AV')+'</button>':'')+
+    '<button class="tab'+(cupSigSel?' sel':'')+'" id="btnCupSig" title="Alla lådor ger signaturföremål, hela cupen">SIGNATURLÄGE: '+(cupSigSel?'PÅ':'AV')+'</button>';
   if(open)document.getElementById('btnCupMirror').addEventListener('click',()=>{cupMirrorSel=!cupMirrorSel;renderCupMirror();});
+  document.getElementById('btnCupSig').addEventListener('click',()=>{cupSigSel=!cupSigSel;ping(600,900,.05);renderCupMirror();});
 }
 function showCupSetup(){
   hideSheets();state='menu';CUP=null;TT=false;
@@ -350,7 +354,7 @@ function showBrief(){
   const RR=cupRounds(c),si=STAGES.findIndex(S=>S.id===RR[c.round]),S=STAGES[si],CD=cupDef(c);
   applyStage(si);
   document.getElementById('briefTitle').innerHTML=S.name+'<i>'+CD.name+' · RUNDA '+(c.round+1)+' AV '+RR.length+'</i>';
-  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name+(c.mirror?(CD.champ?' · SPEGELVÄND':' · SPEGELCUPEN'):'');
+  document.getElementById('briefSub').textContent=S.sub+' · '+(S.laps||3)+' VARV · '+cupClass().name+(c.mirror?(CD.champ?' · SPEGELVÄND':' · SPEGELCUPEN'):'')+(c.sig?' · SIGNATURLÄGE':'');
   const surf=['ASFALT'].concat((S.routes||[]).map(R=>SURF[R.surface].name),(S.routes||[]).some(R=>R.mud)?['LERA']:[]);
   const [got,of]=stageStamps(S),st=standings(c),me=st.indexOf(0);
   const gap=i=>{const d=c.pts[0]-c.pts[i];return (d>0?'+':'')+d+' p';};

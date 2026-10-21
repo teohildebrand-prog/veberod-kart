@@ -45,7 +45,7 @@ function pickWeighted(keys,w){
     which comes back as ['sig', 1, which] */
 function rollItem(k){
   const ev=k&&eventSig(k);if(ev)return ['sig',1,ev];                /* an event's own item first: js/37-extra-allt.js */
-  if(k&&Math.random()<SIG_CHANCE)return ['sig',1,pickSig(k)];
+  if(k&&(sigMode||Math.random()<SIG_CHANCE))return ['sig',1,pickSig(k)];   /* Signaturläge: nothing else */
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }
 /** put an item in the slot; it keeps its level until it is used */
@@ -358,8 +358,9 @@ function checkPickups(){
         it.cool=6;
       }else if(it.type==='rocket'){
         if(k.held)continue;
-        giveItem(k,'rocket',1);
-        if(k===player){toast('SPETTEKAKA!');ping(440,760,.10);}
+        if(sigMode){giveItem(k,'sig',1,pickSig(k));k.roll=ROLLT;}   /* Signaturläge: a signature item instead */
+        else{giveItem(k,'rocket',1);
+          if(k===player){toast('SPETTEKAKA!');ping(440,760,.10);}}
         it.cool=8;
       }else if(it.type==='shield'){
         k.shield=Math.max(k.shield,9*k.shieldMul);
