@@ -99,7 +99,7 @@ def main():
 
         # the exact rules, one frame at a time
         ev("()=>{T_put(player,player.si,0,0);T_put(T_ai(0),player.si+40,0,0);T_put(T_ai(1),player.si+70,0,0);}")
-        r = ev("""()=>{const a=T_ai(0),b=T_ai(1);blast(a,2);const c=gasClouds[gasClouds.length-1];updateFarts(.3);
+        r = ev("""()=>{clearPowerups();const a=T_ai(0),b=T_ai(1);blast(a,2);   /* no stray clouds from the live race */const c=gasClouds[gasClouds.length-1];updateFarts(.3);
             b.spun=0;T_inBlob(b,c);updateFarts(.001);const hit=b.spun,sr=b.spinResist,boost=b.boost;
             b.spun=0;T_inBlob(b,c);updateFarts(.001);const again=b.spun;
             a.spun=0;T_inBlob(a,c);updateFarts(.001);const own=a.spun;
