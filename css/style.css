@@ -569,6 +569,7 @@
   .ss-hints{flex:1;align-self:center;text-align:center;font:600 12px/1.4 "Titillium Web",sans-serif;letter-spacing:.08em;color:#9fb6e6}
   .ss-hints b{color:#fff}
   .ss-hints b.x{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#2f8cff;color:#001233;font-size:10px}
+  .ss-hints b.y{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#ffc22e;color:#2a1a00;font-size:10px}
   #stages .vs-go:disabled{filter:grayscale(.8) brightness(.7);cursor:default}
   #stages .vs-back i,#stages .vs-go i{font:700 12px/1 "Titillium Web",sans-serif;font-style:normal}
   #stages .xb{display:none}
@@ -629,7 +630,7 @@
     .sheet p.ss-tag{display:none}
     .ss-info dd{font-size:12px}
     .ss-info{grid-template-columns:1fr}
-    .ss-side{flex-direction:row;justify-content:flex-start;gap:10px}
+    .ss-side{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:10px;min-width:0}
     .ss-map canvas{width:64px;height:64px}
     .ss-map figcaption{display:none}
     .ss-info{gap:8px;padding-top:4px}
@@ -1035,7 +1036,7 @@ body.touch .ss-mir{min-height:44px}
 #stages.sslist .ss-info dl{grid-template-columns:auto 1fr;gap:0 8px}
 #stages.sslist .ss-info dt{font-size:9px;line-height:1.6}
 #stages.sslist .ss-info dd{font-size:13px}
-#stages.sslist .ss-side{flex-direction:row;align-items:center;gap:6px}
+#stages.sslist .ss-side{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
 #stages.sslist .ss-map{display:none}
 #stages.sslist .ss-hints{display:none}
 #stages.sslist .vs-foot{position:static;margin:0 calc(-1*max(12px,env(safe-area-inset-right,0px))) 0 calc(-1*max(12px,env(safe-area-inset-left,0px)));

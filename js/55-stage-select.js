@@ -143,6 +143,7 @@ function buildStageCards(){
   ssGrid.querySelectorAll('.scard').forEach(el=>el.addEventListener('click',()=>{
     if(SS.swiped)return;bootAudio();ssHighlight(+el.dataset.k,true);}));
 }
+const SIGSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l2.1 4.4 4.9.6-3.6 3.4.9 4.8L8 11.9 3.7 14.2l.9-4.8L1 6l4.9-.6z" fill="currentColor"/></svg>';
 const MIRSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 1h2v14H7zM5 4 1 8l4 4zm6 0 4 4-4 4z" fill="currentColor"/></svg>';
 const LOCKSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z" fill="currentColor"/></svg>';
 const ssPages=()=>Math.max(1,Math.ceil(SS.list.length/ssPer()));
@@ -167,6 +168,7 @@ function renderPage(){
 const fmtOr=t=>t!=null&&isFinite(t)?fmt(t):'—';
 function ssInfoRows(S){
   const m=ssMode(),rows=[],mir=m!=='tt'&&m!=='cup'&&mirrorSel&&!!SAVE.unlock['mirror_'+S.id];
+  if(m==='cup'&&SS.cup.sig)rows.push(['SIGNATURLÄGE','Bara signaturföremål i lådorna, hela cupen']);
   if(S.bonus)rows.push(['BONUSBANA',S.bonusNote||'Ingen cup. Eget föremål i lådorna'+(SIGS.extraallt&&SIGS.extraallt.event===S.id?': Extra Allt':'')]);
   if(m==='race'||m==='cup')rows.push(['VARV',String(S.laps||3)]);
   if(m==='tt')rows.push(['VARV','1 + 3 flygande']);
@@ -211,6 +213,11 @@ function renderPreview(){
   mb.classList.toggle('on',mirOn);
   mb.innerHTML=(open?MIRSVG:LOCKSVG)+'<span>SPEGELVÄND: '+(open?(mirOn?'PÅ':'AV'):'LÅST')+'</span>';
   mb.title=open?'':'Slå Bonden Arnes varv i Tidslopp för att låsa upp';
+  /* Signaturläge: always open, nothing in a time trial; a cup sets it once in its setup */
+  const sb=document.getElementById('btnSsSig');
+  sb.hidden=m==='tt'||m==='cup';
+  sb.classList.toggle('on',sigModeSel);
+  sb.innerHTML=SIGSVG+'<span>SIGNATURLÄGE: '+(sigModeSel?'PÅ':'AV')+'</span>';
   const why=ssBlocked(S);
   document.getElementById('ssWhy').textContent=why;
   /* the launch button: the highlighted stage, or in a cup always the next round */
@@ -279,6 +286,11 @@ function ssMirror(){
   if(m==='tt'||m==='cup'||!SAVE.unlock['mirror_'+S.id])return;
   mirrorSel=!mirrorSel;ping(600,900,.05);renderPreview();
 }
+function ssSig(){
+  const m=ssMode();
+  if(m==='tt'||m==='cup')return;
+  sigModeSel=!sigModeSel;ping(600,900,.05);renderPreview();
+}
 function ssConfirm(){
   if(SS.busy||sheetStages.classList.contains('hide'))return;
   const m=ssMode(),k=m==='cup'?SS.cup.round:SS.hi,si=SS.list[k],S=STAGES[si];
@@ -312,7 +324,7 @@ function openStages(cup){
   SS.cup=cup||null;SS.shown=false;
   buildStageCards();
   const hm=document.getElementById('ssMode');
-  hm.textContent=SS.cup?cupDef(SS.cup).name+' · '+cupClass().name+(SS.cup.mirror?' · SPEGELVÄND':'')+
+  hm.textContent=SS.cup?cupDef(SS.cup).name+' · '+cupClass().name+(SS.cup.mirror?' · SPEGELVÄND':'')+(SS.cup.sig?' · SIGNATURLÄGE':'')+
     ' · RUNDA '+(SS.cup.round+1)+' AV '+SS.list.length:MODENAME[ssMode()];
   sheetStages.classList.toggle('cupview',!!SS.cup);
   sheetStages.classList.remove('hide');
@@ -334,18 +346,20 @@ function stageKeys(e,k){
   else if(k==='q')ssTurn(-1);
   else if(k==='e')ssTurn(1);
   else if(k==='v'){if(!e.repeat)ssMirror();}
+  else if(k==='g'){if(!e.repeat)ssSig();}
   else if(k==='enter'||k===' '){if(!e.repeat)ssConfirm();}
   else if(k==='backspace'||k==='escape'){if(!e.repeat)ssBack();}
   else return false;
   e.preventDefault();bootAudio();
   return true;
 }
-/** the controller on this screen: D-pad or stick moves, LB/RB turn the page, A starts, B back, X mirror */
+/** the controller on this screen: D-pad or stick moves, LB/RB turn the page, A starts, B back, X mirror, Y Signaturläge */
 function stagePad(dir,hit){
   if(dir)ssMove(dir);
   if(hit(PB.A))ssConfirm();
   else if(hit(PB.B))ssBack();
   else if(hit(PB.X))ssMirror();
+  else if(hit(PB.Y))ssSig();
   else if(hit(PB.LB))ssTurn(-1);
   else if(hit(PB.RB))ssTurn(1);
 }
@@ -353,6 +367,7 @@ function stagePad(dir,hit){
 document.getElementById('btnStageGo').addEventListener('click',ssConfirm);
 document.getElementById('btnStageBack').addEventListener('click',ssBack);
 document.getElementById('btnSsMirror').addEventListener('click',ssMirror);
+document.getElementById('btnSsSig').addEventListener('click',ssSig);
 document.getElementById('ssPrev').addEventListener('click',()=>{bootAudio();ssTurn(-1);});
 document.getElementById('ssNext').addEventListener('click',()=>{bootAudio();ssTurn(1);});
 document.getElementById('btnBriefStages').addEventListener('click',()=>{bootAudio();showCupStages();});

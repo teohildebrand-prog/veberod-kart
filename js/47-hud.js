@@ -20,7 +20,7 @@ function perfekt(){
   bark('perfect',6);
 }
 function flash(m){el.flash.textContent=m;el.flash.classList.remove('pop');void el.flash.offsetWidth;el.flash.classList.add('pop');}
-/* the box roulette passes the five families and, every third frame, a signature item */
+/* the box roulette passes the five families and, every third frame, a signature item; in Signaturläge only signature items */
 const REEL=['boost','rocket','sig','shield','pie','sig','fart','sig'];
 /** what the item slot shows now: the held item at its awarded level, or the shield that is running;
     a fresh item box spins through the reel first, ticking slower and slower */
@@ -31,7 +31,7 @@ function slotFrame(k){
     return {spin,frame:0,fam,lvl:k.held?itemLvl(k):(k.shieldLvl||1),sid:k.heldSig};
   }
   const frame=Math.floor((1-(k.roll/ROLLT)**2)*14);     /* 0..13, the last one just before the real item */
-  const at=k.held==='sig'?2:REEL.indexOf(k.held), fam=REEL[(at+frame+1)%REEL.length];
+  const at=k.held==='sig'?2:REEL.indexOf(k.held), fam=sigMode?'sig':REEL[(at+frame+1)%REEL.length];
   const ids=sigPool().concat(k.heldSig&&SIGS[k.heldSig].event?[k.heldSig]:[]), sid=ids[(ids.indexOf(k.heldSig)+1+frame*3+ids.length)%ids.length];
   return {spin,frame,fam,lvl:(itemLvl(k)+frame)%3+1,sid};
 }

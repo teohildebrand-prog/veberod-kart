@@ -6,6 +6,11 @@
    One fixed form, no levels; the HUD shows a star, and the box roulette
    spins past them with the rest. The AI plays them too. */
 const SIG_CHANCE=0.25, SIG_OWN=2;
+/* Signaturläge (Teo, for more chaos): a toggle on the stage picker and in the cup setup. Every box,
+   and every loose Spettekaka on the road, hands out a signature item instead, for the bots too.
+   An event's own item (Extra Allt at Sibylla) still comes out of its share of the boxes first.
+   Set for each race in resetRace from the picker or the running cup. */
+let sigMode=false,sigModeSel=false;
 const SIG_ALIAS={granny:'britta',ghost:'spoket'};  /* AI kinds that are a driver under another id */
 const sigOf=id=>SIGS[id]?id:(SIG_ALIAS[id]||null);
 /** the drivers' items; an event's own item (SIGS[id].event) only comes out of its own boxes */
