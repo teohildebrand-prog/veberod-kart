@@ -3,7 +3,7 @@ pipeline {
   agent {
     docker { image 'mcr.microsoft.com/playwright/python:v1.49.0-noble' }
   }
-  options { timeout(time: 60, unit: 'MINUTES') }   // six west tracks raced twice each, every stage's fuel audited
+  options { timeout(time: 60, unit: 'MINUTES') }   // six west tracks raced twice each, every stage's fuel audited, six tracks' rubber band
   stages {
     stage('Audio test') {
       steps {
@@ -70,6 +70,11 @@ pipeline {
         sh 'python3 tools/vastgota_test.py'
       }
     }
+    stage('Rubber band audit') {
+      steps {
+        sh 'python3 tools/band_audit.py --json band-audit.json'
+      }
+    }
     stage('Fuel audit') {
       steps {
         sh 'python3 tools/fuel_audit.py --json fuel-audit.json'
@@ -92,6 +97,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
   }
 }

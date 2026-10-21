@@ -85,9 +85,29 @@ def main():
             set(200,400,0,30);out.ahead=[gapTo(a),paceTarget(a)];
             [player.marks,a.marks,player.progress,a.progress,a.rival]=sv;return out;}""")
         print('pace', r)
+        cap = ev("()=>[PACE.behind,PACE.ahead]")
         check(r['close'][1] == 1, f'inside the dead zone: normal pace {r["close"]}')
-        check(r['behind'][0] > 10 and 1.04 < r['behind'][1] <= 1 + 0.05 * 1.25, f'far behind: pushes, capped {r["behind"]}')
-        check(r['ahead'][0] < -10 and abs(r['ahead'][1] - 0.96) < 1e-6, f'far ahead: eases off, capped {r["ahead"]}')
+        check(r['behind'][0] > 10 and 1 + cap[0] * 0.9 < r['behind'][1] <= 1 + cap[0] * 1.25,
+              f'far behind: pushes, capped {r["behind"]}')
+        check(r['ahead'][0] < -10 and abs(r['ahead'][1] - (1 - cap[1])) < 1e-6, f'far ahead: eases off, capped {r["ahead"]}')
+
+        # the player's own pull: none with the leader close, capped when the leader is away,
+        # and nothing at all with every rival parked (tidslopp, sandlådan)
+        r = ev("""()=>{const a=karts.find(k=>k.ai&&!k.parked);const sv=[player.marks,a.marks,player.progress,a.progress];
+            const set=(gp,ga,tp,ta)=>{player.progress=gp;a.progress=ga;player.marks=[];a.marks=[];
+              for(let i=0;i*MARK<=gp;i++)player.marks.push(raceTime-tp);
+              for(let i=0;i*MARK<=ga;i++)a.marks.push(raceTime-ta);};
+            const others=karts.filter(k=>k.ai&&k!==a);for(const k of others){k._p=k.parked;k.parked=true;}
+            const out={};
+            set(396,400,0,1);out.close=paceTarget(player);
+            set(200,400,0,30);out.behind=paceTarget(player);
+            a.parked=true;out.alone=paceTarget(player);a.parked=false;
+            for(const k of others)k.parked=k._p;
+            [player.marks,a.marks,player.progress,a.progress]=sv;return [out,PLAYER_PACE.max];}""")
+        print('player pace', r)
+        check(r[0]['close'] == 1, f'player, leader close: no pull {r[0]["close"]}')
+        check(abs(r[0]['behind'] - 1 - r[1]) < 1e-6, f'player, leader far away: capped pull {r[0]["behind"]}')
+        check(r[0]['alone'] == 1, f'player alone on the track: no pull {r[0]["alone"]}')
         browser.close()
     httpd.shutdown()
     errors = [e for e in errors if 'net::ERR_FAILED' not in e]

@@ -81,6 +81,7 @@ tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTB
 tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
 tools/promenad_test.py      headless test: Bodils promenad, its hazards, the TV, Bodil's nap and her passport page
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
+tools/band_audit.py         headless audit: how close the field stays to the player, catch-up on and off
 tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
@@ -124,4 +125,6 @@ python3 tools/promenad_test.py          # Bodils promenad: launcher, sprinkler, 
 python3 tools/vastgota_test.py          # the west and bonus tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
+python3 tools/targetless_test.py
+python3 tools/band_audit.py             # rubber band: six tracks by default, name stages to check others; --set PACE.ahead=0.25 to try a tuning
 ```

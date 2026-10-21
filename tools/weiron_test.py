@@ -116,7 +116,7 @@ def main():
               T_put(o,Math.floor(m.s),m.lat,25);o.x=m.x;o.z=m.z;
               const v0=Math.hypot(o.vx,o.vz);updateMixers(0.002);drawMixers();
               res.push({hit:m.hit.has(o),spun:o.spun,cement:o.cement,v:Math.hypot(o.vx,o.vz)/v0,
-                lump:!!o.lumpG&&o.lumpG.visible,top:sigTop(o)});}
+                lump:!!o.lumpG&&o.lumpG.visible,top:mixTop(o)});}   /* the cement alone: a bot may still have its mates along */
             return res;}""")
         check(len(hit) == 2 and all(h['hit'] and h['spun'] > 0.5 and h['cement'] > 2 and h['v'] < 0.6 and h['lump']
                                     and h['top'] < 0.9 for h in hit), f'every kart it lands on gets cement: spin, speed, a lump {hit}')
