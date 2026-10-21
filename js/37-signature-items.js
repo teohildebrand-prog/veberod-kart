@@ -6,7 +6,7 @@
    One fixed form, no levels; the HUD shows a star, and the box roulette
    spins past them with the rest. The AI plays them too. */
 const SIG_CHANCE=0.25, SIG_OWN=2;
-const SIG_ALIAS={granny:'britta'};                 /* AI kinds that are a driver under another id */
+const SIG_ALIAS={granny:'britta',ghost:'spoket'};  /* AI kinds that are a driver under another id */
 const sigOf=id=>SIGS[id]?id:(SIG_ALIAS[id]||null);
 /** the drivers' items; an event's own item (SIGS[id].event) only comes out of its own boxes */
 const sigPool=()=>Object.keys(SIGS).filter(id=>!SIGS[id].event);
@@ -577,9 +577,9 @@ function freezeTime(k){
 
 /* ── shared: what physics reads, the timers, the drawing, the clean-up ── */
 const sigTop=k=>(k.tow>0?TOW.top:1)*(k.towed>0?TOW.drag:1)*(k.bike>0?BIKE.top:1)*(k.onPlan?PLAN.top:1)*
-  (k.pulled>0?LIC.top:1)*(k.mates>0?MATES.top:1)*(k.mucky>0?muckTop(k):1)*(k.ai&&k.blind>0?TIFO.top:1)*westTop(k)*mixTop(k);   /* the west's own: 37-west-items.js; cement: 37-cementblandaren.js */
-const sigGrip=k=>(k.bike>0?BIKE.grip:1)*(k.onPlan?PLAN.grip:1)*(k.mucky>0?MUCK.grip:1)*westGrip(k);
-const sigPush=(k,thr)=>(k.tow>0?TOW.push:0)+thr*((k.bike>0?BIKE.push:0)+(k.onPlan?PLAN.push:0)+(k.mates>0?MATES.push:0));
+  (k.pulled>0?LIC.top:1)*(k.mates>0?MATES.top:1)*(k.mucky>0?muckTop(k):1)*(k.ai&&k.blind>0?TIFO.top:1)*westTop(k)*mixTop(k)*bossTop(k);   /* the west's own: 37-west-items.js; cement: 37-cementblandaren.js; champions: 37-boss-items.js */
+const sigGrip=k=>(k.bike>0?BIKE.grip:1)*(k.onPlan?PLAN.grip:1)*(k.mucky>0?MUCK.grip:1)*westGrip(k)*bossGrip(k);
+const sigPush=(k,thr)=>(k.tow>0?TOW.push:0)+bossPush(k)+thr*((k.bike>0?BIKE.push:0)+(k.onPlan?PLAN.push:0)+(k.mates>0?MATES.push:0));
 function updateSigs(dt){
   const tick=(k,f)=>{if(k[f]>0)k[f]=Math.max(0,k[f]-dt);};
   for(const k of karts){
@@ -598,7 +598,7 @@ function updateSigs(dt){
     }else k.onPlan=false;
     if(k.planG)drawPlan(k);
   }
-  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);updateExtra(dt);updateMixers(dt);updateStamp();updateTackles(dt);
+  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);updateExtra(dt);updateMixers(dt);updateStamp();updateTackles(dt);updateBoss(dt);
   for(let n=rings.length-1;n>=0;n--){
     const r=rings[n];r.t+=dt;
     if(r.t>.5){scene.remove(r.m);rings.splice(n,1);continue;}
@@ -646,7 +646,7 @@ function drawSigs(){
       if(on){k.iceG.position.set(k.x,k.y+1.2,k.z);k.iceG.rotation.y=k.yaw;}
     }
   }
-  drawWest();drawMixers();drawTackles();
+  drawWest();drawMixers();drawTackles();drawBoss();
 }
 function clearSigs(){
   for(const k of karts){
@@ -663,5 +663,5 @@ function clearSigs(){
   for(const r of rings)scene.remove(r.m);
   herds.length=0;muck.length=0;yarns.length=0;rings.length=0;
   if(tifoEl)tifoEl.classList.remove('on');
-  clearSvin();clearWest();clearExtra();clearMixers();clearTackles();
+  clearSvin();clearWest();clearExtra();clearMixers();clearTackles();clearBoss();
 }

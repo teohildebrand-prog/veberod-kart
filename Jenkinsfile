@@ -55,6 +55,11 @@ pipeline {
         sh 'python3 tools/weiron_test.py'
       }
     }
+    stage('Boss items test') {
+      steps {
+        sh 'python3 tools/boss_items_test.py'
+      }
+    }
     stage('Bodil test') {
       steps {
         sh 'python3 tools/bodil_test.py'
@@ -97,6 +102,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }
   }
 }
