@@ -23,6 +23,7 @@ function suget(k,dt){
   else if(k.suck<0)k.suck=Math.min(0,k.suck+dt);
 }
 function drive(k,dt,ctl){
+  stepPace(k,dt);
   if(k.recoverT>0){k.recoverT-=dt;if(k.recoverT<=0)recoverKart(k);}
   if(k.ghost>0)k.ghost-=dt;
   if(k.frozen>0){                                  /* Tidtagningsrättelse: time stands still for this kart */
@@ -107,7 +108,7 @@ function drive(k,dt,ctl){
   const top=sigTop(k)*k.maxSpeed*(k.pace||1)*(onRoad?(surf?surf.top(offR):1):offR)*(k.boost>0?k.boostMul*(cream>=3?1.14:1):1)*(k.launch>0?HOOK.top:1)*(k.slow>0?0.5:1)*(k.spun>0?0.35:1)*(dry?0.30:1);
   if(!k.air){
     const torque=1+0.35*clamp(1-sp/k.maxSpeed,0,1);  /* short gears down low */
-    fwd+=thr*(k.boost>0?k.power+(cream>=3?34:21):k.power)*torque*(onRoad||cream>=2?1:0.6)*(k.slow>0?0.55:1)*dt;
+    fwd+=thr*(k.boost>0?k.power+(cream>=3?34:21):k.power)*(k.pace||1)*torque*(onRoad||cream>=2?1:0.6)*(k.slow>0?0.55:1)*dt;
     if(k.launch>0)fwd+=HOOK.push*dt;                 /* the hook's surge: forward along your own nose */
     fwd+=sigPush(k,thr)*dt;                          /* tow rope, bike legs, the planned line */
     if(dry)fwd-=Math.sign(fwd)*1.6*dt;              /* coughing along on fumes */
@@ -383,11 +384,16 @@ function askRecover(k){
   if(k===player)toast('TILLBAKA PÅ BANAN…');
 }
 
-/* Catch-up. Each AI's pace follows its gap to the player in seconds along the race (shortcuts
-   map onto the same progress), not its place: within the dead zone it races as it is, further
-   ahead it eases off, further behind it pushes, a little more with every second up to the cap.
-   It scales top speed and corner speed together, and blends in slowly. Tune it in PACE. */
-const PACE={dead:2.5,ramp:10,ahead:0.04,behind:0.05,blend:0.6},MARK=4;
+/* Catch-up, a strong rubber band. Each AI's pace follows its gap to the player in seconds along
+   the race (shortcuts map onto the same progress), not its place: within the dead zone it races as
+   it is, further ahead it eases off, further behind it pushes, harder with every second up to the
+   cap. Pace scales the corner limit, top speed and pull together: karts spend most of a lap
+   cornering, so a band on top speed alone barely moves the field. A bot ahead eases sooner than
+   one behind pushes, so a faster player can still pass and keep the lead. The player gets a
+   smaller pull of their own when the leading bot gets away. It all blends in over half a second.
+   Tune it in PACE and PLAYER_PACE; tools/band_audit.py measures how close the field stays. */
+const PACE={dead:1,deadAhead:0.5,ramp:3,ahead:0.20,behind:0.22,blend:2},MARK=4;
+const PLAYER_PACE={dead:1.5,ramp:4,max:0.08};
 /** seconds k is behind the player (negative: ahead), from when each passed the same point */
 function gapTo(k){
   const a=player.marks,b=k.marks;
@@ -396,14 +402,19 @@ function gapTo(k){
   const t=b[Math.floor(player.progress/MARK)];return t===undefined?0:t-raceTime;
 }
 function paceTarget(k){
-  if(k.noBand||state!=='race'||player.done||k===player)return 1;
-  const g=gapTo(k),over=clamp((Math.abs(g)-PACE.dead)/PACE.ramp,0,1);
+  if(k.noBand||state!=='race'||player.done||player.parked)return 1;
+  if(k===player){                                  /* seconds the leading bot is up the road */
+    let lead=0;for(const o of karts)if(o!==player&&!o.parked&&!o.noBand)lead=Math.max(lead,-gapTo(o));
+    return 1+PLAYER_PACE.max*clamp((lead-PLAYER_PACE.dead)/PLAYER_PACE.ramp,0,1);
+  }
+  const g=gapTo(k),over=clamp((Math.abs(g)-(g>0?PACE.dead:PACE.deadAhead))/PACE.ramp,0,1);
   let p=g>0?1+PACE.behind*over*(k.bandMax-1)/0.16:1-PACE.ahead*over;    /* the class sets how hard they chase */
   if(typeof CUP!=='undefined'&&CUP&&!k.rival&&p>1)p=1+(p-1)*0.7;  /* only the rival chases hard */
   return p;
 }
+/** called every physics step for every kart, the player too */
+function stepPace(k,dt){k.pace=k.noBand?1:lerp(k.pace||1,paceTarget(k),Math.min(1,dt*PACE.blend));}
 function aiControl(k){
-  k.pace=k.noBand?1:lerp(k.pace||1,paceTarget(k),Math.min(1,FIXED*PACE.blend));
   planRoutes(k);
   /* a farm lane is too twisty to aim far ahead: look closer while in one */
   const inLane=k.rib||(k.plan&&((ALTS[k.plan-1].a-k.si)%N+N)%N<8);
