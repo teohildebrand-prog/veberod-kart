@@ -45,9 +45,9 @@ pipeline {
         sh 'python3 tools/west_items_test.py'
       }
     }
-    stage('Extra Allt test') {
+    stage('Sibylla menu test') {
       steps {
-        sh 'python3 tools/extra_allt_test.py'
+        sh 'python3 tools/sibylla_meny_test.py'
       }
     }
     stage('Targetless item test') {
@@ -112,6 +112,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }
   }
 }

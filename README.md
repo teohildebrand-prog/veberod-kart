@@ -15,8 +15,9 @@ Hamnkranen. Finalen still needs only the three Skåne championships.
 
 Two bonus tracks outside the cups, marked BONUSBANA in the stage picker:
 Sibylla, Extra Allt Grand Prix (two laps from a Sibylla car park through the
-drive-through and a giant kitchen). Its boxes also hand out EXTRA ALLT, an
-item found only there, and it brings the SIBYLLA BURGARBUS, a burger-shaped
+drive-through and a giant kitchen). Its boxes hand out only Sibyllas meny,
+six burger items found nowhere else (NUMMER 47!, LÄSKPÅFYLLNING, MOSKANONEN,
+TUNNBRÖDSRULLEN, BURGARTORNET, KORV MED BRÖD), and it brings the SIBYLLA BURGARBUS, a burger-shaped
 vehicle every driver can pick. And Bodils promenad, Bara en liten runda
 (three laps of Bodil's walk: out of the door, up through the woods, round the
 shrub every dog stops at, an agility event on the lawn, and home past the

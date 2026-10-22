@@ -44,7 +44,7 @@ function pickWeighted(keys,w){
 /** what an item box hands out: [family, level 1..3]; first a roll for a signature item, any driver's,
     which comes back as ['sig', 1, which] */
 function rollItem(k){
-  const ev=k&&eventSig(k);if(ev)return ['sig',1,ev];                /* an event's own item first: js/37-extra-allt.js */
+  const ev=k&&eventSig(k);if(ev)return ['sig',1,ev];                /* an event track's own items only: js/37-sibylla-meny.js */
   if(k&&(sigMode||Math.random()<SIG_CHANCE))return ['sig',1,pickSig(k)];   /* Signaturläge: nothing else */
   return [pickWeighted(FAMILIES,ITEMODDS.family),pickWeighted([0,1,2],ITEMODDS.level)+1];
 }
@@ -358,7 +358,8 @@ function checkPickups(){
         it.cool=6;
       }else if(it.type==='rocket'){
         if(k.held)continue;
-        if(sigMode){giveItem(k,'sig',1,pickSig(k));k.roll=ROLLT;}   /* Signaturläge: a signature item instead */
+        const ev=eventSig(k);
+        if(ev||sigMode){giveItem(k,'sig',1,ev||pickSig(k));k.roll=ROLLT;}   /* the event's own items, or Signaturläge: a signature item instead */
         else{giveItem(k,'rocket',1);
           if(k===player){toast('SPETTEKAKA!');ping(440,760,.10);}}
         it.cool=8;

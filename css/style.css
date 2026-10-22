@@ -185,6 +185,20 @@
   #skyfall i:last-child{left:62%;animation-delay:-.1s}
   @keyframes wipe{from{transform:rotate(-72deg)}to{transform:rotate(58deg)}}
   @media (prefers-reduced-motion:reduce){#skyfall.on,#skyfall i{animation:none}}
+  /* Moskanonen: mash splatted on the windscreen, the wipers pushing it off */
+  #mos{inset:0;opacity:0;visibility:hidden;overflow:hidden;pointer-events:none;
+    background:radial-gradient(ellipse 34% 26% at 30% 40%,#f4e6a8 0 70%,transparent 72%),
+      radial-gradient(ellipse 26% 22% at 68% 30%,#efdc96 0 70%,transparent 72%),
+      radial-gradient(ellipse 22% 18% at 52% 62%,rgba(244,230,168,.92) 0 70%,transparent 72%),
+      radial-gradient(ellipse 18% 14% at 14% 76%,#f4e6a8 0 70%,transparent 72%),
+      radial-gradient(ellipse 16% 14% at 86% 70%,#efdc96 0 70%,transparent 72%),
+      radial-gradient(circle at 40% 20%,#fff6cc 0 3%,transparent 3.5%)}
+  #mos.on{visibility:visible}
+  #mos i{position:absolute;bottom:-6%;width:7px;height:82%;border-radius:3px;background:#15161a;
+    transform-origin:50% 100%;animation:wipe .7s ease-in-out infinite alternate}
+  #mos i:first-child{left:24%}
+  #mos i:last-child{left:64%;animation-delay:-.1s}
+  @media (prefers-reduced-motion:reduce){#mos i{animation:none}}
 
   /* chrome-on-aqua callouts */
   #flash{top:0;left:0;right:0;bottom:0;display:grid;place-items:center;text-align:center}
