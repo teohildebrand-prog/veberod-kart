@@ -83,6 +83,8 @@ function updateMixers(dt){
   for(let n=mixers.length-1;n>=0;n--){
     const m=mixers[n];m.t+=dt;
     if(m.t>MIX.time){burstMixer(m);mixers.splice(n,1);continue;}
+    const [mb,md]=mouthAhead(m.s,SHOT_REACH,m.owner);
+    if(mb&&md<=m.speed*dt/SEG+2){openPassage(mb,m.owner);burstMixer(m);mixers.splice(n,1);continue;}   /* crashes into a closed passage */
     m.s=(m.s+m.speed*dt/SEG)%N;
     m.phase+=m.dir*dt*Math.PI*2/MIX.sway;
     m.lat=Math.sin(m.phase)*HW*MIX.swing;                    /* from one side of the road to the other */

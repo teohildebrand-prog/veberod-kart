@@ -13,7 +13,7 @@ function useItem(k){
   USE[fam](k,lvl);k.heldAt=raceTime;   /* a bag that stays in the slot starts the AI's patience over */
 }
 const USE={
-  sig(k){const id=k.heldSig;k.lastSig=id;k.heldSig=null;SIGS[id].use(k);},   /* a signature item: 37-signature-items.js */
+  sig(k){const id=k.heldSig;k.lastSig=id;k.heldSig=null;SIGS[id].use(k);sigBreach(k,id);},   /* a signature item: 37-signature-items.js; passages: 40-genvagar.js */
   /* Mjölk, Gräddfil, Skånsk grädde: longer first, then raw power */
   boost(k,lvl){
     k.boost=Math.max(k.boost,[1.2,2.4,3.0][lvl-1]*k.milk);k.boostLvl=Math.max(k.boostLvl,lvl);k.slow=0;

@@ -12,10 +12,10 @@
    Any driver can get any of them. Tune them here. */
 const ORDER={reach:220,time:1.5,top:0.08,side:3.6};      /* NUMMER 47! */
 const SODA={time:2.0,boost:2.0,r:16,shove:10,hop:3,keep:0.75,slow:0.45};   /* LÄSKPÅFYLLNING */
-const MOS={speed:30,min:44,life:2.2,reach:70,r:2.6,time:3.0,top:0.9,slow:0.35};   /* MOSKANONEN */
+const MOS={speed:30,min:60,life:2.2,reach:70,r:2.6,time:3.0,top:0.9,slow:0.35};   /* MOSKANONEN */
 const WRAP={time:2.6,top:1.18,push:16,grip:1.2,r:3.3,shove:11,hop:4.5,keep:0.6,slow:0.5,dizzy:0.9};   /* TUNNBRÖDSRULLEN */
 const TOWER={n:3,gap:0.6,grip:0.07,mass:0.6,roll:24,life:4.5,r:3.0,spin:1.0,slow:0.6};   /* BURGARTORNET */
-const KORV={speed:34,min:48,life:2.4,r:2.5,time:1.4,pull:34};   /* KORV MED BRÖD */
+const KORV={speed:34,min:62,life:2.4,r:2.5,time:1.4,pull:34};   /* KORV MED BRÖD */
 const MENU_IDS=['nummer','lask','mos','rulle','torn','korv'];
 
 /** the items that come out of this track's boxes, or none */
@@ -141,6 +141,7 @@ function burp(k){
   if(d<90){const v=1-d/110;audioTone(110,60,.55,.14*v+.02,'sawtooth');audioTone(80,50,.4,.08*v,'square',.08);
     if(d<30)shake=Math.min(1,shake+.3);}
   if(k===player)flash('BUUURP!');
+  for(const B of mouthsNear(k,SODA.r+6))openPassage(B,k);
   let hits=0;
   for(const o of karts){
     if(!sigHittable(o,k)||Math.abs(o.y-k.y)>4||Math.hypot(o.x-k.x,o.z-k.z)>SODA.r)continue;
@@ -174,8 +175,10 @@ function splatMash(m,o){
 function updateMashes(dt){
   for(let n=mashes.length-1;n>=0;n--){
     const m=mashes[n];m.t+=dt;
-    m.s=(m.s+m.speed*dt/SEG)%N;
-    if(m.target&&!m.target.parked&&!m.target.rib)m.lat=lerp(m.lat,clamp(m.target.lat,-HW,HW),Math.min(1,dt*4));
+    const step=m.speed*dt/SEG,[mb,md]=mouthAhead(m.s,SHOT_REACH,m.owner);   /* a closed passage first, like a Spettekaka */
+    if(mb&&steerToMouth(m,mb,md,step)){openPassage(mb,m.owner);splatMash(m,null);mashes.splice(n,1);continue;}
+    m.s=(m.s+step)%N;
+    if(!mb&&m.target&&!m.target.parked&&!m.target.rib)m.lat=lerp(m.lat,clamp(m.target.lat,-HW,HW),Math.min(1,dt*4));
     roadPt(Math.floor(m.s),m.lat,1.2+Math.sin(m.t*3)*.4,m.m.position);
     m.m.rotation.x+=dt*9;m.m.rotation.y+=dt*5;
     let hit=null;
@@ -183,7 +186,8 @@ function updateMashes(dt){
       if(o===m.owner||!sigHittable(o,m.owner)||o.rib)continue;
       if(Math.hypot(o.x-m.m.position.x,o.z-m.m.position.z)<MOS.r&&Math.abs(o.y+1-m.m.position.y)<2.4){hit=o;break;}
     }
-    if(hit||m.t>MOS.life){splatMash(m,hit);mashes.splice(n,1);if(!hit&&m.owner===player)sigMiss(m.owner,'MOSET MISSADE');}
+    if(hit||m.t>MOS.life&&!mb){   /* on its way to a passage it flies on */
+      splatMash(m,hit);mashes.splice(n,1);if(!hit&&m.owner===player)sigMiss(m.owner,'MOSET MISSADE');}
   }
 }
 
@@ -214,6 +218,7 @@ function rollWrap(k){
   if(k===player){toast('TUNNBRÖDSRULLEN! RULLA!');ping(300,600,.15);}
 }
 function wrapStep(k){
+  for(const B of mouthsNear(k,WRAP.r+4))openPassage(B,k);   /* rolls straight through a closed passage */
   for(const o of karts){
     if(k.wrapHit.has(o)||!sigHittable(o,k)||Math.abs(o.y-k.y)>3||Math.hypot(o.x-k.x,o.z-k.z)>WRAP.r)continue;
     k.wrapHit.add(o);
@@ -263,6 +268,7 @@ function updateRolls(dt){
       scene.remove(R.g);burgerRolls.splice(n,1);continue;}
     R.s=((R.s-TOWER.roll*dt/SEG)%N+N)%N;                       /* back down the road, against the race */
     const i=Math.floor(R.s);roadPt(i,R.lat,0,R.g.position);
+    for(const B of BLOCKERS)if(!B.R.open&&!B.R.noRocket&&Math.hypot(B.x-R.g.position.x,B.z-R.g.position.z)<TOWER.r+3)openPassage(B,R.owner);
     R.g.rotation.y=Math.atan2(fx[i],fz[i]);R.w.rotation.x-=dt*8;   /* rolling backwards */
     for(const o of karts){
       if(R.hit.has(o)||!sigHittable(o,R.owner)||o.rib)continue;
@@ -302,7 +308,9 @@ function fireKorv(k){
 function updateKorvs(dt){
   for(let n=korvs.length-1;n>=0;n--){
     const K=korvs[n];K.t+=dt;
-    K.s=(K.s+K.speed*dt/SEG)%N;
+    const step=K.speed*dt/SEG,[mb,md]=mouthAhead(K.s,SHOT_REACH,K.owner);
+    if(mb&&steerToMouth(K,mb,md,step)){openPassage(mb,K.owner);scene.remove(K.g);korvs.splice(n,1);continue;}
+    K.s=(K.s+step)%N;
     const i=Math.floor(K.s);roadPt(i,K.lat,.9,K.g.position);K.g.rotation.set(0,Math.atan2(fx[i],fz[i]),0);
     if(Math.random()<.5)puff(K.g.position.x,K.g.position.y,K.g.position.z,.95,.95,.95,.3);
     let hit=null;
@@ -310,7 +318,7 @@ function updateKorvs(dt){
       if(!sigHittable(o,K.owner)||o.rib)continue;
       if(Math.hypot(o.x-K.g.position.x,o.z-K.g.position.z)<KORV.r&&Math.abs(o.y+.9-K.g.position.y)<2.4){hit=o;break;}
     }
-    if(!hit&&K.t<KORV.life)continue;
+    if(!hit&&(K.t<KORV.life||mb))continue;
     scene.remove(K.g);korvs.splice(n,1);
     if(!hit){if(K.owner===player)sigMiss(K.owner,'KORVEN MISSADE');continue;}
     for(let p=0;p<12;p++)puff(hit.x+rand(-1,1),hit.y+rand(.3,1.8),hit.z+rand(-1,1),.88,.6,.28,.6);
