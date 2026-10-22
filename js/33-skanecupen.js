@@ -209,12 +209,20 @@ function applyCharacter(i,force){
   if(!force&&!charOpen(i)){peekCharacter(i);ping(220,160,.06);return;}   /* a look, and the lock text */
   if(i!==charSel||!carPicked){carSel=ownCar(i);carPicked=true;cmpCar=null;}   /* a new driver starts in their own vehicle */
   const fresh=i!==charSel;
-  charSel=i;previewChar=null;showRig();
+  charSel=i;previewChar=null;showRig();revealSel();
   const say=document.getElementById('vsSay');                /* a driver with a line says it when picked */
   if(fresh&&say&&say.textContent){say.classList.remove('pop');void say.offsetWidth;say.classList.add('pop');
     if(CHARS[i].sig==='svinexpress')grunt(.12,.06);
     else if(CHARS[i].sig==='skiftsex')shiftWhistle(.6);
     else if(CHARS[i].sig==='grisorat')woof(.7);}
+}
+/** keep the 1P portrait in view when the roster scrolls (a short phone shows two or three rows) */
+function revealSel(){
+  const g=document.getElementById('cards'),el=g&&g.querySelector('.vcard.sel');
+  if(!el||!g.clientHeight)return;
+  const gr=g.getBoundingClientRect(),r=el.getBoundingClientRect();
+  if(r.top<gr.top+4)g.scrollTop-=gr.top+4-r.top;
+  else if(r.bottom>gr.bottom-4)g.scrollTop+=r.bottom-(gr.bottom-4);
 }
 function peekCharacter(i){                /* a locked champion: a look and the lock text, nothing to confirm */
   if(!previewOn||previewChar===i)return;
@@ -233,7 +241,7 @@ function vsShowStep(step){
   const el=document.getElementById('pick'),two=vsTwoStep();
   el.classList.toggle('vsphone',two);el.dataset.step=two?step:'';
   document.querySelector('#pick .vs-title').textContent=two&&step==='car'?'VÄLJ FORDON':'VÄLJ FÖRARE';
-  renderCombo();
+  renderCombo();revealSel();
   if(document.body.classList.contains('padnav'))       /* a pad keeps its focus on something visible */
     (document.querySelector(step==='car'&&two?'#btnGo':'#cards .vcard.sel')||document.getElementById('btnGo')).focus();
 }
@@ -267,7 +275,8 @@ function renderCombo(){
   host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-  set('vsName',c.name);set('vsHome',c.role);set('vsSay',charOpen(ci)&&c.say&&c.say.pick?'”'+c.say.pick+'”':'');set('ptag',peek?'LÅST':'');
+  set('vsName',c.short);set('vsFull',c.name!==c.short?c.name:'');   /* the big name is the portrait's label, the full one under it */
+  set('vsHome',c.role);set('vsSay',charOpen(ci)&&c.say&&c.say.pick?'”'+c.say.pick+'”':'');set('ptag',peek?'LÅST':'');
   set('vsCar',R.name);set('vsRole',R.role);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
   set('btnGoT',peek?'LÅST':vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);

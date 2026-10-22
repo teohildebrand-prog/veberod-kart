@@ -71,7 +71,7 @@ def main():
         wait(800)
         ev("()=>applyCharacter(CHARS.findIndex(c=>c.id==='weiron'))")
         wait(1200)
-        sel = ev("""()=>({name:vsName.textContent,say:vsSay.textContent,quirk:vsQuirk.textContent,car:vsCar.textContent,
+        sel = ev("""()=>({name:vsFull.textContent||vsName.textContent,say:vsSay.textContent,quirk:vsQuirk.textContent,car:vsCar.textContent,
             more:vsMore.textContent})""")
         page.screenshot(path=str(ROOT / 'weiron-select.png'))
         check(sel['name'] == 'WEIRON I OTTAN' and 'snabbare båtar' in sel['say'] and sel['quirk'] == 'STÄMPLA IN'

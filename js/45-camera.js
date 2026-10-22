@@ -16,18 +16,32 @@ function mirrorCam(){
   camera.position.x*=-1;const q=camera.quaternion;q.set(q.x,-q.y,-q.z,q.w);
   camera.userData.mir=!camera.userData.mir;
 }
+/** where the driver screen wants the kart: the #vsStage box, as its centre in NDC and its size as a
+    share of the canvas; null when the box is hidden or squeezed shut */
+function stageSlot(){
+  const b=document.getElementById('vsStage');if(!b||!b.offsetParent)return null;
+  const r=b.getBoundingClientRect(),c=canvas.getBoundingClientRect();
+  if(r.width<40||r.height<40||!c.width||!c.height)return null;
+  return {x:(r.left+r.width/2-c.left)/c.width*2-1,y:1-(r.top+r.height/2-c.top)/c.height*2,w:r.width/c.width,h:r.height/c.height};
+}
+const previewBox=new THREE.Box3(),previewBall=new THREE.Sphere();
 const camPos=new THREE.Vector3(),camAim=new THREE.Vector3(),wantV=new THREE.Vector3();
 function updateCamera(dt){
   const Fx=Math.sin(player.yaw),Fz=Math.cos(player.yaw);
   if(previewOn){                                   /* driver select: the kart on its turntable */
-    const a=camera.aspect,wide=a>1.15,d=wide?16:24,t=Math.tan(20*Math.PI/180);
-    const Rx=-Fz,Rz=Fx,cx=Fx*.9+Rx*.44,cz=Fz*.9+Rz*.44;
-    camera.position.set(player.x+cx*d,player.y+PEDESTAL+d*.22,player.z+cz*d);
-    /* push the kart into the gap the layout leaves: the right column, between name and panel */
-    const off=wide?0.46*d*t*a:0, up=(wide?-0.12:0.02)*d*t, cRx=-cz, cRz=cx;
-    camAim.set(player.x+cRx*off,player.y+PEDESTAL+1.2+up,player.z+cRz*off);
+    const a=camera.aspect,t=Math.tan(20*Math.PI/180),slot=stageSlot();
+    /* the kart (its bounding sphere) fills the empty slot the layout leaves for it (#vsStage), whatever the screen */
+    previewBox.setFromObject(player.v.root).getBoundingSphere(previewBall);
+    const R=(previewBall.radius||2.4)*.8;                 /* a kart is flatter than its sphere: fit a little tighter */
+    const d=slot?clamp(Math.max(R/(t*slot.h),R/(t*a*slot.w)),5,90):(a>1.15?16:24);
+    const Rx=-Fz,Rz=Fx,cx=Fx*.9+Rx*.44,cz=Fz*.9+Rz*.44,n=Math.hypot(cx,cz,.22);
+    if(slot){camAim.copy(previewBall.center);
+      camera.position.set(camAim.x+cx/n*d,camAim.y+.22/n*d,camAim.z+cz/n*d);}
+    else{camera.position.set(player.x+cx*d,player.y+PEDESTAL+d*.22,player.z+cz*d);
+      camAim.set(player.x,player.y+PEDESTAL+1.2,player.z);}
     camera.lookAt(camAim);
     camera.fov=40;camera.updateProjectionMatrix();
+    if(slot){const e=camera.projectionMatrix.elements;e[8]=-slot.x;e[9]=-slot.y;}   /* lens shift: the kart lands mid-slot */
     return;
   }
   if(state==='grid'||state==='menu'||state==='select'){

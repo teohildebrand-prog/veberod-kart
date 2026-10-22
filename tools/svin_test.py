@@ -60,7 +60,7 @@ def main():
 
         # driver select: Carl in the grid, his own vehicle, his line
         page.click('#cards .vcard[aria-label="GRISABONDEN CARL"]', timeout=10000)
-        sel = ev("""()=>({name:document.getElementById('vsName').textContent,say:document.getElementById('vsSay').textContent,
+        sel = ev("""()=>({name:document.getElementById('vsFull').textContent||document.getElementById('vsName').textContent,say:document.getElementById('vsSay').textContent,
             car:CARS[carSel].id,svinAt:CARS.findIndex(c=>c.id==='svinexpress'),victorAt:CARS.findIndex(c=>c.id==='original'),
             open:charOpen(charSel),inGrid:GRID.includes(charSel)})""")
         check(sel['name'] == 'GRISABONDEN CARL' and sel['say'] == '”Carl. Hörby. Sju lass.”', f'select panel {sel}')

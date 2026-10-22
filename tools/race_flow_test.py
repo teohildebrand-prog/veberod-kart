@@ -22,7 +22,20 @@ from playwright.sync_api import sync_playwright
 from smoke_test import serve
 
 SIZES = {'desk': (1280, 720, False), 'desk-small': (1024, 640, False), 'phone-844': (844, 390, True),
-         'iphone-se': (667, 320, True), 'portrait': (390, 660, True)}
+         'iphone-se': (667, 320, True), 'portrait': (390, 660, True), 'iphone-land': (750, 340, True),
+         'iphone-port': (393, 660, True), 'se-port': (375, 553, True)}
+# the kart on its turntable: its middle projected to the screen must sit inside the #vsStage slot,
+# the slot at least 90 px tall, and no panel (grid, info, name, bars) may cover that point
+KART_SEEN = '''()=>{const b=document.getElementById('vsStage'),r=b.getBoundingClientRect();
+  previewBox.setFromObject(player.v.root).getBoundingSphere(previewBall);
+  const v=previewBall.center.clone().project(camera),c=canvas.getBoundingClientRect();
+  const x=c.left+(v.x+1)/2*c.width,y=c.top+(1-v.y)/2*c.height;
+  const top=document.elementFromPoint(x,y),cover=top&&top.closest('.vs-grid,.vs-panel,.vs-name,.vs-foot,.vs-top');
+  return {h:Math.round(r.height),inside:x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom,cover:cover?cover.className:null}}'''
+SEL_SEEN = '''()=>{const g=document.getElementById('cards').getBoundingClientRect(),s=document.querySelector('#cards .vcard.sel'),
+  r=s.getBoundingClientRect();
+  return r.top>=g.top-1&&r.bottom<=g.bottom+1&&s.querySelector('span').textContent===document.getElementById('vsName').textContent&&
+    document.getElementById('vsFull').textContent==='SLUSSTROLLET'}'''
 
 
 def main():
@@ -100,10 +113,21 @@ def main():
               const l=c[c.length-1].getBoundingClientRect(),r=g.getBoundingClientRect(),n=document.getElementById('vsName').getBoundingClientRect();
               return l.bottom<=r.bottom+1&&l.top>=r.top-1&&n.height>0&&n.bottom<=innerHeight&&n.top>=0}""")
             check(reach, f'{tag:10} pick: last driver reachable, the name in view')
+            page.wait_for_timeout(300)
+            k = ev(KART_SEEN)
+            check(k['h'] >= 90 and k['inside'] and not k['cover'], f'{tag:10} pick: the kart in its own slot, uncovered {k}')
+            if mob:
+                ev("document.getElementById('btnGo').click()")
+                page.wait_for_timeout(300)
+                k = ev(KART_SEEN)
+                check(k['h'] >= 90 and k['inside'] and not k['cover'], f'{tag:10} pick: vehicle step, the kart in view {k}')
+                ev("document.getElementById('btnBack').click()")
+            ev("applyCharacter(CHARS.findIndex(c=>c.id==='slusstrollet'))")
+            check(ev(SEL_SEEN), f'{tag:10} pick: the 1P portrait in view, its label is the big name, full name under it')
             if not mob:
                 page.hover('#cards .vcard:nth-child(5)')
                 page.wait_for_timeout(200)
-                same = ev("()=>document.getElementById('vsName').textContent===CHARS[charSel].name&&document.getElementById('btnGoT').textContent==='VÄLJ '+CHARS[charSel].short")
+                same = ev("()=>document.getElementById('vsName').textContent===CHARS[charSel].short&&document.getElementById('btnGoT').textContent==='VÄLJ '+CHARS[charSel].short")
                 check(same, f'{tag:10} pick: hovering another driver changes nothing')
             locked = ev("()=>{const b=document.querySelector('#cards .vcard.locked');if(!b)return null;b.click();"
                         "return {go:document.getElementById('btnGo').disabled,t:document.getElementById('btnGoT').textContent,sel:charSel}}")
@@ -113,7 +137,7 @@ def main():
                 check(ev("state") == 'select', f'{tag:10} pick: Enter on a locked champion starts nothing')
             page.click('#cards .vcard:nth-child(4)') if not mob else page.tap('#cards .vcard:nth-child(4)')
             agree = ev("""()=>{const c=CHARS[charSel],sel=document.querySelector('#cards .vcard.sel');
-              return !document.getElementById('btnGo').disabled&&document.getElementById('vsName').textContent===c.name&&
+              return !document.getElementById('btnGo').disabled&&document.getElementById('vsName').textContent===c.short&&
                 +sel.dataset.i===charSel&&!document.querySelector('#cards .vcard.peek')}""")
             check(agree, f'{tag:10} pick: tapped portrait, name and KÖR agree')
             ctx.close()
