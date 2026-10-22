@@ -105,6 +105,11 @@ pipeline {
         sh 'python3 tools/menu_fit_test.py'
       }
     }
+    stage('Race flow test') {
+      steps {
+        sh 'python3 tools/race_flow_test.py'
+      }
+    }
   }
   post {
     always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }

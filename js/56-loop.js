@@ -24,13 +24,16 @@ function frame(now){
   if(lamps.length===2){const on=Math.floor(clock*5)%2===0;lamps[0].visible=on;lamps[1].visible=!on;}
 
   if(state==='grid'){
-    countdown-=dt;
+    if(rotateBlocked()){countdown=COUNTDOWN;lastBeep=-1;settleT=0.5;}   /* the lights wait for the phone */
+    else if(settleT>0)settleT=Math.max(0,settleT-dt);    /* landscape layout and pads settle first */
+    else countdown-=dt;
     const n=Math.ceil(countdown-0.6);
-    if(n!==lastBeep&&n>=0&&n<=3){lastBeep=n;flash(n===0?'KÖR!':String(n));}
+    if(n!==lastBeep&&n>=0&&n<=3&&!settleT){lastBeep=n;flash(n===0?'KÖR!':String(n));}
     if(countdown<=0){state='race';raceTime=0;karts.forEach(k=>k.lapStart=0);
       const ln=(stage.id===CHARS[charSel].home&&sayLine('home'))||sayLine('start');if(ln)setTimeout(()=>{if(state==='race')toast(ln);},player.kvart?2600:900);
       const ch=cupChamp();if(ch&&CUP.round===0)setTimeout(()=>{if(state==='race')toast(ch.name+': '+ch.say);},ln?3400:1200);}
   }
+  if(state==='race'&&rotateBlocked())setPause(true);   /* turned upright mid-race: stop, resume by hand */
   readInput();
 
   if(state==='race'||state==='over'){

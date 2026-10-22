@@ -224,7 +224,7 @@ function renderPreview(){
   const go=document.getElementById('btnStageGo');
   if(m==='cup'){const nx=STAGES[SS.list[SS.cup.round]];
     document.getElementById('btnStageGoT').textContent='STARTA NÄSTA LOPP · '+nx.name;go.disabled=false;}
-  else{document.getElementById('btnStageGoT').textContent='VÄLJ '+S.name;go.disabled=!!why;}
+  else{document.getElementById('btnStageGoT').textContent=(SS.keep?'KÖR ':'VÄLJ ')+S.name;go.disabled=!!why;}
 }
 /** the live render for a stage with no baked portrait, once the highlight has rested on it */
 function queueArt(){
@@ -301,7 +301,9 @@ function ssConfirm(){
   setTimeout(()=>{
     SS.busy=false;if(el)el.classList.remove('flash');
     if(m==='cup'){if(stage!==S)applyStage(si);startCupRound();return;}
-    stageSel=si;applyStage(si);showSelect();
+    stageSel=si;applyStage(si);
+    if(SS.keep){CUP=null;cupSetup=false;startRace();return;}   /* from the results: same driver, same vehicle */
+    showSelect();
   },220);
 }
 function ssBack(){
@@ -316,19 +318,22 @@ function applyStage(i){
   buildWorld(STAGES[i]);
   placeOnGrid();camInit=false;
 }
-function openStages(cup){
+/** keep: straight from a single race's results; the stage starts the race with the driver and vehicle kept */
+function openStages(cup,keep){
   hideSheets();setMirror(false);
   previewOn=false;unpeek();setPause(false);
   state='select';camInit=false;
   document.body.classList.remove('racing');
-  SS.cup=cup||null;SS.shown=false;
+  SS.cup=cup||null;SS.shown=false;SS.keep=!cup&&!!keep;
   buildStageCards();
   const hm=document.getElementById('ssMode');
   hm.textContent=SS.cup?cupDef(SS.cup).name+' · '+cupClass().name+(SS.cup.mirror?' · SPEGELVÄND':'')+(SS.cup.sig?' · SIGNATURLÄGE':'')+
-    ' · RUNDA '+(SS.cup.round+1)+' AV '+SS.list.length:MODENAME[ssMode()];
+    ' · RUNDA '+(SS.cup.round+1)+' AV '+SS.list.length:MODENAME[ssMode()]+(SS.keep?' · '+CHARS[charSel].short+' I '+CARS[carSel].name:'');
   sheetStages.classList.toggle('cupview',!!SS.cup);
   sheetStages.classList.remove('hide');
-  const k=SS.cup?SS.cup.round:SS.list.indexOf(stageSel);
+  let k=SS.cup?SS.cup.round:SS.list.indexOf(stageSel);
+  if(SS.keep&&k>=0)for(let n=1;n<SS.list.length;n++){const j=(k+n)%SS.list.length;   /* the next stage that is open */
+    if(!ssBlocked(STAGES[SS.list[j]])){k=j;break;}}
   SS.hi=-1;ssHighlight(k<0?0:k,false);
 }
 function showStages(){openStages(null);}

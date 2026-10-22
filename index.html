@@ -123,12 +123,13 @@
 </div>
 
 <div class="sheet hide" id="namn">
-  <div class="sheet-in">
-    <h1>VAD HETER DU?</h1>
-    <h2>DITT NAMN STÅR I RESULTATEN</h2>
-    <input id="nameBox" type="text" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ditt namn" placeholder="NAMN">
+  <div class="sheet-in name-in">
+    <div class="name-head">
+      <h1>VAD HETER DU?</h1>
+      <h2>DITT NAMN STÅR I RESULTATEN</h2>
+    </div>
+    <input id="nameBox" type="text" maxlength="12" inputmode="text" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Ditt namn" placeholder="NAMN">
     <div id="nameKeys"></div>
-    <div class="mrow actbar"><button class="go" id="btnNameOk">KLAR</button></div>
   </div>
 </div>
 
@@ -299,8 +300,8 @@
     <p class="note" id="doneSay"></p>
     <ol class="rows" id="grid"></ol>
     <p class="note" id="doneStamps"></p>
-    <div class="mrow actbar"><button class="go" id="btnAgain">EN GÅNG TILL</button><button class="go" id="btnTable" hidden>TABELLEN</button></div>
-    <div class="mrow"><button class="alt" id="btnSwap">BYT FÖRARE</button><button class="alt" id="btnStage">BYT BANA</button><button class="alt" id="btnMenu">MENY</button></div>
+    <div class="mrow actbar"><button class="go" id="btnNextStage">VÄLJ NÄSTA BANA</button><button class="go" id="btnTryAgain">FÖRSÖK IGEN</button><button class="go" id="btnTable" hidden>FORTSÄTT · TABELLEN</button></div>
+    <div class="mrow" id="doneMore"><button class="alt" id="btnAgain">KÖR SAMMA BANA IGEN</button><button class="alt" id="btnSwap">BYT FÖRARE</button><button class="alt" id="btnStage">BYT BANA</button><button class="alt" id="btnMenu">MENY</button></div>
   </div>
 </div>
 

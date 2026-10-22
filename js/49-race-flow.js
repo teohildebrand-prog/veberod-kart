@@ -1,6 +1,10 @@
 "use strict";
 /* ───────── race flow ───────── */
-let state='menu',clock=0,raceTime=0,countdown=0,lastBeep=-1;
+let state='menu',clock=0,raceTime=0,countdown=0,lastBeep=-1,settleT=0;
+let COUNTDOWN=3.6;
+/** a phone held upright behind the VRID TELEFONEN card: nothing on track may move (same rule as the CSS) */
+const PORTRAIT=matchMedia('(orientation:portrait)');
+const rotateBlocked=()=>isTouch&&PORTRAIT.matches&&document.body.classList.contains('racing');
 const sheetStart=document.getElementById('start'),sheetDone=document.getElementById('done');
 function order(){
   const s=karts.filter(k=>!k.parked).sort((a,b)=>{
@@ -19,7 +23,7 @@ function resetRace(){
   setMirror(CUP?!!CUP.mirror:(!TT&&mirrorSel&&!!SAVE.unlock['mirror_'+stage.id]));
   sigMode=!TT&&(CUP?!!CUP.sig:sigModeSel);
   previewOn=false;setPause(false);
-  raceTime=0;countdown=FREE?0.6:3.6;lastBeep=-1;camInit=false;shake=0;state='grid';
+  raceTime=0;COUNTDOWN=FREE?0.6:3.6;countdown=COUNTDOWN;settleT=0;lastBeep=-1;camInit=false;shake=0;state='grid';
   hideSheets();document.body.classList.toggle('free',FREE);
   document.body.classList.add('racing');
   for(let i=0;i<PMAX;i++){pLife[i]=0;pPos[i*3+1]=-9999;}
@@ -60,10 +64,19 @@ function showDone(){
   });
   const [got,of]=stageStamps(stage);
   document.getElementById('doneStamps').textContent=of?'PICKNICKSTÄMPLAR PÅ '+stage.name+': '+got+'/'+of:'';
-  for(const id of ['btnAgain','btnSwap','btnStage','btnMenu'])document.getElementById(id).hidden=!!c;
-  document.getElementById('btnTable').hidden=!c;
+  doneButtons(c?'cup':'race');
   if(!c&&player.done)saveBest();
   sheetDone.classList.remove('hide');
+}
+/** one yellow action per mode, first so Enter and the pad land on it: a cup goes on through the table,
+    a single race on to the next stage with the same driver and vehicle, a time trial tries again */
+const DONE_BTNS={cup:['btnTable'],race:['btnNextStage','btnAgain','btnSwap','btnMenu'],
+  tt:['btnTryAgain','btnStage','btnSwap','btnMenu']};
+function doneButtons(mode){
+  const show=DONE_BTNS[mode];
+  for(const id of ['btnNextStage','btnTryAgain','btnTable','btnAgain','btnSwap','btnStage','btnMenu'])
+    document.getElementById(id).hidden=!show.includes(id);
+  document.getElementById('doneMore').hidden=mode==='cup';
 }
 /** the single-race record per stage, normal and mirrored kept apart, shown on the stage picker */
 function saveBest(){
@@ -83,8 +96,7 @@ function showTTDone(){
   document.getElementById('grid').innerHTML=h;
   document.getElementById('doneStamps').textContent=SAVE.unlock['mirror_'+stage.id]?
     'SPEGELVÄND '+stage.name+' ÄR UPPLÅST: VÄLJ DEN PÅ BANVALET.':'SLÅ ARNES VARV FÖR ATT LÅSA UPP SPEGELVÄND '+stage.name+'.';
-  for(const id of ['btnAgain','btnSwap','btnStage','btnMenu'])document.getElementById(id).hidden=false;
-  document.getElementById('btnTable').hidden=true;
+  doneButtons('tt');
   sheetDone.classList.remove('hide');
 }
 const HORN='<svg class="horn" viewBox="0 0 16 16" role="img" aria-label="Rivalen"><title>Rivalen</title>'+
@@ -183,7 +195,6 @@ function portrait(ci,sil){
   return url;
 }
 (function buildCards(){
-  document.getElementById('cards').style.setProperty('--cols',GRID_COLS);
   document.getElementById('cards').innerHTML=GRID.map(i=>
     '<button class="vcard" role="option" data-i="'+i+'" aria-label="'+CHARS[i].name+'"><img alt="" src="'+portrait(i)+'"'+
     (CHARS[i].boss?' data-sil="'+portrait(i,true)+'"':'')+'><span>'+
@@ -192,11 +203,10 @@ function portrait(ci,sil){
   document.querySelectorAll('#cards .vcard').forEach(el=>{
     const i=+el.dataset.i;
     el.addEventListener('click',()=>{bootAudio();ping(700,980,.05);applyCharacter(i);});
-    el.addEventListener('pointerenter',()=>peekCharacter(i));
-    el.addEventListener('focus',()=>peekCharacter(i));
-    el.addEventListener('pointerleave',unpeek);
-    el.addEventListener('blur',unpeek);
+    /* no hover previews: what the panel shows is what KÖR confirms. A pad's focus picks like a click */
+    el.addEventListener('focus',()=>{if(document.body.classList.contains('padnav')&&i!==charSel)applyCharacter(i);});
   });
+  addEventListener('resize',fitCardNames);
   document.getElementById('carPrev').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(-1);});
   document.getElementById('carNext').addEventListener('click',()=>{bootAudio();ping(700,980,.05);stepCar(1);});
   document.getElementById('btnBack').addEventListener('click',()=>{bootAudio();
@@ -204,6 +214,16 @@ function portrait(ci,sil){
     if(cupSetup){previewOn=false;unpeek();showCupSetup();}else showStages();});
   applyCharacter(0);
 })();
+/** the grid's live column count (it reflows with the screen), for the arrow keys */
+function gridCols(){return getComputedStyle(document.getElementById('cards')).gridTemplateColumns.split(' ').length||GRID_COLS;}
+/** every portrait label shows its whole name: long ones shrink a little instead of being cut */
+function fitCardNames(){
+  if(sheetPick.classList.contains('hide'))return;
+  document.querySelectorAll('#cards .vcard span').forEach(sp=>{
+    sp.style.fontSize='';
+    for(let f=parseFloat(getComputedStyle(sp).fontSize);sp.scrollWidth>sp.clientWidth+1&&f>8;f-=.5)sp.style.fontSize=f+'px';
+  });
+}
 let stageSel=1,mirrorSel=false;                /* the stage picker lives in its own section */
 function showSelect(){
   hideSheets();
@@ -217,7 +237,7 @@ function showSelect(){
   sheetStart.classList.add('hide');sheetDone.classList.add('hide');
   sheetPick.classList.remove('hide');
   vsShowStep('driver');
-  applyCharacter(charSel);placeOnGrid();
+  applyCharacter(charSel);placeOnGrid();fitCardNames();
 }
 const sheetPaused=document.getElementById('paused');
 let paused=false;
@@ -235,6 +255,7 @@ document.getElementById('btnRestart').addEventListener('click',()=>{setPause(fal
 document.getElementById('btnQuit').addEventListener('click',()=>{setPause(false);showStages();});
 function startRace(){previewOn=false;unpeek();sheetPick.classList.add('hide');resetRace();}
 function goFromSelect(){
+  if(previewChar!=null&&previewChar!==charSel){ping(220,160,.06);return;}   /* a locked champion is only a look */
   if(vsTwoStep()&&vsStep==='driver'){unpeek();ping(700,980,.05);vsShowStep('car');return;}   /* phones: driver first, then the vehicle */
   if(!cupSetup){CUP=null;startRace();return;}
   cupSetup=false;previewOn=false;unpeek();
@@ -382,7 +403,7 @@ function showTable(){
       k.color.toString(16).padStart(6,'0')+'"></span><span class="nm">'+k.name+(i===c.rival?HORN:'')+
       '</span><span class="mv" aria-label="placeringar">'+(mv>0?'▲'+mv:mv<0?'▼'+(-mv):'–')+
       '</span><span class="pt">+'+L.earned[i]+'</span><span class="tot">'+c.pts[i]+'</span></li>';}).join('');
-  document.getElementById('btnTableNext').textContent=c.done?'PRISPALLEN':'NÄSTA BANA';
+  document.getElementById('btnTableNext').textContent=c.done?'SLUTRESULTAT':'NÄSTA BANA';
   document.getElementById('table').classList.remove('hide');
 }
 function showPodium(){
@@ -472,5 +493,7 @@ document.getElementById('btnTableNext').addEventListener('click',()=>{if(SAVE.cu
 document.getElementById('btnPodDone').addEventListener('click',showMenu);
 refreshMenu();
 document.getElementById('btnAgain').addEventListener('click',resetRace);
+document.getElementById('btnTryAgain').addEventListener('click',resetRace);
+document.getElementById('btnNextStage').addEventListener('click',()=>{bootAudio();openStages(null,true);});
 document.getElementById('btnSwap').addEventListener('click',showSelect);
 document.getElementById('btnStage').addEventListener('click',()=>showStages());
