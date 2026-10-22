@@ -13,7 +13,7 @@ parallel tour open from the start: Västgötacupen (Lerum, Borås, Trollhättan)
 against Regnmolnet, then Göteborgscupen (Avenyn, Hisingen, Ullevi) against
 Hamnkranen. Finalen still needs only the three Skåne championships.
 
-Two bonus tracks outside the cups, marked BONUSBANA in the stage picker:
+Three bonus tracks outside the cups, marked BONUSBANA in the stage picker:
 Sibylla, Extra Allt Grand Prix (two laps from a Sibylla car park through the
 drive-through and a giant kitchen). Its boxes hand out only Sibyllas meny,
 six burger items found nowhere else (NUMMER 47!, LÄSKPÅFYLLNING, MOSKANONEN,
@@ -21,7 +21,11 @@ TUNNBRÖDSRULLEN, BURGARTORNET, KORV MED BRÖD), and it brings the SIBYLLA BURGA
 vehicle every driver can pick. And Bodils promenad, Bara en liten runda
 (three laps of Bodil's walk: out of the door, up through the woods, round the
 shrub every dog stops at, an agility event on the lawn, and home past the
-sofa in the window to NU VILAR VI).
+sofa in the window to NU VILAR VI). And Idalaskolan, Sista rasten (three laps
+of Victor and Carl's old school in Veberöd: out of the playground, through the
+hallway, round the gym and over the bench ramp while the PE teacher sends the
+big ball across, out to recess round the sandpit, and home past the bike
+stands; picking Victor or Carl brings the other along, and they talk).
 
 ## Play
 
@@ -81,6 +85,7 @@ tools/beans_test.py         headless test: the beans' green gas cloud, the spin 
 tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTBLANDAREN and STÄMPLA IN
 tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
 tools/promenad_test.py      headless test: Bodils promenad, its hazards, the TV, Bodil's nap and her passport page
+tools/idalaskolan_test.py   headless test: Idalaskolan, its indoor sections, the gym ball, Victor and Carl's lines, the bell
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/band_audit.py         headless audit: how close the field stays to the player, catch-up on and off
 tools/feel_test.py          headless test: camera shake, the turbo's view kick, the body's knocks on landing and walls
@@ -126,6 +131,7 @@ python3 tools/west_items_test.py        # the six west-coast signature items and
 python3 tools/weiron_test.py            # Weiron i ottan: driver select, CEMENTBLANDAREN, his quirk and horn
 python3 tools/bodil_test.py             # Bodil: driver select, the tackle and its counterplay, her quirk and horn
 python3 tools/promenad_test.py          # Bodils promenad: launcher, sprinkler, TV, the victory nap, the dog page
+python3 tools/idalaskolan_test.py       # Idalaskolan: hallway and gym, the gym ball, the brothers' lines, the bell, the postcard
 python3 tools/vastgota_test.py          # the west and bonus tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
