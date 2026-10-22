@@ -89,6 +89,8 @@ tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
 docs/                 design notes and build history
+tools/ci/Dockerfile   the image every Jenkins stage runs in
+tools/jenkins/        a local Jenkins in Docker with the job set up (start.sh)
 Jenkinsfile           CI: every test and audit in tools/ (the full list)
 CLAUDE.md             working rules for Claude Code
 ```
@@ -134,3 +136,29 @@ python3 tools/feel_test.py              # camera shake, turbo view kick, body sq
 python3 tools/banner_test.py            # HEJA banners on each driver's home stage, none elsewhere
 python3 tools/band_audit.py             # rubber band: six tracks by default, name stages to check others; --set PACE.ahead=0.25 to try a tuning
 ```
+
+### Jenkins
+
+`Jenkinsfile` runs every test and audit above, one stage each, inside
+`tools/ci/Dockerfile` (Playwright's Chromium, the `playwright` package and
+Node). To run it on your own machine you only need Docker:
+
+```bash
+tools/jenkins/start.sh          # http://localhost:8080/job/veberod-kart/ (user admin, password in tools/jenkins/.env)
+tools/jenkins/start.sh stop     # stop; jobs and build history stay in a Docker volume
+tools/jenkins/start.sh logs     # follow Jenkins' log
+```
+
+The first start takes a few minutes (the Jenkins image and its plugins). The
+job builds `main` from GitHub, on Build Now and when main changes (polled
+every 5 minutes). Jenkins only listens on localhost. The CI image also runs
+any one test without Jenkins:
+
+```bash
+docker build -f tools/ci/Dockerfile -t veberod-ci .
+docker run --rm --ipc=host -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work veberod-ci python3 tools/smoke_test.py
+```
+
+On an existing Jenkins server: a Pipeline job, *Pipeline script from SCM*
+on this repo, script path `Jenkinsfile`, on an agent with Docker and the
+Docker Pipeline plugin.

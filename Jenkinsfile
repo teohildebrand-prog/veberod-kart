@@ -1,7 +1,9 @@
-// Smoke test: load the game headless, start a race, fail on any JS error.
+// Every test and audit in tools/, one stage each. Runs in tools/ci/Dockerfile's image
+// (Playwright's Chromium, the playwright package, Node); tools/jenkins/ runs a local Jenkins for it.
 pipeline {
   agent {
-    docker { image 'mcr.microsoft.com/playwright/python:v1.49.0-noble' }
+    // --ipc=host: Chromium needs more shared memory than Docker's default 64 MB for the long audits
+    dockerfile { filename 'tools/ci/Dockerfile'; args '--ipc=host' }
   }
   options { timeout(time: 60, unit: 'MINUTES') }   // six west tracks raced twice each, every stage's fuel audited, six tracks' rubber band
   stages {
@@ -122,6 +124,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,banner-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,banner-*.png,sigmode-*.png,promenad-*.png', allowEmptyArchive: true }
   }
 }

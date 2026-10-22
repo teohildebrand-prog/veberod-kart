@@ -14,7 +14,7 @@ js/NN-<section>.js    game code, one file per section, loaded in number order
 vendor/three.min.js   three.js r128
 tools/                tests, audits and build scripts (Python, plus one Node audio test)
 docs/                 HISTORY.md (rules, roadmap, history), design.md (doc links)
-Jenkinsfile           CI: every test and audit
+Jenkinsfile           CI: every test and audit (image: tools/ci/Dockerfile; local Jenkins: tools/jenkins/start.sh)
 ```
 
 The `js/` files are classic scripts, not ES modules: one shared global scope, so anything declared in an earlier file is visible in later ones.
@@ -32,7 +32,7 @@ The `js/` files are classic scripts, not ES modules: one shared global scope, so
 pip install -r requirements-dev.txt && playwright install chromium
 python3 tools/smoke_test.py        # always: loads the game, starts a race, fails on any JS error
 ```
-Every test and audit is a stage in `Jenkinsfile` (Docker image `mcr.microsoft.com/playwright/python:v1.49.0-noble`); that list is the full suite. Run the tests for the area you touched plus the smoke test. Set `CHROMIUM=/path/to/chrome` to use an existing Chromium instead of Playwright's download.
+Every test and audit is a stage in `Jenkinsfile` (it runs in the image built from `tools/ci/Dockerfile`; bump the Playwright version there and in requirements-dev.txt together); that list is the full suite. Run the tests for the area you touched plus the smoke test. Set `CHROMIUM=/path/to/chrome` to use an existing Chromium instead of Playwright's download.
 - `tools/fuel_audit.py` and `tools/band_audit.py` run headless races and take minutes; other tests can time out if run alongside them, so run them on their own.
 - A new test: Python + Playwright like the others, add it as a Jenkins stage, add any screenshots to `archiveArtifacts`, and list it in the README.
 

@@ -1,0 +1,31 @@
+# One admin user (password from .env, written by start.sh) and one pipeline job on main.
+jenkins:
+  systemMessage: "Veberöd Kart CI"
+  numExecutors: 1
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+jobs:
+  - script: >
+      pipelineJob('veberod-kart') {
+        description('Every test and audit in tools/, from the Jenkinsfile on main')
+        properties { pipelineTriggers { triggers { pollSCM { scmpoll_spec('H/5 * * * *') } } } }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('https://github.com/teohildebrand-prog/veberod-kart.git') }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
