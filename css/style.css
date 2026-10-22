@@ -361,8 +361,10 @@
   .vs{position:absolute;inset:0;display:grid;gap:12px 22px;
     padding:max(12px,env(safe-area-inset-top)) 22px max(14px,env(safe-area-inset-bottom));
     grid-template-columns:minmax(300px,44%) 1fr;
-    grid-template-rows:auto auto 1fr auto auto;
-    grid-template-areas:"top top" "grid name" "grid ." "grid panel" "foot foot"}
+    grid-template-rows:auto auto minmax(150px,1fr) minmax(0,auto) auto;
+    grid-template-areas:"top top" "grid name" "grid stage" "grid panel" "foot foot"}
+  /* the kart's slot: the camera centres the turntable in it (stageSlot in js/45-camera.js) */
+  .vs-stage{grid-area:stage;min-height:0;min-width:0;pointer-events:none}
   .vs-top{grid-area:top;display:flex;align-items:center;gap:22px;margin:0 -22px;padding:8px 22px;
     background:linear-gradient(180deg,#1a3f9e,#0c2466);border-bottom:3px solid #4f86e8;
     box-shadow:0 4px 0 #071746,0 10px 22px rgba(0,10,40,.45)}
@@ -399,6 +401,9 @@
   .vs-name{grid-area:name;justify-self:start}
   .vs-big{font:italic 900 clamp(26px,4.6vw,54px)/1 "Titillium Web",sans-serif;color:#ffd54a;
     letter-spacing:.01em;text-shadow:3px 3px 0 #0a1a4a,-1px -1px 0 #0a1a4a,0 0 22px rgba(255,180,40,.35)}
+  .vs-full{margin-top:2px;font:700 clamp(12px,1.3vw,16px)/1.1 "Titillium Web",sans-serif;color:#ffe9a0;
+    letter-spacing:.1em;text-shadow:2px 2px 0 #0a1a4a}
+  .vs-full:empty{display:none}
   .vs-home{display:flex;align-items:center;gap:8px;margin-top:6px;
     font:700 clamp(15px,2vw,24px)/1 "Titillium Web",sans-serif;color:#fff;letter-spacing:.08em;
     text-shadow:2px 2px 0 #0a1a4a}
@@ -469,7 +474,7 @@
   @media(max-width:760px) and (orientation:portrait){
     .vs{gap:8px;padding:8px 12px max(10px,env(safe-area-inset-bottom));
       grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr auto auto;
-      grid-template-areas:"top" "grid" "name" "." "panel" "foot";overflow-y:auto}
+      grid-template-areas:"top" "grid" "name" "stage" "panel" "foot";overflow-y:auto}
     .vs-top{margin:0 -12px;padding:6px 12px;gap:10px}
     .vs-logo{display:none}
     .vs-mode{font-size:10px}
@@ -483,7 +488,10 @@
     .vs-back,.vs-go{padding:8px 16px 8px 8px}
     .vs-back i,.vs-go i{width:26px;height:26px;font-size:14px}
   }
-  @media(max-height:640px) and (min-width:761px){.vs-blurb{display:none}.vcard span{padding:2px}}
+  @media(max-height:640px) and (min-width:761px){.vcard span{padding:2px}}
+  /* short desks: the story gives way to the kart (a locked champion's card keeps its lock text) */
+  @media(max-height:820px) and (min-width:761px){#pick:not(.vspeek) .vs-blurb{display:none}
+    .vs-panel{min-height:0;overflow-y:auto}}
   @media (prefers-reduced-motion:reduce){.vcard:hover{transform:none}}
 
   /* ── stage select: the driver screen's frame, a roster of stage cards and a big preview ── */
@@ -1088,8 +1096,12 @@ body.touch .ss-mir{min-height:44px}
    step 1: a scrolling portrait grid beside one preview (name, three bars, the ability on one line)
    step 2: the vehicle, with the kart itself left visible on the turntable */
 #pick.vsphone .vs{overflow:hidden;gap:6px 12px;padding-bottom:0;
-  grid-template-columns:minmax(0,46fr) minmax(0,54fr);grid-template-rows:auto auto minmax(0,1fr) auto;
-  grid-template-areas:"top top" "grid name" "grid panel" "foot foot"}
+  grid-template-columns:minmax(0,52fr) minmax(0,48fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;
+  grid-template-areas:"top top" "grid name" "grid stage" "grid panel" "foot foot"}
+/* the driver step shows who: name, the kart itself and the ability; the bars come with the vehicle */
+#pick.vsphone[data-step=driver] #combo,#pick.vsphone[data-step=driver] .vs-more{display:none}
+#pick.vsphone .vs-full{display:inline-block;font-size:11px}
+#pick.vsphone .vs-big{display:inline-block;margin-right:8px}
 #pick.vsphone .vs-grid{align-self:stretch;align-content:start;min-height:0;overflow-y:auto;overscroll-behavior:contain;
   touch-action:pan-y pinch-zoom;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));grid-auto-rows:max-content;gap:4px;padding:5px}
 #pick.vsphone .vcard{border-width:2px}
@@ -1115,7 +1127,9 @@ body.touch .ss-mir{min-height:44px}
 #pick.vsphone[data-step=driver] .vs-car,#pick.vsphone[data-step=driver] #paints{display:none}
 #pick.vsphone[data-step=car] .vs-grid,#pick.vsphone[data-step=car] .vs-quirk,#pick.vsphone[data-step=car] .vs-home,#pick.vsphone[data-step=car] .vs-say{display:none}
 #pick.vsphone .vs-carname small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#pick.vsphone[data-step=car] .vs{grid-template-areas:"top top" "name ." "panel ." "foot foot"}
+#pick.vsphone[data-step=car] .vs{grid-template-rows:auto auto minmax(0,1fr) auto;
+  grid-template-areas:"top top" "name stage" "panel stage" "foot foot"}
+#pick.vsphone[data-step=car] .vs-panel{align-self:end}
 #pick.vsphone .vs-foot{position:static;
   margin:0 calc(-1*max(12px,env(safe-area-inset-right,0px))) 0 calc(-1*max(12px,env(safe-area-inset-left,0px)));
   padding:8px max(12px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
@@ -1125,9 +1139,10 @@ body.touch .ss-mir{min-height:44px}
 #pick.vsphone .vs-back i,#pick.vsphone .vs-go i{width:24px;height:24px;font-size:13px}
 /* portrait: grid on top, the preview under it; the vehicle step leaves the middle to the kart */
 @media (max-width:760px) and (orientation:portrait){
-  #pick.vsphone .vs{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;
-    grid-template-areas:"top" "grid" "name" "panel" "foot"}
-  #pick.vsphone[data-step=car] .vs{grid-template-areas:"top" "." "name" "panel" "foot"}
+  #pick.vsphone .vs{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto minmax(110px,30%) auto auto;
+    grid-template-areas:"top" "grid" "name" "stage" "panel" "foot"}
+  #pick.vsphone[data-step=car] .vs{grid-template-rows:auto minmax(0,1fr) auto auto auto;
+    grid-template-areas:"top" "stage" "name" "panel" "foot"}
   #pick.vsphone .vs-grid{align-self:start;max-height:100%}
 }
 
@@ -1175,4 +1190,11 @@ body.touch .ss-mir{min-height:44px}
   .nk-ctl{flex-wrap:wrap}
   .nk-ctl .nk-w{font-size:10px;letter-spacing:.02em}
   .nk-ctl .go{flex:1 1 100%}
+}
+/* the shortest phones on their side (iPhone SE, browser bars showing): a slimmer header and name so the kart keeps room */
+@media (max-height:360px){
+  #pick.vsphone .vs-top{padding-top:2px;padding-bottom:2px}
+  #pick.vsphone .vs-title{font-size:20px}
+  #pick.vsphone .vs-big{font-size:22px}
+  #pick.vsphone .vs-panel{padding:6px 10px}
 }
