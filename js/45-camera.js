@@ -1,6 +1,14 @@
 "use strict";
 /* ───────── camera ───────── */
 let camMode=0,shake=0,camInit=false;
+/* shake is trauma: events add to it (capped at 1), the camera moves by trauma squared, so a bump barely
+   stirs it and a rocket hit snaps hard. The motion is smooth noise (three detuned sines per axis) plus a
+   little roll, not a fresh random offset every frame. */
+const SHAKE_DECAY=1.6,SHAKE_MOVE=.6,SHAKE_ROLL=.07;
+let shakeT=0,fovKick=0,camFov=camera.fov;
+function wobble(t,s){return Math.sin(t+s)*.5+Math.sin(t*2.31+s*1.7)*.3+Math.sin(t*4.13+s*2.9)*.2;}
+/** a quick widening of the view that springs back in about 0.2 s: the turbo's punch */
+function kickFov(deg){fovKick=Math.min(10,fovKick+deg);}
 /* ───────── spegelvänd: the whole scene is drawn mirrored ─────────
    The GDD planned to negate x at load. The scenery is placed by hand in world
    coordinates, so instead the sim runs unchanged and only the picture flips: the scene
@@ -40,7 +48,7 @@ function updateCamera(dt){
     else{camera.position.set(player.x+cx*d,player.y+PEDESTAL+d*.22,player.z+cz*d);
       camAim.set(player.x,player.y+PEDESTAL+1.2,player.z);}
     camera.lookAt(camAim);
-    camera.fov=40;camera.updateProjectionMatrix();
+    camFov=camera.fov=40;camera.updateProjectionMatrix();
     if(slot){const e=camera.projectionMatrix.elements;e[8]=-slot.x;e[9]=-slot.y;}   /* lens shift: the kart lands mid-slot */
     return;
   }
@@ -49,7 +57,7 @@ function updateCamera(dt){
     camera.position.set(player.x+Math.sin(a)*12,player.y+4.8+Math.sin(clock*.6)*.5,player.z+Math.cos(a)*12);
     camAim.set(player.x,player.y+1.3,player.z);
     camera.lookAt(camAim);
-    camera.fov=lerp(camera.fov,58,0.08);camera.updateProjectionMatrix();
+    camFov=camera.fov=lerp(camFov,58,0.08);camera.updateProjectionMatrix();
     return;
   }
   let dist,hgt,ahead;
@@ -63,17 +71,23 @@ function updateCamera(dt){
   camPos.lerp(wantV,clamp(kk*(camMode===1?1.8:1),0,1));
   camAim.lerp(wantV.set(player.x+Fx*ahead,player.y+1.5,player.z+Fz*ahead),clamp(kk*1.5,0,1));
   camera.position.copy(camPos);
+  shakeT+=dt;
+  let roll=0;
   if(shake>0){
-    shake=Math.max(0,shake-dt*2.2);
-    const s=shake*0.45;
-    camera.position.x+=rand(-s,s);camera.position.y+=rand(-s,s);camera.position.z+=rand(-s,s);
+    shake=Math.max(0,shake-dt*SHAKE_DECAY);
+    const s=shake*shake*SHAKE_MOVE,t=shakeT*30;
+    camera.position.x+=s*wobble(t,1);camera.position.y+=s*wobble(t,2);camera.position.z+=s*wobble(t,3);
+    roll=shake*shake*SHAKE_ROLL*wobble(t,4);
   }
   if(!player.onRoad&&player.speed>10){
-    camera.position.x+=rand(-.09,.09);camera.position.y+=rand(-.09,.09);
+    camera.position.x+=.09*wobble(shakeT*45,5);camera.position.y+=.09*wobble(shakeT*45,6);
   }
-  if(player.sfx==='cobble'&&player.speed>10)camera.position.y+=rand(-.05,.05);   /* cobble shake */
+  if(player.sfx==='cobble'&&player.speed>10)camera.position.y+=.05*wobble(shakeT*60,7);   /* cobble shake */
   camera.lookAt(camAim);
-  camera.fov=lerp(camera.fov,(camMode===1?66:60)+clamp(player.speed/player.maxSpeed,0,1.2)*13+(player.boost>0?(player.boostLvl>=3?10:7):0),
+  if(roll)camera.rotateZ(roll);
+  camFov=lerp(camFov,(camMode===1?66:60)+clamp(player.speed/player.maxSpeed,0,1.2)*13+(player.boost>0?(player.boostLvl>=3?10:7):0),
     1-Math.pow(0.01,dt));
+  fovKick=fovKick<.01?0:fovKick*Math.exp(-dt/.2);
+  camera.fov=camFov+fovKick;
   camera.updateProjectionMatrix();
 }

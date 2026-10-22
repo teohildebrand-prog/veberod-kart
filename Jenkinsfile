@@ -110,6 +110,11 @@ pipeline {
         sh 'python3 tools/race_flow_test.py'
       }
     }
+    stage('Feel test') {
+      steps {
+        sh 'python3 tools/feel_test.py'
+      }
+    }
   }
   post {
     always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }
