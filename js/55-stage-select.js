@@ -169,7 +169,7 @@ const fmtOr=t=>t!=null&&isFinite(t)?fmt(t):'—';
 function ssInfoRows(S){
   const m=ssMode(),rows=[],mir=m!=='tt'&&m!=='cup'&&mirrorSel&&!!SAVE.unlock['mirror_'+S.id];
   if(m==='cup'&&SS.cup.sig)rows.push(['SIGNATURLÄGE','Bara signaturföremål i lådorna, hela cupen']);
-  if(S.bonus)rows.push(['BONUSBANA',S.bonusNote||'Ingen cup. Eget föremål i lådorna'+(SIGS.extraallt&&SIGS.extraallt.event===S.id?': Extra Allt':'')]);
+  if(S.bonus)rows.push(['BONUSBANA',S.bonusNote||'Ingen cup.'+(Object.keys(SIGS).some(id=>SIGS[id].event===S.id)?' Bara banans egna föremål i lådorna.':'')]);
   if(m==='race'||m==='cup')rows.push(['VARV',String(S.laps||3)]);
   if(m==='tt')rows.push(['VARV','1 + 3 flygande']);
   const known=knownRoutes(S);

@@ -144,8 +144,8 @@ def main():
         # Stämpla in: an item stamps a card and pushes him; one that comes straight back does not
         st = ev("""()=>{T_mine();T_put(player,player.si,0,25);player.boost=0;
             giveItem(player,'pie',1);player.roll=0;useItem(player);updateStamp();const pie=player.boost;
-            player.boost=0;T_use('extraallt');updateStamp();const r={pie,back:player.boost,held:player.held};
-            player.held=null;player.heldSig=null;return r}""")
+            player.boost=0;T_use('torn');updateStamp();const r={pie,back:player.boost,held:player.held};
+            player.held=null;player.heldSig=null;clearMenu();return r}""")
         check(st['pie'] >= 0.4 and st['back'] == 0 and st['held'] == 'sig',
               f'Stämpla in: a push after each item, none when it comes back {st}')
         ev("()=>{player.held=null;honk();}")

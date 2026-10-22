@@ -16,10 +16,10 @@ from smoke_test import serve
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# 4000 box rolls for the player: the families that come out, and how many were Extra Allt on Sibylla
+# 4000 box rolls for the player: the families that come out, and how many were the track's own items on Sibylla
 ROLLS = """(where)=>{const was=stage;if(where)stage=STAGES.find(S=>S.id===where);
   const fam={};let extra=0;
-  for(let i=0;i<4000;i++){const r=rollItem(player);fam[r[0]]=(fam[r[0]]||0)+1;if(r[2]==='extraallt')extra++;}
+  for(let i=0;i<4000;i++){const r=rollItem(player);fam[r[0]]=(fam[r[0]]||0)+1;if(r[2]&&SIGS[r[2]].event)extra++;}
   stage=was;return {fam,extra};}"""
 
 
@@ -75,7 +75,7 @@ def main():
         r = ev(ROLLS, None)
         check(r['fam'] == {'sig': 4000}, f'every box roll is a signature item {r}')
         r = ev(ROLLS, 'sibylla')
-        check(set(r['fam']) == {'sig'} and 600 < r['extra'] < 1200, f'Sibylla still gives its Extra Allt {r}')
+        check(r['fam'] == {'sig': 4000} and r['extra'] == 4000, f'Sibylla still gives only its own menu {r}')
         reel = ev("""()=>{giveItem(player,'sig',1,'arne');const f=new Set();
             for(let i=0;i<=200;i++){player.roll=ROLLT*(1-i/201);f.add(slotFrame(player).fam);}
             player.roll=0;const end=slotFrame(player);player.held=null;return {fams:[...f],end:end.sid};}""")

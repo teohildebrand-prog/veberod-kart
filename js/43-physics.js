@@ -40,7 +40,7 @@ function drive(k,dt,ctl){
   k.surf=surf?(RT?RT.S[i]:ms):'';
   pumpStep(k,dt,ctl,!RT&&atPumpNow(i,lat),surf);
   const dry=k.fuel<=0;
-  const thr=k.spun>0?0:(dry?ctl.throttle*0.17:ctl.throttle);   /* dry = limp, not dead */
+  const thr=k.spun>0||k.bunned>0?0:(dry?ctl.throttle*0.17:ctl.throttle);   /* dry = limp, not dead */
   if(!k.ai&&!TT&&!FREE)fuelWarn(k);
   const onRoad=Math.abs(lat)<hwR+(RT?0.8:1.3)||k.court;
   if(TT||FREE)k.fuel=TANK;                                /* nothing to manage in a time trial */
@@ -489,7 +489,8 @@ function separate(){
     if(d>2.9||d<1e-4)continue;
     dx/=d;dz/=d;
     const fa=A.frozen>0,fb=B.frozen>0;if(fa&&fb)continue;
-    let wa=2*B.mass/(A.mass+B.mass),wb=2*A.mass/(A.mass+B.mass);   /* the tractor barely moves */
+    const ma=menuMass(A),mb=menuMass(B);                            /* Burgartornet: heavier with a tower on the roof */
+    let wa=2*mb/(ma+mb),wb=2*ma/(ma+mb);   /* the tractor barely moves */
     if(fa){wa=0;wb=2;}else if(fb){wa=2;wb=0;}                        /* frozen in time: an ice block does not budge */
     const push=(2.9-d)*0.5;
     A.x-=dx*push*wa;A.z-=dz*push*wa;B.x+=dx*push*wb;B.z+=dz*push*wb;
