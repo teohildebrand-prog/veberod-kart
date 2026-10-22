@@ -10,7 +10,9 @@ The test fails when a kart never gets onto the shortcut, needs Arne's tractor, m
 gate, or the shortcut is not quicker on average across the five AI karts.
 
 Closed passages are also fired at with each of the three forward-attack levels
-(Spettekaka, Spettigare kaka, Semmelväggen), each of which must open them.
+(Spettekaka, Spettigare kaka, Semmelväggen), each of which must open them, and with every
+signature item that opens passages (SIG_OPENS in js/40-genvagar.js): an 'ahead' or 'shot' item
+from well before the fork, a 'near' or 'own' one from beside the mouth.
 
 The sim runs the same way mirrored (only the picture flips), so a mirrored race is
 started and checked once per stage for the same results.
@@ -85,6 +87,29 @@ ATTACK = """([routeId, lvl]) => {
   return {open: !!R.open, t};
 }"""
 
+# the same with one signature item; answers the ids that left it shut
+SIG_ATTACK = """(routeId) => {
+  const R = ALTS.find(r => r.id === routeId), B = BLOCKERS.find(b => b.R === R), shut = [];
+  for (const id of Object.keys(SIG_OPENS)) {
+    if (!SIGS[id]) continue;
+    resetRace(); state = 'race';
+    const k = player;
+    for (const o of karts) o.parked = o !== k;
+    shutPassages(null);
+    const close = SIG_OPENS[id] === 'near' || SIG_OPENS[id] === 'own';
+    const s0 = close ? ((Math.round(B.mi) - 2) % N + N) % N : ((R.a - 40) % N + N) % N, lat = close ? clamp(B.lat * .6, -HW, HW) : 0;
+    k.x = sx[s0] + rx[s0] * lat; k.z = sz[s0] + rz[s0] * lat; k.si = s0; k.mi = s0; k.yaw = Math.atan2(fx[s0], fz[s0]);
+    k.y = groundAt(k.x, k.z, s0); k.vx = k.vz = 0; k.speed = 0; k.lat = lat; k.rib = 0; k.air = false;
+    giveItem(k, 'sig', 1, id); k.roll = 0;
+    useItem(k);
+    let t = 0;
+    while (t < 6 && !R.open) { updateRockets(FIXED); t += FIXED; clock += FIXED; }
+    if (!R.open) shut.push(id);
+  }
+  resetRace();
+  return shut;
+}"""
+
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
@@ -152,6 +177,10 @@ def main():
                               f"{'opens in %.2f s' % a['t'] if a['open'] else 'STAYS SHUT'}")
                         if not a['open']:
                             failures.append(f"{sid}/{R['id']}: forward attack level {lvl} did not open it")
+                    shut = page.evaluate(SIG_ATTACK, R['id'])
+                    print(f"{'':10s} {'':10s} signature items: {'all open it' if not shut else 'SHUT by ' + ', '.join(shut)}")
+                    if shut:
+                        failures.append(f"{sid}/{R['id']}: signature items did not open it: {shut}")
             page.evaluate('setMirror(false)')
         browser.close()
     httpd.shutdown()

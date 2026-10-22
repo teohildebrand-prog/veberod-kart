@@ -400,3 +400,10 @@ Teo: "The special item on the burger track is boring and weird." Extra Allt was 
   A shield, Anders' bucket and Björn's bike block them as usual. The AI uses each in its own spot.
 - `tools/sibylla_meny_test.py` (new, in Jenkins): box odds and roulette, each item's effect, the AI, the Burgarbus and its bell, the clean-up.
 
+
+## Signature items open shortcuts (2026-10-22)
+Teo: "Most of the powerups should be able to open the shortcut", and the same for the other signature items. Until now only Spettekaka, Spettigare kaka and Semmelväggen opened a closed passage, and Sibylla's boxes no longer hand those out, so PERSONALVÄGEN could never open there.
+- `SIG_OPENS` in js/40-genvagar.js: 19 of the 28 signature items open closed passages. 'ahead' (Bogserlinan, Visa körkortet!, Kreatursöverfarten, Kompisarna, Tifot, Sju lass svin, Skyfallet, Containern, Stormfloden, Bråk och tråk) opens the next closed mouth within 90 samples up the road after the time the effect takes to travel there at 60 m/s; 'near' (Tidtagningsrättelse, BUUU!, Läskpåfyllning, Tunnbrödsrullen, Burgartornet) opens any within 22 m; 'shot' (Cementblandaren, Moskanonen, Korv med bröd) flies into the mouth like a Spettekaka; Raket-Rune's sonic boom opens one within 22 m. The burp, the rolling wrap and the tower rolling back down the road also open what they pass. Left out: Cykla mer!, Färdplanen, Gödselspridaren, Garnnystanet, Slussporten, Dyket, Räkmackan, Offside, Nummer 47!. A switch-only passage still ignores them.
+- The target ring over the next closed mouth shows while the player holds any opener; bots use an opener when a closed mouth is in its reach (`sigOpensHere`).
+- Moskanonen and Korv med bröd fly faster (60 / 62 m/s at least), so they catch karts at full speed.
+- `tools/shortcut_test.py` fires every opener at every closed passage on every stage.

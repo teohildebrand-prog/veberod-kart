@@ -603,7 +603,7 @@ function updateSigs(dt){
     }else k.onPlan=false;
     if(k.planG)drawPlan(k);
   }
-  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);updateMenu(dt);updateMixers(dt);updateStamp();updateTackles(dt);updateBoss(dt);
+  updateHerds(dt);updateSvin(dt);updateMuck(dt);updateYarns(dt);updateWest(dt);updateMenu(dt);updateMixers(dt);updateBreaches(dt);updateStamp();updateTackles(dt);updateBoss(dt);
   for(let n=rings.length-1;n>=0;n--){
     const r=rings[n];r.t+=dt;
     if(r.t>.5){scene.remove(r.m);rings.splice(n,1);continue;}

@@ -81,12 +81,55 @@ const aimMark=(function(){
   g.visible=false;scene.add(g);return g;
 })();
 function aimAtMouth(){
-  const armed=state==='race'&&player.held==='rocket'&&!(player.roll>0)&&!player.rib;
+  const armed=state==='race'&&(player.held==='rocket'||player.held==='sig'&&!!SIGS[player.heldSig].opens)&&!(player.roll>0)&&!player.rib;
   const [B]=armed?mouthAhead(player.mi,120):[null];
   aimMark.visible=!!B;
   if(!B)return;
   aimMark.position.set(B.x,B.top+2.6+Math.sin(clock*5)*.35,B.z);
   aimMark.rotation.y=clock*2.5;
+}
+/* Signature items open passages too (Teo, 2026-10-22: most of them should). How each one does it:
+   'ahead' opens the next closed mouth up the road within OPEN.reach a moment after it is used, as
+   the rope, the cows, the mates, the container or the wave get there; 'near' opens any closed
+   mouth within OPEN.r of the kart; 'shot' flies into the mouth like a Spettekaka (its own update
+   steers it); 'own' opens it at its own moment (Raket-Rune's sonic boom). Items not listed
+   (the bike, the map, the muck and the yarn behind, the lock gate, the dive, the gull, the yellow
+   card, the order number) leave passages alone. A switch-only passage ignores them all. */
+const SIG_OPENS={arne:'ahead',billy:'ahead',cow:'ahead',mehmet:'ahead',teo:'ahead',carl:'ahead',
+  regnmolnet:'ahead',hamnkranen:'ahead',viking:'ahead',bodil:'ahead',
+  victor:'near',spoket:'near',lask:'near',rulle:'near',torn:'near',
+  rune:'own',weiron:'shot',mos:'shot',korv:'shot'};
+const OPEN={reach:90,speed:60,r:22};        /* samples up the road; m/s the 'ahead' effect travels; metres round the kart */
+const breaches=[];
+/** the closed mouths within r metres of k */
+function mouthsNear(k,r){
+  if(k.rib)return [];
+  return BLOCKERS.filter(B=>!B.R.open&&!B.R.noRocket&&Math.hypot(k.x-B.x,k.z-B.z)<r);
+}
+/** what a signature item does to passages when k uses it (called from USE.sig) */
+function sigBreach(k,id){
+  const how=SIGS[id]&&SIGS[id].opens;
+  if(!how||k.rib)return;
+  if(how==='near')for(const B of mouthsNear(k,OPEN.r))openPassage(B,k);
+  else if(how==='ahead'){
+    const [B,d]=mouthAhead(k.mi,OPEN.reach);
+    if(B&&!breaches.some(b=>b.B===B))breaches.push({B,k,t:Math.max(.25,d*SEG/OPEN.speed)});
+  }
+}
+function updateBreaches(dt){
+  for(let n=breaches.length-1;n>=0;n--){
+    const b=breaches[n];b.t-=dt;
+    if(b.t>0)continue;
+    if(!b.k.parked)openPassage(b.B,b.k);
+    breaches.splice(n,1);
+  }
+}
+/** would the AI's held signature item open a passage from here? */
+function sigOpensHere(k){
+  const how=k.held==='sig'&&SIGS[k.heldSig]&&SIGS[k.heldSig].opens;
+  if(!how||k.rib)return false;
+  if(how==='near')return mouthsNear(k,OPEN.r*.8).length>0;
+  return !!mouthAhead(k.mi,how==='shot'?40:OPEN.reach*.6,how==='shot'?k:null)[0];
 }
 /** karts on the main road bump off a closed boulder */
 function bumpBlockers(k){
@@ -102,8 +145,9 @@ function bumpBlockers(k){
     if(k===player&&Math.abs(vn)>8)shake=Math.min(1,shake+.5);
   }
 }
+for(const id in SIG_OPENS)if(SIGS[id])SIGS[id].opens=SIG_OPENS[id];
 function buildAltWorld(){
-  BLOCKERS=[];
+  BLOCKERS=[];breaches.length=0;
   if(!ALTS.length)return;
   const wood=psMat({color:0x6b5540}),rail=psMat({color:0x8a7259});
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),

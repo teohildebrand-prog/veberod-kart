@@ -315,6 +315,7 @@ function ignite(k){
   if(d<120){const v=1-d/140;audioTone(1100,180,.12,.09*v,'square');audioTone(90,45,.6,.16*v,'sawtooth',.02);
     shake=Math.min(1,shake+clamp(.7-d*.008,.1,.7));}
   if(k===player)flash('ÖVERLJUD!');
+  for(const B of mouthsNear(k,OPEN.r))openPassage(B,k);   /* the boom blows a passage open: 40-genvagar.js */
   let hits=0;
   for(const o of karts){
     if(!sigHittable(o,k)||Math.abs(o.y-k.y)>4||Math.hypot(o.x-k.x,o.z-k.z)>RUNE.r)continue;

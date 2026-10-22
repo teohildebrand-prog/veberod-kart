@@ -290,7 +290,7 @@ function aiItemLines(){
       const lvl=itemLvl(k),h=k.held;
       /* held too long with nothing to aim at: spend it anyway, so a leader keeps picking up boxes.
          A forward shot with a closed passage up the road goes for the passage. */
-      const stale=raceTime-(k.heldAt||0)>AI_HOLD+k.roll, mouth=h==='rocket'&&!k.rib&&!!mouthAhead(k.mi,40,k)[0];
+      const stale=raceTime-(k.heldAt||0)>AI_HOLD+k.roll, mouth=!k.rib&&(h==='rocket'?!!mouthAhead(k.mi,40,k)[0]:sigOpensHere(k));   /* a signature item that opens it too: 40-genvagar.js */
       if(stale||mouth)useItem(k);
       else if(h==='boost')useItem(k);
       else if(h==='rocket'&&(lvl===2?near:ahead))useItem(k);
