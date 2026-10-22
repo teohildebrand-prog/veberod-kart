@@ -216,7 +216,7 @@ function applyCharacter(i,force){
     else if(CHARS[i].sig==='skiftsex')shiftWhistle(.6);
     else if(CHARS[i].sig==='grisorat')woof(.7);}
 }
-function peekCharacter(i){                /* hover/focus: look, don't commit */
+function peekCharacter(i){                /* a locked champion: a look and the lock text, nothing to confirm */
   if(!previewOn||previewChar===i)return;
   previewChar=i;showRig();
 }
@@ -267,10 +267,12 @@ function renderCombo(){
   host.parentNode.querySelector('#vsMore').innerHTML=more.join('');
   const peek=previewChar!=null&&previewChar!==charSel;
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-  set('vsName',c.name);set('vsHome',c.role);set('vsSay',charOpen(ci)&&c.say&&c.say.pick?'”'+c.say.pick+'”':'');set('ptag',peek?'FÖRHANDSVISNING':'');
+  set('vsName',c.name);set('vsHome',c.role);set('vsSay',charOpen(ci)&&c.say&&c.say.pick?'”'+c.say.pick+'”':'');set('ptag',peek?'LÅST':'');
   set('vsCar',R.name);set('vsRole',R.role);set('vsCarSub',R.id===c.sig?'EGET FORDON · '+R.sub:R.sub);
   set('vsQuirk',c.quirk[0]);set('vsQuirkT',c.quirk[1]);set('cblurb',charOpen(ci)?c.blurb:bossLockText(ci));
-  set('btnGoT',vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);
+  set('btnGoT',peek?'LÅST':vsTwoStep()&&vsStep==='driver'?'NÄSTA':cupSetup?'STARTA CUPEN':vsTwoStep()?'STARTA':'VÄLJ '+CHARS[charSel].short);
+  const go=document.getElementById('btnGo');if(go)go.disabled=peek;   /* never confirms a driver the panel isn't showing */
+  document.getElementById('pick').classList.toggle('vspeek',peek);
   document.querySelectorAll('#cards .vcard').forEach(el=>{const n=+el.dataset.i,open=charOpen(n);
     if(el.classList.contains('locked')===open){const im=el.querySelector('img'),was=im.src;
       if(im.dataset.sil){im.src=im.dataset.sil;im.dataset.sil=was;}}   /* silhouette and portrait trade places */

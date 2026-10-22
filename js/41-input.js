@@ -19,8 +19,8 @@ addEventListener('keydown',e=>{
     }else{
       if(k==='arrowleft'||k==='a')mv(-1);
       if(k==='arrowright'||k==='d')mv(1);
-      if(k==='arrowup'||k==='w')mv(-GRID_COLS);
-      if(k==='arrowdown'||k==='s')mv(GRID_COLS);
+      if(k==='arrowup'||k==='w')mv(-gridCols());
+      if(k==='arrowdown'||k==='s')mv(gridCols());
     }
     if(k==='q')stepCar(-1);
     if(k==='e')stepCar(1);
