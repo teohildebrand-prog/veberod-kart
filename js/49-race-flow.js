@@ -20,6 +20,7 @@ function resetRace(){
   LAPS=TT?4:FREE?1e9:(stage.laps||3);                       /* a time trial gets three flying laps */
   if(TT)recordArne(stage);
   placeOnGrid();
+  placeHomeBanners();                                      /* before setMirror, so its text is flipped back */
   setMirror(CUP?!!CUP.mirror:(!TT&&mirrorSel&&!!SAVE.unlock['mirror_'+stage.id]));
   sigMode=!TT&&(CUP?!!CUP.sig:sigModeSel);
   previewOn=false;setPause(false);

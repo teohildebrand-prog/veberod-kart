@@ -115,8 +115,13 @@ pipeline {
         sh 'python3 tools/feel_test.py'
       }
     }
+    stage('Banner test') {
+      steps {
+        sh 'python3 tools/banner_test.py'
+      }
+    }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,banner-*.png', allowEmptyArchive: true }
   }
 }
