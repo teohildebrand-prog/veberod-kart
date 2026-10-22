@@ -87,7 +87,8 @@ tools/split.py        regenerate index.html/css/js from a single-file build
 tools/join.py         build the single-file game from the repo (split.py's inverse)
 tools/stage_art.py    bake the stage picker's portraits into js/54-stage-art.js
 docs/                 design notes and build history
-Jenkinsfile           CI: runs the audio, cup schedule, shortcut, signature, beans and smoke tests
+Jenkinsfile           CI: every test and audit in tools/ (the full list)
+CLAUDE.md             working rules for Claude Code
 ```
 
 The `js/` files are classic scripts, not ES modules. They share one global

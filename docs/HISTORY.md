@@ -2,6 +2,68 @@
 
 Condensed from the original claude.ai chat Teo pasted on 2026-10-17. Original published artifact: claude.ai/artifact/VGeHKhrfGGX7mnbppPbBzx
 
+The project was built in a claude.ai project (2026-10-17 to 2026-10-22, PRs #1 to #52) and continues in Claude Code from this repo. This file is the memory of that project: the next three sections are the rules, the open work and the reference docs as of 2026-10-22; after that comes the build history, oldest first. Working rules for code (layout, tests, Jenkins) are in [CLAUDE.md](../CLAUDE.md).
+
+## Teo's rules (standing, don't re-ask)
+Brands, people and sources
+- No real brands or trademarks: STATOLJA instead of Statoil, cars named after towns (Trollhättan 96, Torslanda 240, Ängelholm CC), no real shop signs or street names. Two personal exceptions Teo chose himself: the GAIS scarf on Teo's signature item (TIFOT) and the real Sibylla name and sign on the Sibylla bonus track. Don't extend them to anything else without asking.
+- Original character designs only. Don't copy existing designed characters (a trading-card police character was declined).
+- LEGO Racers (github.com/isledecomp/racers) is an idea reference: take ideas, never code, data or assets.
+- Easter eggs with real people, always stylized, never photos in the game: Teo and Amanda (Teo's partner) replaced Roger and Linnéa, drawn from Teo's photos; Victor is Teo's friend (player-only driver); Grisabonden Carl is Teo's friend Calle; Bodil is Teo's cocker spaniel; Bodils promenad is modelled on Teo and Amanda's real block, with no street names or real signs.
+- Mehmet's humour comes from his teen swagger, never from his ethnicity.
+
+Language and look
+- Everything a player reads is Swedish: menus, signs, stage tags, barks, item names, postcards, and the longer texts too (GDD decision 2026-10-18). Code, comments, commits and docs are English.
+- In-world signs use the pixel font (Press Start 2P); menus use the Titillium Web glass UI. One yellow main action per menu (`.go`; `.go.sec` is the dark blue secondary).
+
+Game rules
+- Points stay 10-7-5-3-2-1 (countback on ties).
+- A cup has at most four rounds ("otherwise it's too much"). A new track that doesn't fit an existing cup gets a new cup, not a fifth round. Finalen unlocks from the three Skåne championships only (`FINAL_CUPS`).
+- Any driver can drive any vehicle, and any driver can get any signature item from a box (25 % of box rolls, the driver's own at double weight).
+- Every item, signature items included, fires and is spent even with nobody to hit. Knockbacks push sideways, never forward.
+- Rubber band: strong elastic on the bots, a small pull for the player (PR #45). Teo turned down leader mistakes, item luck by place and a visible slingshot.
+- Loops (Åhus) are scenery only: the physics is a heightfield, one ground height per x,z.
+- Phones: the race blocks zoom and scroll, menus must keep both. Teo tests on a real iPhone (about 393x660 portrait, 750x340 landscape in Safari), so check those sizes.
+
+How work is done
+- One change per PR; Teo reviews and merges. Each PR adds its section to this file in the same PR.
+- Only one session edits game code at a time; the others wait. Docs-only work can run alongside.
+- For anything with a design choice, brainstorm a few options and let Teo pick; write down which were his picks and which were Claude's defaults.
+- Teo's tool preferences: Python, bash, Jenkins, git.
+
+## Roadmap and open items (2026-10-22)
+Roadmap (Teo, 2026-10-18): 1) cup schedules, DONE (PR #20); 2) Lund shortcuts and stamps, DONE (#21); 3) signature-item prototype, DONE (#32); 4) the remaining shortcuts and stamps, DONE (Bron #23, Åhus #25, Tollarp #27); 5) a signature item for every driver, DONE (#33, #34, then #35 to #46 for the new drivers and champions); 6) completion rewards and track personality: NEXT, not started.
+
+Found and offered, waiting for Teo's go
+- Bots run out of petrol in full races with the player on track (Karlskrona and Raket-Runes runda 3 to 12 s a race). `tools/fuel_audit.py` parks the player, so it doesn't see it.
+- Amanda's bot leaves the road on tight bends of the twisty west and bonus tracks (Avenyn, Ullevi, Lerum, the promenad) and can trail by 10 s or more.
+- Championship select redesign: the last item on Teo's phone-menu list, never scheduled.
+- Gröna gubben från skogen is the only champion without a signature item (TRAKTORSTRÅLEN was suggested; Teo hasn't been asked).
+- Older shortcuts measure slower for the AI than the main road: Rapsfältet -0.15 s, Korvkiosken -2.65, Svinstigen -3.91, Skeppet -0.79, Stenraden -1.03. Reported, not fixed.
+
+Claude's defaults Teo hasn't confirmed (he may change them)
+- Bodil's quirk GODISNOSEN, her teal colour and bracketed lines; Weiron's quirk STÄMPLA IN.
+- The Västgöta split into two cups of three; Regnmolnet's ALLTID BLÖTT and Hamnkranen's TUNGLAST quirks; the four west non-boss drivers' items (Slussporten, Dyket, Räkmackan, Offside).
+- Signaturläge doesn't keep single-race records apart.
+- Roger, Linnéa (now Teo and Amanda) and Britta being playable from the start.
+
+Ideas parked for later
+- Sibylla: a short Extra Allt cup, a kids' meal carton toy.
+- Blanket paints per track, Gyllene Picknickpasset, a retire option in cup races (scores 0), a route-assist minimap setting, a camera-shake slider.
+- Championship tuning from playtests: champion speeds, unlock order, whether the mirror tier also reverses the direction.
+- From the first character sheet: item looks as drawn there, Anders recovering himself.
+
+The GDD lags behind the game: it was updated through PR #46 and still lists the first three signature ideas from before #32, shows Signaturläge as in progress, and has nothing on Sibyllas meny (#51) or signature items opening shortcuts (#52).
+
+## Reference docs
+- Game design document, the master doc going forward (28 tracks, drivers, vehicles, items, roadmap): https://claude.ai/code/artifact/ce4fc56d-f8f8-467f-9ef4-34b29cdd8124
+- GDD v2 (shortcuts, Skånecupen, picnic stamps; release 1): https://claude.ai/code/artifact/b1d72590-d7d1-4f32-8072-428974ec1551
+- GDD v1, superseded: https://claude.ai/code/artifact/47380973-afd4-4c57-b182-aa42ddc04032
+- Character summary (2026-10-18): https://claude.ai/code/artifact/7fd56e1d-e361-45cf-a79d-98940c5c244b
+- Original creation chat: https://claude.ai/share/9b6c9cbf-31c6-423d-b50e-554d7c424cd5
+- Play on a phone: https://teohildebrand-prog.github.io/veberod-kart/ (GitHub Pages from `main`)
+- Design sheets, mockups and screenshots stayed in the claude.ai project's files (design/, maps/), not in this repo.
+
 ## Build order
 1. "Kart Rush": Three.js kart racer, Catmull-Rom track (720 samples), drift physics, 5 AI, fixed 120 Hz step.
 2. PS1 look (vertex snap, affine textures, 15-bit + Bayer dither, ~320x240, CRT pass) and southern Swedish countryside.
@@ -23,7 +85,7 @@ Condensed from the original claude.ai chat Teo pasted on 2026-10-17. Original pu
 18. (This project, 2026-10-17) The GDD's LEGO Racers ideas (6 adopted + sugar cubes, time trial, rival's paint) and two new tracks, Glimmingehus and Ales stenar. Details below.
 19. (This project, 2026-10-17) Debug menu (F1/§/`) and SANDLÅDA free roam. Details below.
 
-## Decisions to keep
+## Decisions to keep (2026-10-17; the full list is under Teo's rules above)
 - No real trademarks: STATOLJA instead of Statoil; cars named after towns (Saab -> Trollhättan 96, Volvo -> Torslanda 240, Koenigsegg -> Ängelholm CC).
 - Don't copy existing designed characters (a trading-card police character was declined); build original designs.
 - Loops on Åhus are scenery only: physics is a heightfield (one ground height per x,z), so inverted loops would need a track-relative car model.
@@ -74,7 +136,7 @@ Design sheet: /mnt/project-files/design/new-characters.md, concept art: /mnt/pro
 - Debug menu: F1, § or `, or DEBUG in the pause sheet. Glass panel over the running game (does not pause). Track, driver, car (own vehicles stay with their driver; locked during a cup), light presets BANANS/DAG/KVÄLL/NATT/DIMMA (no real weather exists, so presets borrow Veberöd/Bron/Glimminge sky, fog and light), teleport to the 8 checkpoints (gate counts as passed so laps still add up), GUDALÄGE (blockHit returns true for the player), infinite fuel, infinite items (refills the last item), give any item / 3 sugar cubes / turbo, SISTA VARVET, AI SOM VANLIGT/KÖR/FRYST/BORTA, FPS and physics readouts, time scale 0.25-3x (scales dt before the fixed step). State lives in DBG, nothing saved; light and AI mode survive restarts via dbgOnReset() in resetRace.
 - SANDLÅDA: main-menu button, flag FREE (like TT). AI parked, LAPS=1e9 (HUD shows /∞), full tank, 0.6 s countdown, clock and position boards hidden (body.free), lap time toast on each line crossing. Stamps still collectable under their normal rules.
 
-## Deferred ideas
+## Deferred ideas (2026-10-17; the shortcuts and stamps are done, the rest is under Roadmap above)
 - The other 7 shortcuts and stamps on the original five tracks (GDD build step 7), one track at a time.
 - Blanket paints per track, Gyllene Picknickpasset (21 stamps now).
 - Retire option in a cup race (scores 0), route-assist minimap setting, camera-shake slider, auto-accelerate.
@@ -368,6 +430,15 @@ Teo's spec: Bodil's own bonus track, "Tre varv. Fyrtiosju intressanta lukter.", 
 - Picnic stamps: Hundkex by the sign at Porten, Morotsbit behind the shrub, Vattenskål in the tunnel. Her passport page is a dog's (`album:'dog'` on the stage, paw prints, "BODILS SIDA"). Postcard: Bodil asleep upside down on the sofa, the trophy beside her, Teo and Amanda quietly tidying the racing gear. "En väldigt jobbig dag."
 - `tools/promenad_test.py` (new, in Jenkins): the stage, card and note, the launcher's warning and clear side, the wet patch, the TV once a lap, Bodil's ears and head, the nap with the trophy, the dog page. The promenad is in `tools/vastgota_test.py` and `tools/shortcut_test.py`.
 
+## Petrol that rewards planning (2026-10-21, PR #44)
+Teo asked for a "very balanced" petrol system. Measured first, then tuned per stage.
+- `FUEL_MUL[stage.id]` in js/38-statolja.js, fixed per stage (never by place, fuel or vehicle): a neutral driver in a GOKART burns about 37.5 a lap on three-lap stages, the same race total on two-lap ones, so one stop is the normal plan. Thrifty pairs (Amanda in her L61) can skip it; thirsty ones (Raket-Rune with Överljud) need one or two.
+- Pumps fill at 25/s, only on the forecourt and below walking pace (12 m/s); partial fills, a painted pump lane, guide strips and a STATOLJA sign ahead. One-shot LÅG BENSIN / TANKA SNART! / SOPPA-TORSK! warnings, a station cue on approach, a fill animation on the gauge.
+- The AI plans to the next usable station with a reserve, learns its real cost per sample, commits early, skips lanes that would strand it and fills only what the finish needs. Rough surfaces no longer charge fuel on top of the slowdown.
+- Stations moved off shortcut merges on Veberöd, Åhus and Romeleåsen; a station must not sit on a fork or merge.
+- Time trial uses no fuel; the sandbox has a full tank.
+- `tools/fuel_audit.py` (new, Jenkins stage "Fuel audit"): every stage. A new track needs a `FUEL_MUL` entry: `python3 tools/fuel_audit.py <id> --calibrate`, then the audit. It runs at most two browsers; run other tests on their own while it runs, or they time out.
+
 ## A much stronger rubber band (2026-10-21)
 Teo: "There should be way more rubber-banding." From a short brainstorm he picked two of five ideas: a much stronger elastic on the bots, and a small pull for the player when the leader gets away (not item luck by place, not a visible slingshot).
 - Measured first, with a new headless audit (`tools/band_audit.py`): the old band (nothing inside 2.5 s, at most +5 % / -4 %, 10 s to build) barely changed a race, and its +5 % sat mostly on top speed while karts spend most of a lap cornering under it. Over 28 tracks with the player's kart on the AI's hands at four skill levels, the field crossed the line about 24 s apart with or without it.
@@ -378,6 +449,26 @@ Teo: "There should be way more rubber-banding." From a short brainstorm he picke
 - Found, not changed here: in a full race with the player on track, bots run dry on many stages even on the old band (Karlskrona and Raket-Runes runda 3 to 12 s a race); `tools/fuel_audit.py` races its field with the player parked, so it does not see it.
 - Left as it was: one bot can still trail by 10 s or more on a few twisty west and bonus tracks (Avenyn, Ullevi, Lerum, the promenad), mostly Amanda's (her far look on tight bends puts her off the road, catch-up on or off).
 - `tools/band_audit.py` (new, in Jenkins on six tracks): the gates above. `tools/targetless_test.py` checks the new caps and the player's pull; `tools/weiron_test.py` checks the cement's own speed hold, not a bot's other boosts.
+
+## The champions' signature items (2026-10-21, PR #46)
+Teo picked one move for each original Skåne champion.
+- Spöket på Glimmingehus, BUUU!: a sheet ghost rises beside the kart and howls; every kart within 20 m hops, slows and swerves sideways away.
+- Vikingahövdingen, STORMFLODEN: a wave rolls up from behind, washing aside karts in its path, then carries the user for 3.4 s (faster, more grip) and sweeps away anyone just in front. (Teo wrote "3 STORMFLODEN" when option 3 was Katapulten; the name was taken as the pick.)
+- Raket-Rune, 3-2-1 ÖVERLJUD!: Teo combined two ideas, a countdown and a sonic boom: 1.5 s crawling, then the biggest boost in the game (2.6 s) and a shockwave that throws karts within 18 m off their line. The AI only counts down with a straight ahead.
+- js/37-boss-items.js (BOO, FLOOD, RUNE; `SIG_ALIAS` ghost -> spoket). In every box like the other signature items, spent with nobody to hit. Gröna gubben still has none.
+- `tools/boss_items_test.py` (new, in Jenkins).
+
+## Signaturläge (2026-10-21, PR #47)
+Teo: a "Signature mode" toggle per race and per cup, for chaos.
+- SIGNATURLÄGE button in the stage picker beside the mirror toggle (G key, pad Y; `sigModeSel`), and a tab in cup setup that holds for the whole cup (`cupSigSel`, saved as `SAVE.cup.sig`). The live flag is `sigMode`, set in resetRace (js/37-signature-items.js).
+- With it on, every box and loose Spettekaka gives a signature item (`pickSig()`, own driver's at double weight) to bots too, and the roulette spins only signature items. Never in a time trial. Roadside milk and äggakaka are untouched. Sibylla's own items win there (see Sibyllas meny).
+- Single-race records are not kept apart for this mode (Claude's choice).
+- `tools/sigmode_test.py` (new, in Jenkins).
+
+## Vykort for every track (2026-10-21, PR #48)
+Teo: every track needs a postcard, the reward for finding all three picnic stamps on it.
+- js/36-vykort.js: the 20 missing postcards in `VYKORT` (by stage id, drawn with the `pcKit` helpers). The west tracks, Sibylla and the promenad draw their own in their stage files (`postcard:{draw,caption}`). Teo approved all 20 drafts as they were.
+- A new track needs a postcard, in its STAGES entry or in `VYKORT`.
 
 ## Race flow and UI usability (2026-10-22)
 Teo's change request, from player feedback and screenshots: four items.
