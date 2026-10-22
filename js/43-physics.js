@@ -89,6 +89,8 @@ function drive(k,dt,ctl){
         k.boost=big?(perfect?1.95:1.5):0.95;
         for(let p=0;p<10;p++)puff(k.x+rand(-1,1),k.y+.5,k.z+rand(-1,1),
           big?1:.42, big?.70:.76, big?.18:.95, .5);
+        bodyKick(k,big?-.13:-.07,0,0);                   /* the nose kicks up as the boost bites */
+        if(k===player)kickFov(perfect?6:(big?5:3));
         if(k===player&&perfect){perfekt();ping(520,1500,.2);}
         else if(k===player){toast(big?'TURBO!':'FART!');ping(big?520:620,big?1200:900,.17);}
       }
@@ -136,7 +138,10 @@ function drive(k,dt,ctl){
     const vl=k.vx*T.RX[j]+k.vz*T.RZ[j],vf=k.vx*T.FX[j]+k.vz*T.FZ[j];
     /* a real hit costs speed; leaning on the fence just slides you along it */
     const keep=Math.abs(vl)>3?0.72:0.995;
-    if(keep<1)k.clean=false;                         /* a knock spoils a clean drift */
+    if(keep<1){k.clean=false;                        /* a knock spoils a clean drift */
+      if(raceTime-(k.wallAt??-9)>.3)                 /* the body rolls on into the fence, then rights itself; once per knock, not per grinding step */
+        bodyKick(k,0,clamp(-vl*(T.RX[j]*Rx+T.RZ[j]*Rz)*.012,-.16,.16),clamp(Math.abs(vl)*.003,0,.05));
+      k.wallAt=raceTime;}
     k.vx=T.FX[j]*vf*keep-T.RX[j]*vl*0.25;k.vz=T.FZ[j]*vf*keep-T.RZ[j]*vl*0.25;
     if(!k.ai&&Math.abs(vl)>9)shake=Math.min(1,shake+0.5);
     /* pinned nose-first at walking pace: the fence turns you along itself */
@@ -162,6 +167,7 @@ function drive(k,dt,ctl){
         k.boost=Math.max(k.boost,.85);
         if(k===player){if(!k.jumpSaid)toast('SNYGGT HOPP!');ping(420,900,.12);}
       }
+      bodyKick(k,0,0,clamp(-k.vy*.006,.04,.16));        /* squash on the springs */
       if(k===player)shake=Math.min(1,shake+clamp(-k.vy*0.035,0,.7));
     }
     k.y=gy;k.vy=0;k.air=false;k.airT=0;k.jumpSaid=false;
