@@ -430,8 +430,9 @@ function aiControl(k){
   /* a stage with long samples can shorten the aim (stage.aiLook), or the AI chords its bends */
   const [T,t]=walkPt(k,inLane||pit?Math.round(5+k.speed*0.3):Math.round((12+k.lookAdd+k.speed*0.55)*(stage.aiLook||1)));
   /* each AI drives one of three lines this race: inside, middle or outside */
-  const L=pit?pitS.side*(HW-1.5):T===MAIN&&k.fplan>0?planLat(t):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
+  let L=pit?pitS.side*(HW-1.5):T===MAIN&&k.fplan>0?planLat(t):T===MAIN?clamp(k.line+(k.rib?0:k.itemBias)-k.lineVar*clamp(scurv[t]/0.2,-1,1)*HW*0.38,-HW+2,HW-2)
                   :clamp(k.line*0.3,-(T.hw-1),T.hw-1);
+  if(stage.aiDodge&&T===MAIN&&!pit)L=stage.aiDodge(k,t,L);   /* a track's moving obstacle: the line that stays clear of it */
   const err=wrapAng(Math.atan2(T.X[t]+T.RX[t]*L-k.x,T.Z[t]+T.RZ[t]*L-k.z)-k.yaw);
   let steer=clamp(err*(k.drift!==0?2.0:2.85),-1,1);  /* calmer hands mid-slide */
   if(k.blind>0)steer=clamp(steer+Math.sin(clock*6.5+k.idx*1.7)*0.6,-1,1);   /* Tifot: driving blind behind a scarf */

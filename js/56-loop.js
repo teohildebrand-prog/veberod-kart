@@ -30,8 +30,10 @@ function frame(now){
     const n=Math.ceil(countdown-0.6);
     if(n!==lastBeep&&n>=0&&n<=3&&!settleT){lastBeep=n;flash(n===0?'KÖR!':String(n));}
     if(countdown<=0){state='race';raceTime=0;karts.forEach(k=>k.lapStart=0);
-      const ln=(stage.id===CHARS[charSel].home&&sayLine('home'))||sayLine('start');if(ln)setTimeout(()=>{if(state==='race')toast(ln);},player.kvart?2600:900);
-      const ch=cupChamp();if(ch&&CUP.round===0)setTimeout(()=>{if(state==='race')toast(ch.name+': '+ch.say);},ln?3400:1200);}
+      const duo=duoLines();
+      const ln=duo?duo[0]:(stage.id===CHARS[charSel].home&&sayLine('home'))||sayLine('start');if(ln)setTimeout(()=>{if(state==='race')toast(ln);},player.kvart?2600:900);
+      if(duo)setTimeout(()=>{if(state==='race')toast(duo[1]);},player.kvart?5000:3300);
+      const ch=cupChamp();if(ch&&CUP.round===0)setTimeout(()=>{if(state==='race')toast(ch.name+': '+ch.say);},ln?(duo?5800:3400):1200);}
   }
   if(state==='race'&&rotateBlocked())setPause(true);   /* turned upright mid-race: stop, resume by hand */
   readInput();

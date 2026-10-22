@@ -110,8 +110,18 @@ function blockHit(k){
   }
   return false;
 }
-/** the driver's line for the moment; on their home stage, homeSay takes over where it has one */
-function sayLine(w){const c=CHARS[charSel],h=stage&&stage.id===c.home&&c.homeSay;return (h&&h[w])||(c.say&&c.say[w]);}
+/** the driver's line for the moment; a stage's own lines for this driver come first (stage.say), then
+    homeSay on their home stage, then their usual one */
+function sayLine(w){const c=CHARS[charSel],s=stage&&stage.say&&stage.say[c.id],h=stage&&stage.id===c.home&&c.homeSay;
+  return (s&&s[w])||(h&&h[w])||(c.say&&c.say[w]);}
+/** a stage's start exchange between two drivers on the grid (stage.duo): the player's line, and the
+    other driver's reply with their name, or null when the player isn't one of them or the other isn't racing */
+function duoLines(){
+  const D=stage&&stage.duo,me=CHARS[charSel].id;if(!D||!D[me])return null;
+  const other=Object.keys(D).find(id=>id!==me);
+  const o=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind===other);
+  return o?[D[me],o.name+': '+D[other]]:null;
+}
 /** the player's driver says their line for the moment, at most once per cd seconds */
 const barkAt={};
 function bark(w,cd){
@@ -126,8 +136,9 @@ function hitLine(src,fallback){
     standing still too long */
 function raceLines(dt){
   const c=CHARS[charSel];if(!c.say||state!=='race'||raceTime<3)return;
-  if(c.say.pass){
-    const t=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind===(c.rival||'teo'));
+  if(sayLine('pass')){
+    const rv=(stage.rivals&&stage.rivals[c.id])||c.rival||'teo';           /* a stage can pair drivers up */
+    const t=karts.find(k=>k!==player&&!k.parked&&k.cfg.kind===rv);
     if(t){const ahead=player.progress>t.progress;
       if(ahead&&player.teoGap<0)bark('pass',20);
       player.teoGap=ahead?1:-1;}
