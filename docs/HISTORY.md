@@ -22,6 +22,7 @@ Game rules
 - Any driver can drive any vehicle, and any driver can get any signature item from a box (25 % of box rolls, the driver's own at double weight).
 - Every item, signature items included, fires and is spent even with nobody to hit. Knockbacks push sideways, never forward.
 - Rubber band: strong elastic on the bots, a small pull for the player (PR #45). Teo turned down leader mistakes, item luck by place and a visible slingshot.
+- Difficulty stays relaxed (2026-10-22): a driver who only steers can podium on later tracks, and the late championship tracks are no harder than the first. Teo chose to keep it that way: no stronger band for championships, no faster late AI, no thirstier late fuel.
 - Loops (Åhus) are scenery only: the physics is a heightfield, one ground height per x,z.
 - Phones: the race blocks zoom and scroll, menus must keep both. Teo tests on a real iPhone (about 393x660 portrait, 750x340 landscape in Safari), so check those sizes.
 
@@ -515,3 +516,9 @@ Roadmap 6, track personality. The GDD lists four pieces: driver-reactive signs, 
 - Home stage is `home` on the driver; for drivers without one, `BANNER_HOME` counts the town in their role (Claude's default): Majros and Anders Veberöd, Björn Lund, Mehmet Rosengård, Teo Tollarp. Arne (Österlen), Billy and Britta get none. Twenty drivers have a banner.
 - Claude's defaults: the wording, the gold edge stripes, dark text on light driver colours, the two spots.
 - `tools/banner_test.py` (new, in Jenkins): all twenty drivers on their home stage, two banners each behind the fence and clear of lanes, none on another stage, the text flipped back in a mirrored race, and banner-*.png from three home stages at phone landscape size.
+
+## Design check (2026-10-22)
+Teo asked for a check of the whole design against the threejs-gameplay-systems skill (design brief, core loop, fun-factor tests). Docs only, no code.
+- Single races, 6 karts, AI and items on, a bot that only steers on full throttle (no drift, items, shortcuts or brakes): Veberöd 6/6, Avenyn 3/6, Raket-Runes runda 3/6; on Veberöd with real fuel and no stop it ran dry for only 3 s. Boxes: 30 per tested track, the first 53-70 m from the grid.
+- Passes: a decision within the first seconds (boxes), a clear objective, failure that names its cause. Partly fails: the main mechanics can be skipped on later tracks (band `PACE.ahead=0.20` plus the flat layouts found in the stage audit), the difficulty curve runs backwards (Veberöd is the hardest for a naive driver), fuel is low-stakes, rewards are cosmetic.
+- Teo's pick: leave it, a relaxed game anyone can podium in (recorded under Game rules).
