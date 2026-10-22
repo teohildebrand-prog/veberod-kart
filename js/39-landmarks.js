@@ -136,3 +136,54 @@ function landmarksVeberod(){
     }
   }
 }
+/* the home crowd's banner: on the player's driver's home stage, two roadside banners in the driver's
+   colour cheer them by name. Drivers without a home stage of their own count the town in their role. */
+const BANNER_HOME={cow:'veberod',anders:'veberod',bjorn:'lund',mehmet:'rosengard',teo:'tollarp'};
+let homeBanners=[];
+function homeOf(c){return c.home||BANNER_HOME[c.id]||null;}
+function bannerTex(text,col){
+  const w=16+text.length*8,h=14,c=new THREE.Color(col);
+  const light=c.r*.3+c.g*.59+c.b*.11>.6;
+  return pixTex(w,h,(g)=>{
+    g.fillStyle='#'+c.getHexString();g.fillRect(0,0,w,h);
+    g.fillStyle='#e8c33a';g.fillRect(0,0,w,1);g.fillRect(0,h-1,w,1);
+    g.fillStyle=light?'#1b1f2a':'#f4ecd8';g.font='8px "Press Start 2P",monospace';
+    g.textAlign='center';g.textBaseline='middle';g.fillText(text,w/2,h/2+1);
+  });
+}
+/** a roadside spot with nothing in the way: off the lanes, the forecourts and the ramps, on ground near road height,
+    and away from a banner already up */
+function bannerSpot(from,to){
+  for(let i=from;i<to;i+=4)for(const s of [1,-1]){
+    const q=((i%N)+N)%N,o=s*(HW+5),x=sx[q]+rx[q]*o,z=sz[q]+rz[q]*o;
+    if(Math.abs(meshY(x,z)-(sy[q]+o*bank[q]))>2.5)continue;
+    if(homeBanners.some(g=>Math.hypot(g.position.x-x,g.position.z-z)<120))continue;   /* the two stand apart */
+    if(stations.some(t=>Math.min(Math.abs(q-t.at),N-Math.abs(q-t.at))<t.len+20))continue;
+    if(JUMPS.some(J=>Math.min(Math.abs(q-J.at),N-Math.abs(q-J.at))<J.up+J.dn+10))continue;
+    if(ALTS.some(R=>{for(let j=0;j<R.n;j+=3)if(Math.hypot(R.X[j]-x,R.Z[j]-z)<R.hw+6)return true;return false;}))continue;
+    return {q,s,x,z};
+  }
+  return null;
+}
+function placeHomeBanners(){
+  for(const b of homeBanners)if(b.parent)b.parent.remove(b);
+  homeBanners=[];
+  const c=CHARS[charSel];
+  if(!c||homeOf(c)!==stage.id)return;
+  const tex=bannerTex('HEJA '+c.short+'!',c.color||0xc8321f);
+  const cloth=psMat({map:tex,unlit:true,side:THREE.DoubleSide}),pole=psMat({color:0x5a5f68});
+  const H=1.8,W=H*tex.image.width/tex.image.height;
+  const lead=10+Math.ceil(karts.length/2)*16+20;          /* just past the front of the grid, then half a lap on */
+  for(const [a,b] of [[lead,lead+80],[lead+N/2-60,lead+N/2+180]]){
+    const P=bannerSpot(a,b)||bannerSpot(lead+90,lead+N-40);   /* raised tracks: anywhere the ground meets the road */
+    if(!P)continue;
+    const g=new THREE.Group(),y=meshY(P.x,P.z);
+    const m=new THREE.Mesh(flat(new THREE.PlaneGeometry(W,H)),cloth);m.position.y=3.1;g.add(m);
+    for(const e of [-1,1]){const p=new THREE.Mesh(flat(new THREE.CylinderGeometry(.12,.12,4,5)),pole);
+      p.position.set(e*W/2,2,0);g.add(p);}
+    /* hung along the road behind the fence, its face turned toward the road and the karts coming up it */
+    const F=[fx[P.q],fz[P.q]],R=[rx[P.q]*-P.s,rz[P.q]*-P.s],nx=-F[0]*.6+R[0]*.8,nz=-F[1]*.6+R[1]*.8;
+    g.rotation.y=Math.atan2(nx,nz);g.position.set(P.x,y,P.z);
+    world.add(g);homeBanners.push(g);
+  }
+}
