@@ -65,6 +65,11 @@ pipeline {
         sh 'python3 tools/boss_items_test.py'
       }
     }
+    stage('Crop circles test') {
+      steps {
+        sh 'python3 tools/crop_circles_test.py'
+      }
+    }
     stage('Bodil test') {
       steps {
         sh 'python3 tools/bodil_test.py'
@@ -127,6 +132,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,banner-*.png,idalaskolan-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,crop-*.png,banner-*.png,idalaskolan-*.png', allowEmptyArchive: true }
   }
 }

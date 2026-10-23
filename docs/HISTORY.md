@@ -31,20 +31,20 @@ How work is done
 - For anything with a design choice, brainstorm a few options and let Teo pick; write down which were his picks and which were Claude's defaults.
 - Teo's tool preferences: Python, bash, Jenkins, git.
 
-## Roadmap and open items (2026-10-22)
+## Roadmap and open items (2026-10-23)
 Roadmap (Teo, 2026-10-18): 1) cup schedules, DONE (PR #20); 2) Lund shortcuts and stamps, DONE (#21); 3) signature-item prototype, DONE (#32); 4) the remaining shortcuts and stamps, DONE (Bron #23, Åhus #25, Tollarp #27); 5) a signature item for every driver, DONE (#33, #34, then #35 to #46 for the new drivers and champions); 6) completion rewards and track personality: NEXT, not started.
 
 Found and offered, waiting for Teo's go
 - Bots run out of petrol in full races with the player on track (Karlskrona and Raket-Runes runda 3 to 12 s a race). `tools/fuel_audit.py` parks the player, so it doesn't see it.
 - Amanda's bot leaves the road on tight bends of the twisty west and bonus tracks (Avenyn, Ullevi, Lerum, the promenad) and can trail by 10 s or more.
 - Championship select redesign: the last item on Teo's phone-menu list, never scheduled.
-- Gröna gubben från skogen is the only champion without a signature item (TRAKTORSTRÅLEN was suggested; Teo hasn't been asked).
 - Older shortcuts measure slower for the AI than the main road: Rapsfältet -0.15 s, Korvkiosken -2.65, Svinstigen -3.91, Skeppet -0.79, Stenraden -1.03. Reported, not fixed.
 
 Claude's defaults Teo hasn't confirmed (he may change them)
 - Bodil's quirk GODISNOSEN, her teal colour and bracketed lines; Weiron's quirk STÄMPLA IN.
 - The Västgöta split into two cups of three; Regnmolnet's ALLTID BLÖTT and Hamnkranen's TUNGLAST quirks; the four west non-boss drivers' items (Slussporten, Dyket, Räkmackan, Offside).
 - Signaturläge doesn't keep single-race records apart.
+- SÄDESCIRKLARNA's details: three circles (one big, two small), the spin round with antennae, Gröna gubben immune to his own circles, no passage opening.
 - Roger, Linnéa (now Teo and Amanda) and Britta being playable from the start.
 
 Ideas parked for later
@@ -455,7 +455,7 @@ Teo picked one move for each original Skåne champion.
 - Spöket på Glimmingehus, BUUU!: a sheet ghost rises beside the kart and howls; every kart within 20 m hops, slows and swerves sideways away.
 - Vikingahövdingen, STORMFLODEN: a wave rolls up from behind, washing aside karts in its path, then carries the user for 3.4 s (faster, more grip) and sweeps away anyone just in front. (Teo wrote "3 STORMFLODEN" when option 3 was Katapulten; the name was taken as the pick.)
 - Raket-Rune, 3-2-1 ÖVERLJUD!: Teo combined two ideas, a countdown and a sonic boom: 1.5 s crawling, then the biggest boost in the game (2.6 s) and a shockwave that throws karts within 18 m off their line. The AI only counts down with a straight ahead.
-- js/37-boss-items.js (BOO, FLOOD, RUNE; `SIG_ALIAS` ghost -> spoket). In every box like the other signature items, spent with nobody to hit. Gröna gubben still has none.
+- js/37-boss-items.js (BOO, FLOOD, RUNE; `SIG_ALIAS` ghost -> spoket). In every box like the other signature items, spent with nobody to hit. Gröna gubben got his on 2026-10-23 (SÄDESCIRKLARNA, below).
 - `tools/boss_items_test.py` (new, in Jenkins).
 
 ## Signaturläge (2026-10-21, PR #47)
@@ -530,3 +530,10 @@ Teo handed over a track GDD (Veberod-Kart-Idalaskolan-GDD.md) for a bonus track 
 - Not done (outside the GDD's first scope): the Veberödsrundan mini-cup.
 - `tools/idalaskolan_test.py` (new, in Jenkins); the stage is added to `vastgota_test.py` and `shortcut_test.py`. Pre-existing local failures that also fail on main here (Playwright 1.64 on Python 3.14, not the CI image): signature_test (Billy's siren), beans_test, sibylla_meny_test (mash), menu_fit_test (name box).
 
+## Gröna gubben's SÄDESCIRKLARNA (2026-10-23)
+Teo asked for a brainstorm on the last champion without a signature item, Gröna gubben från skogen. Offered: TRAKTORSTRÅLEN (beam up the kart ahead and drop it behind you), BORTFÖRD! (swap places with the kart ahead), SÄDESCIRKLARNA (a crop circle trap), TYNGDLÖSHETEN (everyone else floats with no grip) and BLIIP BLIIP BLIIP (three homing mini saucers). Teo picked SÄDESCIRKLARNA and asked for it "crazy and whacky".
+- What was built (the details are Claude's defaults): the saucer swoops in low from up the road over the user's head, hovers with its beam on and burns three crop circles into the road 12 m behind (a big one in the user's lane, two small ones 5.6 m either side and 5 m further back, gaps between), then shoots off into the sky. Wheat sprouts out of the tarmac round the rims and the rings glow for 11 s. Nothing happens until they are burnt in (0.9 s).
+- A kart that drives into a circle is lifted 1.4 m, goes round the circle once in 1.3 s spinning three turns of its own (bliip bliip bliip), and is let go facing up the road at 40 % of its speed, flung 9 m/s sideways out of the circle (never forwards), with bobbing green antennae for 4 s. Each pattern takes a kart once. The user, Gröna gubben (driver or bot), a shield and a kart in the air get through.
+- The AI drops it with someone behind; not usable in a farm lane (`lane:false`); it leaves passages alone (listed with the other behind-traps in the `SIG_OPENS` comment).
+- js/37-sadescirklarna.js (new, in index.html after the boss items; tuned in `CROP`). A caught kart is driven by `orbitStep()` from `drive()` in js/43-physics.js, like a frozen one; hooks into `updateSigs`/`drawSigs`/`clearSigs`.
+- `tools/crop_circles_test.py` (new, in Jenkins, screenshots crop-*.png); `signature_test.py` now counts 23 items. Pre-existing local failure that also fails on main here: targetless_test's three pace-cap checks.

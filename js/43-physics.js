@@ -30,6 +30,7 @@ function drive(k,dt,ctl){
     k.frozen=Math.max(0,k.frozen-dt);k.vx=0;k.vz=0;k.vy=0;k.speed=0;k.drift=0;k.charge=0;
     return;
   }
+  if(k.orbit){orbitStep(k,dt);return;}             /* Sädescirklarna: going round a crop circle */
   const RT=k.rib?ALTS[k.rib-1]:null, T=RT||MAIN, hwR=RT?RT.hw:HW;
   k.si=RT?nearestAlt(RT,k.x,k.z,k.si):nearestLocal(k.x,k.z,k.si);
   const i=k.si, i1=RT?Math.min(i+1,RT.n-1):(i+1)%N;
