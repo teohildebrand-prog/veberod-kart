@@ -3,7 +3,7 @@
 
     CHROMIUM=/path/to/chrome python3 tools/vastgota_test.py [stage ...]
 
-For each stage (default: the six west-coast tracks and the three bonus tracks):
+For each stage (default: the six west-coast tracks, the three bonus tracks and Lomma Beach):
   * the track builds without a JS error, no stretch of road comes near another (no
     overlapping road surfaces), and no shortcut runs close beside the main road;
   * two fuel stops, kept off the jumps and out of the shortcuts' forks and merges;
@@ -23,7 +23,7 @@ from playwright.sync_api import sync_playwright
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from smoke_test import serve  # noqa: E402
 
-DEFAULT_STAGES = ['lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi', 'sibylla', 'promenad', 'idalaskolan']
+DEFAULT_STAGES = ['lerum', 'boras', 'trollhattan', 'avenyn', 'hisingen', 'ullevi', 'sibylla', 'promenad', 'idalaskolan', 'lomma']
 
 LAYOUT = """(id) => {
   CUP = null; TT = false; FREE = false; mirrorSel = false;

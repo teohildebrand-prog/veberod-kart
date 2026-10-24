@@ -116,7 +116,7 @@ const FUEL={fill:25,slow:12,low:25,crit:10,reserve:8,commit:70,cue:230,pitLane:2
 const FUEL_MUL={lund:0.69,veberod:0.58,bron:0.65,ahus:0.70,tollarp:0.63,glimminge:0.58,ales:0.52,kivik:0.65,
   soderasen:0.71,foteviken:0.49,karlskrona:0.50,ven:0.50,limhamn:0.61,angelholm:0.56,hoor:0.56,romele:0.66,
   kalmar:0.61,rune:0.54,rosengard:0.54,horby:0.56,lerum:0.45,boras:0.54,trollhattan:0.46,avenyn:0.35,
-  hisingen:0.47,ullevi:0.39,sibylla:0.57,promenad:0.40,idalaskolan:0.31};
+  hisingen:0.47,ullevi:0.39,sibylla:0.57,promenad:0.40,idalaskolan:0.31,lomma:0.25};
 const stageFuel=()=>FUEL_MUL[stage.id]||0.5;
 /** a surface's fuel factor for this kart. Rough ground that already slows you costs no extra
     a second on top: you pay in time, or, in a kart built for it, in fuel, never both */
@@ -162,7 +162,7 @@ function fuelWarn(k){
    to brake. If it stops, it fills to what the finish needs, or to the brim: one proper stop,
    not a string of small ones. Catch-up never touches any of this. */
 function fuelModel(k,i){
-  const s=MAINS[i]?SURF[MAINS[i]]:null;
+  const s=mainSurfAll(i);
   return sampleSecs(k,MAIN,i)*fuelRate(k,0.95,false,s)*1.1;
 }
 /** predicted fuel for the next n main-road samples from where k is */
