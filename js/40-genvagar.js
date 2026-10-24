@@ -93,7 +93,7 @@ function aimAtMouth(){
    the rope, the cows, the mates, the container or the wave get there; 'near' opens any closed
    mouth within OPEN.r of the kart; 'shot' flies into the mouth like a Spettekaka (its own update
    steers it); 'own' opens it at its own moment (Raket-Rune's sonic boom). Items not listed
-   (the bike, the map, the muck and the yarn behind, the lock gate, the dive, the gull, the yellow
+   (the bike, the map, the muck, the yarn and the crop circles behind, the lock gate, the dive, the gull, the yellow
    card, the order number) leave passages alone. A switch-only passage ignores them all. */
 const SIG_OPENS={arne:'ahead',billy:'ahead',cow:'ahead',mehmet:'ahead',teo:'ahead',carl:'ahead',
   regnmolnet:'ahead',hamnkranen:'ahead',viking:'ahead',bodil:'ahead',

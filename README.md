@@ -86,6 +86,7 @@ tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTB
 tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
 tools/promenad_test.py      headless test: Bodils promenad, its hazards, the TV, Bodil's nap and her passport page
 tools/idalaskolan_test.py   headless test: Idalaskolan, its indoor sections, the gym ball, Victor and Carl's lines, the bell
+tools/crop_circles_test.py  headless test: Gröna gubben's SÄDESCIRKLARNA, the saucer, the spin round, who gets through, the AI
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/band_audit.py         headless audit: how close the field stays to the player, catch-up on and off
 tools/feel_test.py          headless test: camera shake, the turbo's view kick, the body's knocks on landing and walls
@@ -135,6 +136,7 @@ python3 tools/idalaskolan_test.py       # Idalaskolan: hallway and gym, the gym 
 python3 tools/vastgota_test.py          # the west and bonus tracks: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
+python3 tools/crop_circles_test.py      # Gröna gubben's crop circles: the pattern, the spin round, antennae, the AI
 python3 tools/targetless_test.py
 python3 tools/feel_test.py              # camera shake, turbo view kick, body squash and roll
 python3 tools/banner_test.py            # HEJA banners on each driver's home stage, none elsewhere
