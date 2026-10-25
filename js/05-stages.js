@@ -3,6 +3,7 @@
 const N=720, TANK=100, CPN=8, AI_G=30;   /* AI cornering grip */   /* checkpoints per lap */
 let HW=8.2, BANKLAT=12.7, SEG=1, JUMPS=[];
 const MAINS=new Array(N).fill('');   /* main-road surface per sample, '' = the stage's own road */
+const MSIDE=new Int8Array(N);        /* 0: MAINS covers the full width; +1/-1: only that half of the road (a sandy inside line) */
 const sx=new Float32Array(N),sy=new Float32Array(N),sz=new Float32Array(N);
 const fx=new Float32Array(N),fz=new Float32Array(N);
 const rx=new Float32Array(N),rz=new Float32Array(N);
@@ -288,8 +289,8 @@ function sampleTrack(st){
     fx[i]=dx;fz[i]=dz;rx[i]=-dz;rz[i]=dx;
   }
   JUMPS=autoJumps(st.jumpSpec,(st.routes||[]).map(r=>[r.a,r.b]));
-  MAINS.fill('');                              /* stretches of the main road on another surface */
-  for(const [a,b,s] of (st.zones||[]))for(let i=a;i!==b;i=(i+1)%N)MAINS[i]=s;
+  MAINS.fill('');MSIDE.fill(0);               /* stretches of the main road on another surface; a 4th entry = one half only */
+  for(const [a,b,s,side] of (st.zones||[]))for(let i=a;i!==b;i=(i+1)%N){MAINS[i]=s;MSIDE[i]=side||0;}
   for(const J of JUMPS){                       /* ramp up, then the ground falls away */
     for(let k=0;k<=J.up;k++){const t=k/J.up;sy[(J.at-J.up+k+N)%N]+=J.h*t*t;}
     for(let k=1;k<=J.dn;k++){const t=k/J.dn;sy[(J.at+k)%N]+=J.h*(1-t)-J.drop*t;}
@@ -340,6 +341,11 @@ const SFX={
   sand:  {dust:[.93,.85,.66],           noise:{f:2600,g:.018}}
 };
 const isCow=k=>k===player?CHARS[charSel].id==='cow':k.cfg.kind==='cow';
+/** the main road's surface name under a kart at sample i, lat across ('' = the stage's own road) */
+const mainSurfAt=(i,lat)=>MAINS[i]&&!(MSIDE[i]&&lat*MSIDE[i]<0)?MAINS[i]:'';
+/** the surface the whole width of sample i is on, for the AI's plans: a half-width zone is a line
+    to choose, so the plan assumes the firm half */
+const mainSurfAll=i=>MAINS[i]&&!MSIDE[i]?SURF[MAINS[i]]:null;
 function surfaceEnter(k,s){
   const S=SFX[s];
   if(S&&S.field&&isCow(k)&&clock-(k.mooT||-9)>4&&
@@ -634,8 +640,10 @@ function buildRoad(st){
   if(st.zones&&st.zones.length){                    /* stretch by stretch, each on its own surface */
     const own=psMat({map:roadTex(st.road)}),mats={};
     for(let a=0,n=0;n<N;){
-      const s0=MAINS[a];let len=1;while(len<N-n&&MAINS[(a+len)%N]===s0)len++;
-      sweep(a,a+len,-HW,0,HW,0,s0?(mats[s0]=mats[s0]||psMat({map:roadTex(s0)})):own);
+      const s0=MAINS[a],h0=MSIDE[a];let len=1;while(len<N-n&&MAINS[(a+len)%N]===s0&&MSIDE[(a+len)%N]===h0)len++;
+      const zm=s0?(mats[s0]=mats[s0]||psMat({map:roadTex(s0)})):own;
+      if(h0){sweep(a,a+len,h0<0?-HW:0,0,h0<0?0:HW,0,zm);sweep(a,a+len,h0<0?0:-HW,0,h0<0?HW:0,0,own);}   /* half and half */
+      else sweep(a,a+len,-HW,0,HW,0,zm);
       a=(a+len)%N;n+=len;
     }
   }else world.add(new THREE.Mesh(ribbon(-HW,HW,0,7,ROADSTEP),psMat({map:roadTex(st.road)})));

@@ -85,6 +85,11 @@ pipeline {
         sh 'python3 tools/idalaskolan_test.py'
       }
     }
+    stage('Lomma Beach test') {
+      steps {
+        sh 'python3 tools/lomma_test.py'
+      }
+    }
     stage('West and bonus tracks test') {
       steps {
         sh 'python3 tools/vastgota_test.py'
@@ -132,6 +137,6 @@ pipeline {
     }
   }
   post {
-    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,crop-*.png,banner-*.png,idalaskolan-*.png', allowEmptyArchive: true }
+    always { archiveArtifacts artifacts: 'fuel-audit.json,band-audit.json,smoke.png,sig-*.png,beans-*.png,west-*.png,weiron-*.png,meny-*.png,bodil-*.png,boss-*.png,crop-*.png,banner-*.png,idalaskolan-*.png,lomma-*.png', allowEmptyArchive: true }
   }
 }

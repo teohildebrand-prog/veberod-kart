@@ -23,9 +23,9 @@ The `js/` files are classic scripts, not ES modules: one shared global scope, so
 - Don't put a dashed banner comment (`/* ── x ── */`) inside a file: `tools/split.py` treats any such banner as a new section.
 
 ## Architecture
-Where things live, by number band (81 files, ~24k lines):
+Where things live, by number band (83 files, ~25k lines):
 - `00`-`04`: boot (`fail()` if no WebGL/three.js), helpers, PS1 renderer and materials, sky.
-- `05-stages.js`: track geometry globals (`N=720` samples per lap, `sx/sz/curv/bank...` typed arrays), the first `STAGES` entries and `let stage`. Each later track file (`10`-`29`) calls `STAGES.push({id, group, ...})` and may extend the shared registries `SURF`, `SFX`, `ROADTEX` for its own surfaces. A stage holds `ctrl` (spline control points), `routes` (shortcuts), `stamps`, `jumpSpec`, look (`sky`, `fog`, `road`...) and `laps`, and may opt in to `say`/`duo`/`rivals` (its own driver lines, a grid exchange, who counts as whose rival) and `aiDodge(k,t,L)` (the AI line round a moving hazard); `group` names its cup tour (`skane`, `osterlen`, `kust`, `vild`, `final`, `vastgota`, `goteborg`, `bonus`).
+- `05-stages.js`: track geometry globals (`N=720` samples per lap, `sx/sz/curv/bank...` typed arrays), the first `STAGES` entries and `let stage`. Each later track file (`10`-`29`) calls `STAGES.push({id, group, ...})` and may extend the shared registries `SURF`, `SFX`, `ROADTEX` for its own surfaces. A stage holds `ctrl` (spline control points), `routes` (shortcuts), `stamps`, `jumpSpec`, `zones` (`[a, b, surface]` main-road surfaces by sample; a fourth value `1`/`-1` covers only the right/left half, read with `mainSurfAt(i, lat)`), look (`sky`, `fog`, `road`...), `laps` and `aiLook` (a shorter AI aim for tight bends), and may opt in to `say`/`duo`/`rivals` (its own driver lines, a grid exchange, who counts as whose rival) and `aiDodge(k,t,L)` (the AI line round a moving hazard); `group` names its cup tour (`skane`, `osterlen`, `kust`, `vild`, `final`, `vastgota`, `goteborg`, `bonus`).
 - `30-*`: drivers and vehicles. `CHARS` (playable drivers), `ROSTER` and `karts` in js/30-karts.js; `VEHICLES` in js/30-vehicles.js; driver-specific files (`30-bodil`, `30-weiron`, `30-west-crew`, `30-burgarbus`).
 - `31-save.js`: `SAVE` object in localStorage key `vk.save.v1`; every access in try/catch, `writeSave()` persists. Audio settings use `vk.audio.v1`.
 - `32`-`40`: time trial, cups (`CUPS` in js/33-skanecupen.js), pickups, picnic stamps, postcards, items (`37-*`; `SIGS` in js/37-signature-items.js), fuel (`FUEL_MUL` in js/38-statolja.js), shortcuts (js/40-genvagar.js).
@@ -50,7 +50,7 @@ Each test starts its own HTTP server on a free port and drives headless Chromium
 - A new test: Python + Playwright like the others, add it as a Jenkins stage, add any screenshots to `archiveArtifacts`, and list it in the README.
 
 ## Checklists
-A new track needs: a STAGES entry with `order`, `tag` (Swedish) and `view`; a `FUEL_MUL` entry (`python3 tools/fuel_audit.py <id> --calibrate`); three picnic stamps; a postcard (`postcard:` on the stage or `VYKORT` in js/36-vykort.js); a baked portrait; its shortcuts in `tools/shortcut_test.py` (and a bonus or west track in `tools/vastgota_test.py`); a cup only if one has room (max four rounds) or a new cup.
+A new track needs: a STAGES entry with `order`, `tag` (Swedish) and `view`; a `FUEL_MUL` entry (`python3 tools/fuel_audit.py <id> --calibrate`); three picnic stamps; a postcard (`postcard:` on the stage or `VYKORT` in js/36-vykort.js); a baked portrait; its shortcuts in `tools/shortcut_test.py` (and a bonus, west or other no-cup track in `tools/vastgota_test.py`, which races it in full; if the AI runs wide in tight bends, set `aiLook`); a cup only if one has room (max four rounds) or a new cup.
 
 A new signature item needs: to fire and be spent with nobody to hit, an AI use, an entry in `SIG_OPENS` (js/40-genvagar.js) saying whether it opens closed shortcuts, sideways-only knockback, and a test.
 

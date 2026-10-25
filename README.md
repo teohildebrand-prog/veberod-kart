@@ -3,7 +3,7 @@
 A silly PS1-style kart racer through the Skåne countryside. Three.js r128,
 plain JavaScript, no build step.
 
-26 tracks and eight cups of at most four rounds. Two home cups without a
+27 tracks and eight cups of at most four rounds. Two home cups without a
 champion: Skånecupen (Veberöd, Lund, Tollarp, Hörby) and Sommarcupen (Åhus,
 Glimmingehus, Ales stenar, the bridge). Then championships built on LEGO
 Racers' cup shape (ideas only): Österlencupen, Kustcupen and Vildmarkscupen
@@ -26,6 +26,13 @@ of Victor and Carl's old school in Veberöd: out of the playground, through the
 hallway, round the gym and over the bench ramp while the PE teacher sends the
 big ball across, out to recess round the sandpit, and home past the bike
 stands; picking Victor or Carl brings the other along, and they talk).
+
+One Skåne track in no cup, raced from the stage picker: Lomma Beach, Sand
+mellan däcken (three laps of a beach day: out of the car park, along the
+paved promenade, round the giant sandcastle with loose sand on the inside,
+past the beach ball that gets loose before the jetty, behind the dunes onto
+the compacted access road and over a low crest, and home past the ice-cream
+kiosk; Mellan badhytterna and Sandspåret are its shortcuts).
 
 ## Play
 
@@ -86,6 +93,7 @@ tools/weiron_test.py        headless test: Weiron i ottan, his Skiftsex, CEMENTB
 tools/bodil_test.py         headless test: Bodil, her Grisörat, BRÅK OCH TRÅK OCH SKRÅK and GODISNOSEN
 tools/promenad_test.py      headless test: Bodils promenad, its hazards, the TV, Bodil's nap and her passport page
 tools/idalaskolan_test.py   headless test: Idalaskolan, its indoor sections, the gym ball, Victor and Carl's lines, the bell
+tools/lomma_test.py         headless test: Lomma Beach, its sectors and sand, the beach ball, the speaker's lines, the postcard
 tools/crop_circles_test.py  headless test: Gröna gubben's SÄDESCIRKLARNA, the saucer, the spin round, who gets through, the AI
 tools/targetless_test.py    headless test: every item can be spent with nobody to aim at; the AI catch-up pace
 tools/band_audit.py         headless audit: how close the field stays to the player, catch-up on and off
@@ -133,7 +141,8 @@ python3 tools/weiron_test.py            # Weiron i ottan: driver select, CEMENTB
 python3 tools/bodil_test.py             # Bodil: driver select, the tackle and its counterplay, her quirk and horn
 python3 tools/promenad_test.py          # Bodils promenad: launcher, sprinkler, TV, the victory nap, the dog page
 python3 tools/idalaskolan_test.py       # Idalaskolan: hallway and gym, the gym ball, the brothers' lines, the bell, the postcard
-python3 tools/vastgota_test.py          # the west and bonus tracks: layout, fuel stops, stamps, full AI races
+python3 tools/lomma_test.py             # Lomma Beach: the sectors and sand, the beach ball, the speaker's lines, the postcard
+python3 tools/vastgota_test.py          # the west and bonus tracks and Lomma: layout, fuel stops, stamps, full AI races
 python3 tools/svin_test.py
 python3 tools/beans_test.py
 python3 tools/crop_circles_test.py      # Gröna gubben's crop circles: the pattern, the spin round, antennae, the AI

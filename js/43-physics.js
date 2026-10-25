@@ -36,7 +36,7 @@ function drive(k,dt,ctl){
   const i=k.si, i1=RT?Math.min(i+1,RT.n-1):(i+1)%N;
   const dx=k.x-T.X[i],dz=k.z-T.Z[i];
   let lat=dx*T.RX[i]+dz*T.RZ[i];
-  const ms=!RT&&MAINS[i]&&Math.abs(lat)<HW+1.3?MAINS[i]:'';
+  const ms=!RT&&Math.abs(lat)<HW+1.3?mainSurfAt(i,lat):'';
   const surf=RT&&Math.abs(lat)<RT.hw+0.8?SURF[RT.S[i]]:(ms?SURF[ms]:null);
   k.surf=surf?(RT?RT.S[i]:ms):'';
   pumpStep(k,dt,ctl,!RT&&atPumpNow(i,lat),surf);
@@ -321,7 +321,7 @@ function routeCost(k,T,i0,n){
 }
 /** rough seconds for this kart to cross one sample of a route */
 function sampleSecs(k,T,i){
-  const s=T===MAIN?(MAINS[i]?SURF[MAINS[i]]:null):SURF[T.S[i]], G=AI_G*(2.7/k.caution);
+  const s=T===MAIN?mainSurfAll(i):SURF[T.S[i]], G=AI_G*(2.7/k.caution);
   const top=k.maxSpeed*(s?s.top(k.offRoad):1);
   const v=Math.min(top,Math.sqrt(G*(k.gripOn*(s?s.grip(k.offRoad):1)/9.5)*14*SEG/Math.max(T.CURV[i],1e-4)));
   return SEG/Math.max(v,4);
@@ -447,7 +447,7 @@ function aiControl(k){
   /* Corner speed from the radius the curvature implies. The old linear falloff
      saturated at its floor on ordinary bends, pinning the whole field at 42%. */
   const R=14*SEG/Math.max(cmax,1e-4);
-  const sg=T===MAIN?(MAINS[t]?SURF[MAINS[t]].grip(k.offRoad):1):SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
+  const sg=T===MAIN?(mainSurfAll(t)?mainSurfAll(t).grip(k.offRoad):1):SURF[T.S[t]].grip(k.offRoad);    /* loose lanes: brake earlier */
   const hold=AI_G*(k.gripOn*sg/9.5)*(2.7/k.caution)*(k.drift!==0?1.18:1);
   const limit=Math.min(k.maxSpeed,Math.sqrt(hold*R));
   const band=k.pace;
