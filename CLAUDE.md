@@ -15,6 +15,7 @@ vendor/three.min.js   three.js r128
 tools/                tests, audits and build scripts (Python, plus one Node audio test)
 docs/                 HISTORY.md (rules, roadmap, history), design.md (doc links)
 Jenkinsfile           CI: every test and audit
+.claude/skills/       Claude Code skills (grill-me, grilling), installed with `npx skills`; skills-lock.json pins them
 ```
 
 The `js/` files are classic scripts, not ES modules: one shared global scope, so anything declared in an earlier file is visible in later ones.
@@ -63,3 +64,4 @@ A new menu sheet needs a `PADBACK` entry (js/53-gamepad.js) for the pad's B butt
 - When a change involves a design choice, offer Teo a few options and let him pick; record his picks and your own defaults separately in HISTORY.md.
 - Teo plays on a real iPhone: check phone sizes (about 393x660 portrait, 750x340 landscape) for anything on screen.
 - Teo prefers Python, bash, Jenkins and git for tooling.
+- `/grill-me` (Matt Pocock's skills, MIT) interviews Teo in numbered rounds, each question with a recommended answer, until a plan or design is settled. It only runs when Teo types it, and nothing is built until he confirms the shared understanding. Update both skills with `npx skills add https://github.com/mattpocock/skills --skill grill-me --skill grilling -a claude-code -y`.
