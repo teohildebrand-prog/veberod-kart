@@ -1,7 +1,7 @@
 "use strict";
 /* A quiet, band-limited mix. Engine/road loops and effects have separate buses. */
 let actx=null,engine=null,skid=null,muted=false,audioMix=null;
-const AUDIO_DEFAULTS={master:.7,engine:.35,effects:.65};
+const AUDIO_DEFAULTS={master:.7,engine:.35,effects:.65,music:.5};
 const audioVolumes={...AUDIO_DEFAULTS};
 try{
   const saved=JSON.parse(localStorage.getItem('vk.audio.v1')||'{}');
@@ -17,6 +17,7 @@ function applyAudioMix(){
   audioMix.master.gain.setTargetAtTime(muted||document.hidden?0:audioVolumes.master,t,.035);
   audioMix.engine.gain.setTargetAtTime(audioVolumes.engine,t,.05);
   audioMix.effects.gain.setTargetAtTime(audioVolumes.effects,t,.05);
+  audioMix.music.gain.setTargetAtTime(audioVolumes.music,t,.05);
 }
 function bootAudio(){
   if(muted)return;
@@ -24,13 +25,13 @@ function bootAudio(){
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
   try{actx=new AC();}catch(_){return;}
   audioVoices=0;lastPing=lastMoo=lastFart=-10;
-  const master=actx.createGain(),motor=actx.createGain(),effects=actx.createGain();
+  const master=actx.createGain(),motor=actx.createGain(),effects=actx.createGain(),music=actx.createGain();
   const limiter=actx.createDynamicsCompressor();
   limiter.threshold.value=-12;limiter.knee.value=12;limiter.ratio.value=8;
   limiter.attack.value=.004;limiter.release.value=.18;
   const effectFilter=actx.createBiquadFilter();effectFilter.type='lowpass';effectFilter.frequency.value=2400;effectFilter.Q.value=.5;
-  motor.connect(master);effects.connect(effectFilter);effectFilter.connect(master);master.connect(limiter);limiter.connect(actx.destination);
-  master.gain.value=0;audioMix={master,engine:motor,effects};applyAudioMix();
+  motor.connect(master);effects.connect(effectFilter);effectFilter.connect(master);music.connect(master);master.connect(limiter);limiter.connect(actx.destination);
+  master.gain.value=0;audioMix={master,engine:motor,effects,music};applyAudioMix();
   const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=480;lp.Q.value=.5;
   const g=actx.createGain();g.gain.value=0;
   const o1=actx.createOscillator(),o2=actx.createOscillator();

@@ -64,7 +64,7 @@ function frame(now){
   drawSigs();
   drawRivalTag();
   drawGhosts();
-  stepParticles(dt);updateCamera(dt);drawHUD(dt);drawMap();audioUpdate();
+  stepParticles(dt);updateCamera(dt);drawHUD(dt);drawMap();audioUpdate();musicUpdate();
   if(MIRROR)mirrorCam();
   if(sheetStages.classList.contains('hide'))renderer.render(scene,camera);   /* the stage picker covers the world */
 }
