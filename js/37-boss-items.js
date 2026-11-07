@@ -103,6 +103,7 @@ function knock(o,k,shove,hop,keep,slow){
   sideways(o,-Fz*s,Fx*s,shove,keep);
   if(!o.air&&hop>0)o.vy=Math.max(o.vy,hop);
   o.slow=Math.max(o.slow,slow);o.boost=0;o.drift=0;o.charge=0;
+  if(o===player)musicDuck();
   return true;
 }
 /** speed kept, plus a shove along (dx,dz) */
@@ -313,7 +314,7 @@ function ignite(k){
   for(let p=0;p<18;p++)puff(k.x+rand(-2.5,2.5),k.y+rand(.3,2.4),k.z+rand(-2.5,2.5),.95,.95,.95,.7);
   const d=Math.hypot(player.x-k.x,player.z-k.z);
   if(d<120){const v=1-d/140;audioTone(1100,180,.12,.09*v,'square');audioTone(90,45,.6,.16*v,'sawtooth',.02);
-    shake=Math.min(1,shake+clamp(.7-d*.008,.1,.7));}
+    shake=Math.min(1,shake+clamp(.7-d*.008,.1,.7));musicDuck();}
   if(k===player)flash('ÖVERLJUD!');
   for(const B of mouthsNear(k,OPEN.r))openPassage(B,k);   /* the boom blows a passage open: 40-genvagar.js */
   let hits=0;
